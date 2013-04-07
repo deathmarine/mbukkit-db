@@ -178,15 +178,16 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 			Log("No File(s) selected.");
 			return;
 		}
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				for (File f:files) {
-					if (!f.isDirectory() && f.getName().contains(".jar"))
-						new DecompJar(f, datab);
+				for (final File f:files) {
+					if (!f.isDirectory() && f.getName().contains(".jar")) 
+						new Thread(new Runnable(){
+							@Override
+							public void run() {
+								new DecompJar(f, datab);
+								
+							}
+						}).start();
 				}
-			}
-		}).start();
 	}
 
 	private void Log(String string) {
@@ -212,16 +213,10 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 			this.setVisible(true);
 		}else if(value==JOptionPane.YES_OPTION){
 			this.dispose();
-			new Thread(new Runnable(){
-				@Override
-				public void run() {
-
-					ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png");
-					JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nBy: Deathmarine", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
-					System.exit(0);
-				}
-				
-			}).start();
+			ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png");
+			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.1\nBy: Deathmarine", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+			System.exit(0);
+		
 		}
 		
 	}

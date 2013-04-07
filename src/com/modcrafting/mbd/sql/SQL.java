@@ -11,20 +11,35 @@ import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class SQL {
 	MasterPluginDatabase plugin;
+	Connection conn;
 	public SQL(MasterPluginDatabase masterPluginDatabase) {
 		this.plugin = masterPluginDatabase;
 	}
+	public void connect(){
+		conn = plugin.getConnection();
+	}
 	
-	public void setAddress(String packag, String clazz, String hash){
+	public void disconnect(){
+		if(conn != null){
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void setAddress(String packag, String clazz, String hash) {
 		try {
-			Connection conn = plugin.getConnection();
+			if(conn == null || conn.isClosed()){
+				connect();
+			}
 			PreparedStatement ps = conn.prepareStatement("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES(?,?,?)");
 			ps.setString(1, packag);
 			ps.setString(2, clazz);
 			ps.setString(3, hash);
 			ps.executeUpdate();
 			ps.close();
-			conn.close();
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
@@ -33,7 +48,9 @@ public class SQL {
 	public List<String> getHash(String packag, String clazz) {
 		List<String> hash = new ArrayList<String>();
 		try {
-			Connection conn = plugin.getConnection();
+			if(conn == null || conn.isClosed()){
+				connect();
+			}
 			PreparedStatement ps = conn.prepareStatement("SELECT * FROM db_masterdbo WHERE package = ? AND class = ?");
 			ps.setString(1, packag);
 			ps.setString(2, clazz);
@@ -43,7 +60,6 @@ public class SQL {
 			}
 			ps.close();
 			rs.close();
-			conn.close();
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
