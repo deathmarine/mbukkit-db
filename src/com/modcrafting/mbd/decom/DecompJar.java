@@ -36,7 +36,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
-import javax.swing.ProgressMonitorInputStream;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -48,6 +47,7 @@ import javax.swing.tree.TreeSelectionModel;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.modcrafting.mbd.MasterPluginDatabase;
+import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.sql.SQL;
 
 public class DecompJar extends JFrame implements TreeSelectionListener, ActionListener, HyperlinkListener, WindowListener{
@@ -60,6 +60,7 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	public DecompJar(File file, SQL sql){
 		long time = System.currentTimeMillis();
 		database = sql;
+		ProgressWindow pw = new ProgressWindow(this);
 		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		this.setIconImage(img);
 		try{
@@ -99,7 +100,6 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 			recursiveFolderLoad(fs);
 		}
 
-		System.out.println("Building Tree...");
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		final Dimension center = new Dimension((int)(screenSize.width*0.75), (int)(screenSize.height*0.75));
 		final int x = (int) (center.width * 0.2);
@@ -107,9 +107,10 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 		this.setBounds(x, y, center.width, center.height);
 		this.setTitle(file.getName());
 	    HashFile fa = null;
-	    DefaultMutableTreeNode top = new DefaultMutableTreeNode(file.getName());
 		System.out.println("Connecting to database...");
 	    database.connect();
+		System.out.println("Building Tree...");
+	    DefaultMutableTreeNode top = new DefaultMutableTreeNode(file.getName());
 	    for(String packs :files.keySet()){
 	    	if(packs.length()>0){
 	    		//TODO: Needs Better Package Breakdown
@@ -120,7 +121,19 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	    		 *     |   |-SubNode
 	    		 *     |       |-File
 	    		 *     |       |-File
-	    		 */
+	    		 *
+	    		StringBuilder sb = new StringBuilder();
+	    		for(String s: packs.split(".")){
+	    			sb.append(s);
+	    			if(files.containsKey(sb.toString())){
+	    		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(sb.toString());
+	    				//Below
+	    			}else{
+	    				sb.append(s).append(".");
+	    			}
+	    		}  
+	    		*Start Rework
+	    		*/
 		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(packs);
 			    	for(HashFile f: files.get(packs)){
 				    	DefaultMutableTreeNode dmtn1 = new DefaultMutableTreeNode(f.getFile().getName());
@@ -134,6 +147,7 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 						}
 			    	}
 		    	top.add(dmtn);
+		    	//End
 	    	}else{
 		    	for(HashFile f: files.get(packs)){
 		    		if(f.getFile().getName().equalsIgnoreCase("plugin.yml")){
@@ -170,6 +184,7 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setVisible(true);
 		System.out.println("Done in : "+(System.currentTimeMillis()-time)+"ms");
+		pw.close();
 	}
 
 	private File[] extract(File file) {
