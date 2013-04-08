@@ -19,12 +19,14 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	Icon image3;
 	Icon image4;
 	Icon image5;
+	Icon image6;
 	public CheckedTreeCellRenderer(DecompJar jar){
 		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"star.png");
 		this.image2 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
 		this.image3 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj.png");
 		this.image4 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"java.png");
 		this.image5 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"file.png");
+		this.image6 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
 		this.jar = jar;
 	}
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
@@ -32,20 +34,28 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 		if (isSafe(value)){
 			setIcon(image);
 			setToolTipText("This is a safe file.");
+			return this;
+		}else if(isWarn(value)){
+			setIcon(image6);
+			setToolTipText(null);
+			return this;
 		}else if(isJar(value)){
 			setIcon(image2);
 			setToolTipText(null);
+			return this;
 		}else if(!leaf){
 			setIcon(image3);
 			setToolTipText(null);
-		}else if(leaf && isJava(value)){
+			return this;
+		}else if(leaf && isJava(value) && !isSafe(value) && !isWarn(value)){
 			setIcon(image4);
 			setToolTipText(null);
+			return this;
 		}else{
 			setIcon(image5);
 			setToolTipText(null);
+			return this;
 		}
-		return this;
 	}
 	
 	protected boolean isSafe(Object value) {
@@ -77,4 +87,16 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         }
         return false;
     }
+	
+	protected boolean isWarn(Object value) {
+        DefaultMutableTreeNode node =
+                (DefaultMutableTreeNode)value;
+        String title = (String) node.getUserObject();
+        if (jar.warn.containsKey(title)) {
+            return true;
+        }
+        return false;		
+	}
+	
+	
 }

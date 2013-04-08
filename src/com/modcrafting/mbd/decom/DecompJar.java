@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
@@ -55,11 +56,14 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	HashMap<String, HashSet<HashFile>> files = new HashMap<String, HashSet<HashFile>>();
 	JTabbedPane tabbed;
 	SQL database;
+	Map<String, String> map;
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
-	public DecompJar(File file, SQL sql){
+	HashMap<String, HashFile> warn = new HashMap<String, HashFile>();
+	public DecompJar(File file, SQL sql, Map<String, String> map){
 		long time = System.currentTimeMillis();
 		database = sql;
+		this.map = map; 
 		ProgressWindow pw = new ProgressWindow(this);
 		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		this.setIconImage(img);
@@ -75,9 +79,8 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 				"-dgs=true", file.getAbsolutePath(), MasterPluginDatabase.PATH + File.separator + "decomp" };
 		ProcessBuilder builder = new ProcessBuilder(cl);
 		builder.redirectErrorStream(true);
-		Process process;
 		try {
-			process = builder.start();
+			Process process = builder.start();
 			BufferedReader reader = new BufferedReader (new InputStreamReader(process.getInputStream()));
 			String line;
 			while((line = reader.readLine())!=null){
@@ -143,6 +146,13 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 							if(f.checkDiffs(hash)){
 								safe.put(f.getFile().getName(), f);
 								System.out.println("SAFE:"+f.getFile().getName());
+							}
+						}
+						System.out.println("Checking warnings for: "+f.getFile().getName());
+						if(f.list.size()>0){
+							warn.put(f.getFile().getName(), f);
+							for(String s: f.list){
+								System.out.println("WARN: "+s);
 							}
 						}
 			    	}
@@ -241,6 +251,7 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 			sb.deleteCharAt(sb.length()-1);
 		String packag = sb.toString();
 		if(!fs.isDirectory()){
+			//TODO: Sort lists.
 			if(this.files.containsKey(packag)){
 				HashSet<HashFile> set = this.files.get(packag);
 				set.add(new HashFile(packag, fs, this));
@@ -260,6 +271,8 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	}
 	@Override
 	public void valueChanged(TreeSelectionEvent selection) {
+		//TODO: Bug on same file name under different packages.
+		
 		String[] args = selection.getPath().toString().replace("[", "").replace("]", "").split(",");
 		if(args.length<2)
 			return;
@@ -312,6 +325,14 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 		}
 		if(!open.containsKey(file)){
 			open.put(title, file);
+			if(file.list.size()>0){
+				StringBuilder sb = new StringBuilder();
+				sb.append("The following files contains markers at:\n");
+				for(String er: file.list){
+					sb.append(er).append("\n");
+				}
+				JOptionPane.showMessageDialog(this, sb.toString(), "Warning!", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 	
@@ -326,8 +347,11 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
         	String title = tabbed.getTitleAt(pos);
         	if(open.containsKey(title)){
         		HashFile hash = open.get(title);
-        		if(safe.containsKey(title)){
+        		if(safe.containsKey(title) || title.endsWith(".MF")){
+            		open.remove(title);
         			tabbed.remove(selected);
+        			return;
+        			
         		}
         		if(hash.getPackage().length()>0){
             		int value = JOptionPane.showConfirmDialog(selected,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);

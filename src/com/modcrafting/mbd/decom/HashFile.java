@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.Gutter;
@@ -20,9 +23,12 @@ public class HashFile implements SyntaxConstants {
 	private String pack;
 	RTextScrollPane scrollPane;
 	RSyntaxTextArea textArea;
+	DecompJar jar;
+	List<String> list = new ArrayList<String>();
 	public HashFile(String pack, File file, DecompJar jar){
 		this.file = file;
 		this.pack = pack;
+		this.jar = jar;
 		textArea = new RSyntaxTextArea(25, 70);
 		textArea.setCaretPosition(0);
 		textArea.addHyperlinkListener(jar);
@@ -52,10 +58,22 @@ public class HashFile implements SyntaxConstants {
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		StringBuilder sb = new StringBuilder();
 		String line;
+		int lineNum = 1;
+		System.out.println("Searching Files... ");
 		while((line = br.readLine())!=null){
+			if(file.getName().endsWith(".java")){
+				for(String as: jar.map.keySet()){
+					if (line.toLowerCase().contains(as.toLowerCase())) {
+						String check = jar.map.get(as) 
+								+" ("+pack+"."+ file.getName()+ " @L" + lineNum + ")";
+						line = line+" //Possible issues "+check;
+							list.add(check+"\n"+line.trim());
+					}
+					
+				}
+			}
 			sb.append(line).append("\n");
-			//TODO: Check for phrases here JOptionPane Display warning
-			//      And/OR Add a tab with the code and set the Caret Position Highlighted
+			lineNum++;
 		}
 		textArea.setText(sb.toString());
 		textArea.setCaretPosition(0);
