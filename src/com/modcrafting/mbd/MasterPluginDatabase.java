@@ -83,23 +83,29 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 	    panel.add(new JScrollPane(mdt));
 	    JPanel p2 = new JPanel();
 	    this.actionlist = new JList();
-	    keyword.put(".getName().equals", "[WARN] Possible player name check");
-		keyword.put(".getDisplayName().equals", "[WARN] Possible player name check");
-		keyword.put(".setBanned(", "[WARN] Banning player");
-		keyword.put("new URL(", "[WARN] Setting up URL connection");
-		keyword.put(".openConnection(", "[WARN] Opens URL connection");
-		keyword.put(".dispatchCommand(", "[WARN] Dispatches a command");
-		keyword.put("http", "[WARN] Making HTTP(S) connection");
-		keyword.put("getDefinedMethod", "[WARN] Getting defined method");
-		keyword.put("getMethod", "[WARN] Getting method");
-		keyword.put("ClassLoader.class", "[WARN] Use of ClassLoader");
-		keyword.put("hack", "[WARN] Use of the string \"hack\"");
-		keyword.put(".setOp(", "[SEVERE] Setting OP status");
-		keyword.put("backdoor", "[SEVERE] Use of the string \"backdoor\"");
-		keyword.put("abstract enum", "[SEVERE] Use of abstract enum - investigate");
-		keyword.put("\"op ", "[SEVERE] Setting op status");
-		keyword.put("org.ow2", "[SERVERE] Using ASM");
-		keyword.put("org.objectweb.asm", "[SERVERE] Using ASM");
+	    try {
+            keyword = (Map<String, String>) SLAPI.load("keywords.bin");
+        } catch (Exception e) {
+            log.info("Failed to load keywords list.");
+            keyword.put(".getName().equals", "[WARN] Possible player name check");
+            keyword.put(".getDisplayName().equals", "[WARN] Possible player name check");
+            keyword.put(".setBanned(", "[WARN] Banning player");
+            keyword.put("new URL(", "[WARN] Setting up URL connection");
+            keyword.put(".openConnection(", "[WARN] Opens URL connection");
+            keyword.put(".dispatchCommand(", "[WARN] Dispatches a command");
+            keyword.put("http", "[WARN] Making HTTP(S) connection");
+            keyword.put("getDefinedMethod", "[WARN] Getting defined method");
+            keyword.put("getMethod", "[WARN] Getting method");
+            keyword.put("ClassLoader.class", "[WARN] Use of ClassLoader");
+            keyword.put("hack", "[WARN] Use of the string \"hack\"");
+            keyword.put(".setOp(", "[SEVERE] Setting OP status");
+            keyword.put("backdoor", "[SEVERE] Use of the string \"backdoor\"");
+            keyword.put("abstract enum", "[SEVERE] Use of abstract enum - investigate");
+            keyword.put("\"op ", "[SEVERE] Setting op status");
+            keyword.put("org.ow2", "[SERVERE] Using ASM");
+            keyword.put("org.objectweb.asm", "[SERVERE] Using ASM");
+        }
+	    
 	    this.actionlist.setListData(keyword.keySet().toArray());
 	    this.actionlist.addMouseListener(new MouseListener(){
 			@Override
@@ -342,6 +348,11 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 		if(value==JOptionPane.CANCEL_OPTION && value==JOptionPane.NO_OPTION){
 			this.setVisible(true);
 		}else if(value==JOptionPane.YES_OPTION){
+		    try {
+                SLAPI.save(keyword, "keywords.bin");
+            } catch (Exception e) {
+                log.info("Failed to save keywords list.");
+            }
 			this.dispose();
 			ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png");
 			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.2\nBy: Deathmarine", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
