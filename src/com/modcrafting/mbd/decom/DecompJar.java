@@ -1,14 +1,12 @@
 package com.modcrafting.mbd.decom;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -17,20 +15,26 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -51,7 +55,7 @@ import com.modcrafting.mbd.MasterPluginDatabase;
 import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.sql.SQL;
 
-public class DecompJar extends JFrame implements TreeSelectionListener, ActionListener, HyperlinkListener, WindowListener{
+public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
 	HashMap<String, HashSet<HashFile>> files = new HashMap<String, HashSet<HashFile>>();
 	JTabbedPane tabbed;
@@ -60,10 +64,12 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> warn = new HashMap<String, HashFile>();
+	File file;
 	public DecompJar(File file, SQL sql, Map<String, String> map){
 		long time = System.currentTimeMillis();
 		database = sql;
-		this.map = map; 
+		this.map = map;
+		this.file = file;
 		ProgressWindow pw = new ProgressWindow(this);
 		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		this.setIconImage(img);
@@ -114,7 +120,9 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	    database.connect();
 		System.out.println("Building Tree...");
 	    DefaultMutableTreeNode top = new DefaultMutableTreeNode(file.getName());
-	    for(String packs :files.keySet()){
+	    List<String> list = Arrays.asList(files.keySet().toArray(new String[0]));
+	    Collections.sort(list);
+	    for(String packs : list){
 	    	if(packs.length()>0){
 	    		//TODO: Needs Better Package Breakdown
 	    		/*
@@ -124,18 +132,21 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	    		 *     |   |-SubNode
 	    		 *     |       |-File
 	    		 *     |       |-File
-	    		 *
+	    		 *  
 	    		StringBuilder sb = new StringBuilder();
 	    		for(String s: packs.split(".")){
-	    			sb.append(s);
 	    			if(files.containsKey(sb.toString())){
-	    		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(sb.toString());
-	    				//Below
+	    		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(s);
+	    				if(files.containsKey(s)){
+	    			    	for(HashFile f: files.get(s)){
+	    			    		
+	    			    	}
+	    				}
 	    			}else{
 	    				sb.append(s).append(".");
 	    			}
-	    		}  
-	    		*Start Rework
+	    		}
+	    		 *Start Rework
 	    		*/
 		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(packs);
 			    	for(HashFile f: files.get(packs)){
@@ -170,10 +181,12 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	    }
 	    database.disconnect();
 		System.out.println("Disconnecting from database...");
+		
 	    JTree tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-	    tree.getSelectionModel().addTreeSelectionListener(this);
+	    tree.getSelectionModel().addTreeSelectionListener(new TreeListener());
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
+	    
 	    JPanel panel2 = new JPanel();
 	    panel2.setLayout(new BoxLayout(panel2, 1));
 	    panel2.setBorder(BorderFactory.createTitledBorder("Structure"));
@@ -181,22 +194,31 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	    
 	    tabbed = new JTabbedPane();
 	    tabbed.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+	    //tabbed.
 	    if(fa!=null)
 	    	addTab(fa.getFile().getName(), fa.scrollPane, fa);
+	    
 	    JPanel panel = new JPanel();
 	    panel.setLayout(new BoxLayout(panel, 1));
 	    panel.setBorder(BorderFactory.createTitledBorder("Code"));
 	    panel.add(tabbed);
 	    
 		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, panel2, panel);
-	    this.add(sp);
+	    this.getContentPane().add(sp);
 	    this.addWindowListener(this);
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		JMenuBar mbar = new JMenuBar();
+		JMenu menu = new JMenu("Edit");
+		mbar.add(menu);
+		mbar.setVisible(true);
+		this.setJMenuBar(mbar);
+	    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setVisible(true);
+		
+		
 		System.out.println("Done in : "+(System.currentTimeMillis()-time)+"ms");
 		pw.close();
 	}
-
+	
 	private File[] extract(File file) {
 		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
@@ -251,7 +273,9 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 			sb.deleteCharAt(sb.length()-1);
 		String packag = sb.toString();
 		if(!fs.isDirectory()){
+			
 			//TODO: Sort lists.
+			
 			if(this.files.containsKey(packag)){
 				HashSet<HashFile> set = this.files.get(packag);
 				set.add(new HashFile(packag, fs, this));
@@ -269,34 +293,6 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 			}	
 		}
 	}
-	@Override
-	public void valueChanged(TreeSelectionEvent selection) {
-		//TODO: Bug on same file name under different packages.
-		
-		String[] args = selection.getPath().toString().replace("[", "").replace("]", "").split(",");
-		if(args.length<2)
-			return;
-		if(args.length==2){
-			if(files.containsKey("")){
-				for(HashFile file :files.get("")){
-					if(file.getFile().getName().equals(args[1].trim())){
-						addTab(file.getFile().getName(), file.scrollPane, file);
-						return;
-					}
-				}
-			}
-		}
-		if(args.length==3){
-			if(files.containsKey(args[1].trim().toString())){
-				for(HashFile file :files.get(args[1].trim().toString())){
-					if(file.getFile().getName().equals(args[2].trim())){
-						addTab(file.getFile().getName(), file.scrollPane, file);
-						return;
-					}
-				}
-			}
-		}
-	}
 	
 	public void addTab(String title, RTextScrollPane rTextScrollPane, HashFile file){
 		if(tabbed.indexOfTab(title)==-1){
@@ -305,6 +301,7 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 			int index = tabbed.indexOfTab(title);
 			JPanel pnlTab = new JPanel(new GridBagLayout());
 			pnlTab.setOpaque(false);
+			
 			JLabel lblTitle = new JLabel(title);
 			JButton btnClose = new JButton("x");
 			GridBagConstraints gbc = new GridBagConstraints();
@@ -316,7 +313,7 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 			gbc.weightx = 0;
 			pnlTab.add(btnClose, gbc);
 			tabbed.setTabComponentAt(index, pnlTab);
-			btnClose.addActionListener(this);
+			btnClose.addActionListener(new CloseTab(title, pnlTab));
 			if(safe.containsKey(title)){
 				tabbed.setBackgroundAt(index, Color.GREEN);
 			}
@@ -334,42 +331,6 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 				JOptionPane.showMessageDialog(this, sb.toString(), "Warning!", JOptionPane.ERROR_MESSAGE);
 			}
 		}
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-        Component selected = tabbed.getSelectedComponent();
-        if (selected != null) {
-        	int pos = tabbed.getSelectedIndex();
-        	if(pos==-1){
-        		return;
-        	}
-        	String title = tabbed.getTitleAt(pos);
-        	if(open.containsKey(title)){
-        		HashFile hash = open.get(title);
-        		if(safe.containsKey(title) || title.endsWith(".MF")){
-            		open.remove(title);
-        			tabbed.remove(selected);
-        			return;
-        			
-        		}
-        		if(hash.getPackage().length()>0){
-            		int value = JOptionPane.showConfirmDialog(selected,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
-            		if(value==JOptionPane.CANCEL_OPTION){
-            			return;
-            		}else if(value==JOptionPane.YES_OPTION){
-            			if(open.containsKey(title)){
-            				HashFile file = open.get(title);
-                			database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
-                			database.disconnect();
-            			}
-            			safe.put(title, hash);
-            		}
-        		}
-        		open.remove(title);
-        	}
-			tabbed.remove(selected);
-        }
 	}
 
 	@Override
@@ -395,11 +356,26 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
     		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have files open.\n\nAre you sure you want to close?", "OpenWindows", JOptionPane.OK_CANCEL_OPTION);
     		if(value==JOptionPane.CANCEL_OPTION && value==JOptionPane.NO_OPTION){
     			this.setVisible(true);
+    			return;
     		}else if(value==JOptionPane.YES_OPTION){
     			this.dispose();
     		}
 		}else{
 			this.dispose();
+		}
+
+		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+				+ File.separator + file.getName());
+		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+				+ File.separator);
+		dir.mkdir();
+		File newDir = new File(dir,file.getName());
+		FileUtils.deleteFolder(newDir);
+		FileUtils.deleteFolder(newFile);
+
+		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"Delete the source file?", "Deletion", JOptionPane.OK_CANCEL_OPTION);
+		if(value==JOptionPane.YES_OPTION){
+			FileUtils.deleteFolder(file);
 		}
 	}
 
@@ -425,5 +401,75 @@ public class DecompJar extends JFrame implements TreeSelectionListener, ActionLi
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private class TreeListener implements TreeSelectionListener{
+		@Override
+		public void valueChanged(TreeSelectionEvent selection) {
+			//TODO: Bug on same file name under different packages.
+			String[] args = selection.getPath().toString().replace("[", "").replace("]", "").split(",");
+			if(args.length<2)
+				return;
+			if(args.length==2){
+				if(files.containsKey("")){
+					for(HashFile file :files.get("")){
+						if(file.getFile().getName().equals(args[1].trim())){
+							addTab(file.getFile().getName(), file.scrollPane, file);
+							return;
+						}
+					}
+				}
+			}
+			if(args.length==3){
+				if(files.containsKey(args[1].trim().toString())){
+					for(HashFile file :files.get(args[1].trim().toString())){
+						if(file.getFile().getName().equals(args[2].trim())){
+							addTab(file.getFile().getName(), file.scrollPane, file);
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private class CloseTab extends AbstractAction {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2301441154974782485L;
+		JPanel panel;
+		String title;
+		public CloseTab(String title, JPanel panel) {
+			this.panel = panel;
+			this.title = title;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+	    	if(open.containsKey(title)){
+	    		HashFile hash = open.get(title);
+	    		if(safe.containsKey(title) || title.endsWith(".MF")){
+	        		open.remove(title);
+	    			tabbed.remove(panel);
+	    			return;
+	    		}
+	    		if(hash.getPackage().length()>0){
+	        		int value = JOptionPane.showConfirmDialog(panel,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
+	        		if(value==JOptionPane.CANCEL_OPTION){
+	        			return;
+	        		}else if(value==JOptionPane.YES_OPTION){
+	        			if(open.containsKey(title)){
+	        				HashFile file = open.get(title);
+	            			database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
+	            			database.disconnect();
+	        			}
+	        			safe.put(title, hash);
+	        		}
+	    		}
+	    		open.remove(title);
+	    	}
+			tabbed.remove(panel);
+		}
 	}
 }

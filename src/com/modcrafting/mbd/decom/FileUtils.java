@@ -4,16 +4,12 @@ import java.io.File;
 
 public class FileUtils {
 	public static void deleteFolder(File file) {
-		File trfil = file;
-		if(!trfil.isDirectory())
-			trfil = file.getParentFile();
-		for (File f : trfil.listFiles()) {
-			if(f.isDirectory()){
+		if(file.isDirectory()){
+			for (File f : file.listFiles()) {
 				deleteFolder(f);
-			}else{
-				f.delete();
 			}
 		}
+		System.out.println("Deleteing: "+file.getAbsolutePath());
 		file.delete();
 	}
 }
