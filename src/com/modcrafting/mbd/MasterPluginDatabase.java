@@ -315,7 +315,7 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 			return;
 		}
 				for (final File f:files) {
-					if (!f.isDirectory() && f.getName().contains(".jar")) 
+					if (!f.isDirectory() && f.getName().toLowerCase().contains(".jar")) 
 						new Thread(new Runnable(){
 							@Override
 							public void run() {
