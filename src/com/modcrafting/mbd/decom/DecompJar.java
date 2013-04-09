@@ -1,6 +1,7 @@
 package com.modcrafting.mbd.decom;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -149,24 +150,24 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    		 *Start Rework
 	    		*/
 		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(packs);
-			    	for(HashFile f: files.get(packs)){
-				    	DefaultMutableTreeNode dmtn1 = new DefaultMutableTreeNode(f.getFile().getName());
-				    	dmtn.add(dmtn1);
-						System.out.println("Checking hash for: "+f.getFile().getName());
-						for(String hash : database.getHash(packs, f.getFile().getName())){
-							if(f.checkDiffs(hash)){
-								safe.put(f.getFile().getName(), f);
-								System.out.println("SAFE:"+f.getFile().getName());
-							}
+		    	for(HashFile f: files.get(packs)){
+			    	DefaultMutableTreeNode dmtn1 = new DefaultMutableTreeNode(f.getFile().getName());
+			    	dmtn.add(dmtn1);
+					System.out.println("Checking hash for: "+f.getFile().getName());
+					for(String hash : database.getHash(packs, f.getFile().getName())){
+						if(f.checkDiffs(hash)){
+							safe.put(f.getFile().getName(), f);
+							System.out.println("SAFE:"+f.getFile().getName());
 						}
-						System.out.println("Checking warnings for: "+f.getFile().getName());
-						if(f.list.size()>0){
-							warn.put(f.getFile().getName(), f);
-							for(String s: f.list){
-								System.out.println("WARN: "+s);
-							}
+					}
+					System.out.println("Checking warnings for: "+f.getFile().getName());
+					if(f.list.size()>0){
+						warn.put(f.getFile().getName(), f);
+						for(String s: f.list){
+							System.out.println("WARN: "+s);
 						}
-			    	}
+					}
+		    	}
 		    	top.add(dmtn);
 		    	//End
 	    	}else{
@@ -313,10 +314,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			gbc.weightx = 0;
 			pnlTab.add(btnClose, gbc);
 			tabbed.setTabComponentAt(index, pnlTab);
-			btnClose.addActionListener(new CloseTab(title, pnlTab));
-			if(safe.containsKey(title)){
-				tabbed.setBackgroundAt(index, Color.GREEN);
-			}
+			btnClose.addActionListener(new CloseTab(title));
 		}else{
 			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
 		}
@@ -438,38 +436,38 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		 * 
 		 */
 		private static final long serialVersionUID = 2301441154974782485L;
-		JPanel panel;
 		String title;
-		public CloseTab(String title, JPanel panel) {
-			this.panel = panel;
+		public CloseTab(String title) {
 			this.title = title;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			int index = tabbed.indexOfTab(title);
+			Component co = tabbed.getComponentAt(index);
 	    	if(open.containsKey(title)){
 	    		HashFile hash = open.get(title);
 	    		if(safe.containsKey(title) || title.endsWith(".MF")){
 	        		open.remove(title);
-	    			tabbed.remove(panel);
+	    			tabbed.remove(co);
 	    			return;
 	    		}
 	    		if(hash.getPackage().length()>0){
-	        		int value = JOptionPane.showConfirmDialog(panel,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
+	        		int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
 	        		if(value==JOptionPane.CANCEL_OPTION){
 	        			return;
 	        		}else if(value==JOptionPane.YES_OPTION){
+	        			safe.put(title, hash);
 	        			if(open.containsKey(title)){
 	        				HashFile file = open.get(title);
 	            			database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
 	            			database.disconnect();
 	        			}
-	        			safe.put(title, hash);
 	        		}
 	    		}
 	    		open.remove(title);
 	    	}
-			tabbed.remove(panel);
+			tabbed.remove(co);
 		}
 	}
 }

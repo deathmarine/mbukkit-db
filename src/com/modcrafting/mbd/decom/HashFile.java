@@ -75,9 +75,8 @@ public class HashFile implements SyntaxConstants {
 			if(file.getName().endsWith(".java")){
 				for(String as: jar.map.keySet()){
 					if (line.toLowerCase().contains(as.toLowerCase())) {
-						String check = jar.map.get(as) 
-								+" ("+pack+"."+ file.getName()+ " @L" + lineNum + ")";
-						list.add(check+"\n"+line.trim());
+						String check = jar.map.get(as);
+						list.add(check+" ("+pack+"."+ file.getName()+ " @L" + lineNum + ")\n"+line.trim());
 						line = line+" //"+check;
 						set.add(lineNum-1);
 					}
