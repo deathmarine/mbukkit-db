@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import javax.swing.border.BevelBorder;
 import com.modcrafting.mbd.decom.DecompJar;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProgressWindow;
+import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.sql.SQL;
 
 public class MasterPluginDatabase extends JFrame implements WindowListener{
@@ -56,6 +58,7 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 	public SQL datab;
 	private JList actionlist;
 	private Map<String, String> keyword = new HashMap<String, String>();
+	@ SuppressWarnings ("unchecked")
 	public MasterPluginDatabase(Properties properties){
 		ProgressWindow pw = new ProgressWindow(this);
 		this.properties = properties;
@@ -213,56 +216,86 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 			.replace(File.separator + "mbd.jar", "");
 	
 	public static void main(String[] args){
+		List<String> argList = new ArrayList<String>();
+		for(String s : args){
+			argList.add(s);
+		}
 		String username = new String();
 		String password = new String();
-		for(String ar:args){
-			if(ar.contains("=")){
-				String[] var = ar.split("=");
-				if(var[0].contains("u"))
-					username = var[1];
-				if(var[0].contains("p"))
-					password = var[1];
+		if(argList.contains("--nogui")){
+			for(String ar:args){
+				if(ar.contains("=")){
+					String[] var = ar.split("=");
+					if(var[0].contains("u"))
+						username = var[1];
+					if(var[0].contains("p"))
+						password = var[1];
+				}
 			}
-		}
-		if(username.length()<1 || password.length()<1){
-			System.out.println("Please enter your username.");
-			Scanner scan = new Scanner(System.in);
-			username = scan.nextLine();
-			System.out.println("Please enter your password.");
-			password = scan.nextLine();
-		}
-		try{
-			String prop = "submitted=1&username="
-					+ URLEncoder.encode(username, "UTF-8") + "&password=" 
-					+ URLEncoder.encode(password, "UTF-8"); 
-			HttpURLConnection httpcon = (HttpURLConnection) ((new URL("http://server.modcrafting.com:2063/check.php").openConnection()));
-			httpcon.setDoOutput(true);
-			httpcon.setDoInput(true);
-			httpcon.setInstanceFollowRedirects(false); 
-			httpcon.setRequestMethod("POST");
-			httpcon.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-			httpcon.setRequestProperty("Content-Length", "" + Integer.toString(prop.getBytes().length));
-			DataOutputStream wr = new DataOutputStream(httpcon.getOutputStream());
-			wr.writeBytes(prop);
-			wr.flush();
-			wr.close();
-			httpcon.disconnect();
-			StringBuilder builder = new StringBuilder();
-			BufferedReader br = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
-			String line;
-			while((line = br.readLine()) != null) {
-				builder.append(line);
+			if(username.length()<1 || password.length()<1){
+				System.out.println("Please enter your username.");
+				Scanner scan = new Scanner(System.in);
+				username = scan.nextLine();
+				System.out.println("Please enter your password.");
+				password = scan.nextLine();
 			}
-			br.close();
-			final String[] arg = builder.toString().split(",");
-			if(arg.length<1){
-				log.severe("Unable to connect to the site.");
-				System.exit(0);
+			try{
+				String prop = "submitted=1&username="
+						+ URLEncoder.encode(username, "UTF-8") + "&password=" 
+						+ URLEncoder.encode(password, "UTF-8"); 
+				HttpURLConnection httpcon = (HttpURLConnection) ((new URL("http://server.modcrafting.com:2063/check.php").openConnection()));
+				httpcon.setDoOutput(true);
+				httpcon.setDoInput(true);
+				httpcon.setInstanceFollowRedirects(false); 
+				httpcon.setRequestMethod("POST");
+				httpcon.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+				httpcon.setRequestProperty("Content-Length", "" + Integer.toString(prop.getBytes().length));
+				DataOutputStream wr = new DataOutputStream(httpcon.getOutputStream());
+				wr.writeBytes(prop);
+				wr.flush();
+				wr.close();
+				httpcon.disconnect();
+				StringBuilder builder = new StringBuilder();
+				BufferedReader br = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
+				String line;
+				while((line = br.readLine()) != null) {
+					builder.append(line);
+				}
+				br.close();
+				final String[] arg = builder.toString().split(",");
+				if(arg.length<1){
+					log.severe("Unable to connect to the site.");
+					System.exit(0);
+				}
+				if(arg[0].equalsIgnoreCase("get")){
+					log.severe("Incorrect Username or Password.");
+					System.exit(0);
+				}
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							UIManager.setLookAndFeel(UIManager.
+													getSystemLookAndFeelClassName());
+						} catch (Exception e) {
+							e.printStackTrace(); // Never happens
+						}
+						Toolkit.getDefaultToolkit().setDynamicLayout(true);
+						Properties props = new Properties();
+						props.put("autoReconnect", "true");
+						props.put("user", arg[0]);
+						props.put("password", arg[1]);
+						props.put("useUnicode", "true");
+						props.put("characterEncoding", "utf8");	
+						new MasterPluginDatabase(props); 
+					}
+				});
+			}catch(Exception e){
+				e.printStackTrace();
 			}
-			if(arg[0].equalsIgnoreCase("get")){
-				log.severe("Incorrect Username or Password.");
-				System.exit(0);
-			}
+		}else{
+			UserPassWindow upw = new UserPassWindow();
+			final String user = upw.getUsername();
+			final String pass = upw.getPassword();
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					try {
@@ -274,15 +307,13 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 					Toolkit.getDefaultToolkit().setDynamicLayout(true);
 					Properties props = new Properties();
 					props.put("autoReconnect", "true");
-					props.put("user", arg[0]);
-					props.put("password", arg[1]);
+					props.put("user", user);
+					props.put("password", pass);
 					props.put("useUnicode", "true");
 					props.put("characterEncoding", "utf8");	
 					new MasterPluginDatabase(props); 
 				}
 			});
-		}catch(Exception ex){
-			ex.printStackTrace();
 		}
 	}
 
@@ -293,15 +324,18 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 			setConnection(DriverManager.getConnection(database, properties));
 			return connection;
 		} catch (SQLException ex) {
-			String message = ex.getCause().getMessage();
-			if(message.contains("is not allowed to connect to this MySQL server")){
-				log.severe("Unable to connection to database: Please check your Username and Password.");
-			}else{
-				log.severe("Unable to connect to the site.");
-				ex.printStackTrace();
+			try {
+				String message = ex.getCause().getMessage();
+				if(message.contains("is not allowed to connect to this MySQL server")){
+					log.severe("Unable to connection to database: Please check your Username and Password.");
+				}else{
+					log.severe("Unable to connect to the site.");
+					ex.printStackTrace();
+				}
+				System.exit(0);
+			} catch(Exception ex2){
 			}
-			System.exit(0);
-		}
+		} 
 		return null;
 	}
 
