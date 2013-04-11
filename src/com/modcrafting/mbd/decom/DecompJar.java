@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -70,6 +71,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> warn = new HashMap<String, HashFile>();
+	List<String> prevOpenBadFiles = new ArrayList<String>();
 	File file;
 	public DecompJar(File file, SQL sql, Map<String, String> map){
 		long time = System.currentTimeMillis();
@@ -319,12 +321,13 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 		if(!open.containsKey(file)){
 			open.put(title, file);
-			if(file.list.size()>0){
+			if(file.list.size()>0 && !prevOpenBadFiles.contains(title)){
 				StringBuilder sb = new StringBuilder();
 				sb.append("The following files contains markers at:\n");
 				for(String er: file.list){
 					sb.append(er).append("\n");
 				}
+				prevOpenBadFiles.add(title);
 				JOptionPane.showMessageDialog(this, sb.toString(), "Warning!", JOptionPane.ERROR_MESSAGE);
 			}
 		}
