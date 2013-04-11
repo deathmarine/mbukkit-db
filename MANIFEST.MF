@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: com.modcrafting.mbd.MasterPluginDatabase
+Class-Path: lib/fernflower.jar lib/mysql-connector-java-5.1.23-bin.jar
+
