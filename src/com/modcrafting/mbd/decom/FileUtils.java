@@ -11,7 +11,7 @@ public class FileUtils {
 				deleteFolder(f);
 			}
 		}
-		System.out.println("Deleteing: "+file.getAbsolutePath());
+		System.out.println("Deleting: "+file.getAbsolutePath());
 		file.delete();
 	}
 	public static String treePathToPackage(TreeNode[] path){

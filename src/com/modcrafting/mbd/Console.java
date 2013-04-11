@@ -46,6 +46,7 @@ public class Console implements Runnable{
 				}
 				if (this.quit)
 					return;
+				Thread.sleep(1);
 			}
 			while (Thread.currentThread() == this.reader2) {
 				if (this.pin2.available() != 0) {
@@ -56,6 +57,7 @@ public class Console implements Runnable{
 				}
 				if (this.quit)
 					return;
+				Thread.sleep(1);
 			}
 		} catch (Exception e) {
 			this.text.append("\nConsole reports an Internal error.");
