@@ -428,7 +428,10 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 		
 		public void mouseClicked(MouseEvent event) {
-			final String[] args = tree.getPathForLocation(event.getX(), event.getY()).toString().replace("[", "").replace("]", "").split(",");
+			TreePath trp = tree.getPathForLocation(event.getX(), event.getY());
+			if(trp==null)
+				return;
+			final String[] args = trp.toString().replace("[", "").replace("]", "").split(",");
 			if(SwingUtilities.isRightMouseButton(event)){
 		        TreePath selPath = tree.getPathForLocation(event.getX(), event.getY());
 		        tree.getSelectionModel().setSelectionPath(selPath);
@@ -447,7 +450,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 						}
 					}
 		        	if(selPath.toString().contains(".java") && menuItem.isEnabled()){
+		        		
 			        	menuItem.addActionListener(new TreeListener(tree, selPath));
+			        	
 		        	} else if(open.containsKey(args[args.length-1]) && ac.equals("Close")){
 		        		menuItem.addActionListener(new ActionListener(){
 							@Override
@@ -464,13 +469,11 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		        		menuItem.addActionListener(new ActionListener(){
 							@Override
 							public void actionPerformed(ActionEvent e) {
-								for(String name : open.keySet()){
-									int index = tabbed.indexOfTab(name);
-									if(index!=-1){
-										Component co = tabbed.getComponentAt(index);
-						        		open.remove(name);
-						    			tabbed.remove(co);
-									}
+								for(int i=tabbed.getTabCount();i>tabbed.getTabCount();i--){
+									String title = tabbed.getTitleAt(i);
+									if(open.containsKey(title))
+									open.remove(i);
+									tabbed.removeTabAt(i);
 								}
 								
 							}

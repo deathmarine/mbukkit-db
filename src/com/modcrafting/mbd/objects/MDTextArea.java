@@ -179,8 +179,12 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
 
 	}
 
-	public void paintComponent(Graphics g) {
-		g.drawImage(image, 0, 0, (int)getSize().getWidth(), (int)getSize().getHeight(), this);
+    @Override
+    protected void paintComponent(Graphics g) {
+        g.setColor(getBackground());
+        g.fillRect(0, 0, getWidth(), getHeight());
+        
+		g.drawImage(image, 0, 0, this);
 	 	super.paintComponent(g);  
 	}  
 }
