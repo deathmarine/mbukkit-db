@@ -389,7 +389,7 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
             }
 			this.dispose();
 			ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png");
-			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.3\nDeathmarine, lol768, Zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.3\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
 			System.exit(0);
 		
 		}

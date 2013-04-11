@@ -13,20 +13,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JWindow;
 import javax.swing.SpringLayout;
-import javax.swing.border.Border;
 
 
-public class UserPassWindow extends JWindow implements ActionListener, KeyListener{
+public class UserPassWindow extends JFrame implements ActionListener, KeyListener{
 
 	private static final long serialVersionUID = 6328274426699959338L;
 	private String username = "";
@@ -42,17 +40,18 @@ public class UserPassWindow extends JWindow implements ActionListener, KeyListen
 	public boolean isOpen = true;
 		
 	public UserPassWindow(){
-		super();
+		super("Login");
 		panel = new JPanel();
-		Border compound = BorderFactory.createCompoundBorder(
-				BorderFactory.createRaisedBevelBorder(), 
-				BorderFactory.createLoweredBevelBorder());
-		panel.setBorder(compound);
+//		Border compound = BorderFactory.createCompoundBorder(
+//				BorderFactory.createRaisedBevelBorder(), 
+//				BorderFactory.createLoweredBevelBorder());
+//		panel.setBorder(compound);
 		this.setSize(300, 150);
 		this.setAlwaysOnTop(true);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(screenSize.width/2 - (this.getSize().width/2),screenSize.height/2 - (this.getSize().height/2));
         this.setContents();
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.add(panel);
 		this.setVisible(true);
 		while(this.isOpen){
@@ -82,7 +81,7 @@ public class UserPassWindow extends JWindow implements ActionListener, KeyListen
 		userField = new JTextField("", 16);
 		userField.addKeyListener(this);
 		pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
-		pane.add(new JLabel("Username:     "));
+		pane.add(new JLabel("Username:    "));
 		pane.add(userField);
 		layout.putConstraint(SpringLayout.VERTICAL_CENTER, pane, -30, SpringLayout.VERTICAL_CENTER, panel);
 		layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, pane, 0, SpringLayout.HORIZONTAL_CENTER, panel);
@@ -170,7 +169,7 @@ public class UserPassWindow extends JWindow implements ActionListener, KeyListen
 				if(this.userField.getText().equals("")){
 					this.errorArea.setText("Please enter a username.");
 					this.errorArea.setVisible(true);
-				}else if(this.passField.getPassword().equals("")){
+				}else if(this.passField.getPassword().length == 0){
 					this.errorArea.setText("Please enter a password.");
 					this.errorArea.setVisible(true);
 				}else{
