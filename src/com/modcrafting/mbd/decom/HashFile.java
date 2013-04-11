@@ -48,10 +48,7 @@ public class HashFile implements SyntaxConstants {
 		textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVA);
 		
 		scrollPane = new RTextScrollPane(textArea, true);
-		scrollPane.setIconRowHeaderEnabled(true);
-		//Gutter gutter = scrollPane.getGutter();
-		//gutter.setBookmarkingEnabled(true);
-		
+		scrollPane.setIconRowHeaderEnabled(true);		
 		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
 		try {
 			this.load();

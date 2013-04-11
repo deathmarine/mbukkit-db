@@ -2,6 +2,8 @@ package com.modcrafting.mbd.objects;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -22,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TooManyListenersException;
 
+import javax.swing.GrayFilter;
+import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
@@ -33,7 +37,8 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
 	/**
 	 * 
 	 */
-	MasterPluginDatabase mdb;
+	MasterPluginDatabase mdb;  
+ 	Image image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
 	private static final long serialVersionUID = 5406400669307759665L;
 	public MDTextArea(MasterPluginDatabase mdb){
 		super();
@@ -46,6 +51,7 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
 		this.setWrapStyleWord(true);
 		this.setEditable(false);
 	    this.addMouseListener(this);
+	    this.setOpaque(false);
 	    DropTarget dt = new DropTarget();
 		try {
 			dt.addDropTargetListener(this);
@@ -174,6 +180,9 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
 	public void dropActionChanged(DropTargetDragEvent arg0) {
 
 	}
-	
 
+	public void paintComponent(Graphics g) {
+		g.drawImage(image, 0, 0, (int)getSize().getWidth(), (int)getSize().getHeight(), this);
+	 	super.paintComponent(g);  
+	}  
 }

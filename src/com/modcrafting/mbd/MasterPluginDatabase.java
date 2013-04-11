@@ -56,6 +56,7 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 	public SQL datab;
 	private JList actionlist;
 	private Map<String, String> keyword = new HashMap<String, String>();
+	@SuppressWarnings("unchecked")
 	public MasterPluginDatabase(Properties properties){
 		ProgressWindow pw = new ProgressWindow(this);
 		this.properties = properties;
@@ -355,7 +356,7 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
             }
 			this.dispose();
 			ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png");
-			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.2\nBy: Deathmarine", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.3", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
 			System.exit(0);
 		
 		}

@@ -2,12 +2,14 @@ package com.modcrafting.mbd.decom;
 
 import java.awt.Component;
 import java.io.File;
+import java.util.Enumeration;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeNode;
 
 import com.modcrafting.mbd.MasterPluginDatabase;
 
@@ -20,6 +22,8 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	Icon image4;
 	Icon image5;
 	Icon image6;
+	Icon image7;
+	Icon image8;
 	public CheckedTreeCellRenderer(DecompJar jar){
 		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"star.png");
 		this.image2 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
@@ -27,46 +31,79 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 		this.image4 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"java.png");
 		this.image5 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"file.png");
 		this.image6 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
+		this.image7 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
+		this.image8 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
 		this.jar = jar;
 	}
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-		if (isSafe(value)){
+		if (isSafe(value) && isJava(value)){
 			setIcon(image);
-			setToolTipText("This is a safe file.");
 			return this;
-		}else if(isWarn(value)){
+		}else if(isWarn(value) && isJava(value)){
 			setIcon(image6);
-			setToolTipText(null);
 			return this;
 		}else if(isJar(value)){
 			setIcon(image2);
-			setToolTipText(null);
+			return this;
+		}else if(!leaf && isPackageSafe(value)){
+			setIcon(image7);
+			return this;
+		}else if(!leaf && isPackageWarn(value)){
+			setIcon(image8);
 			return this;
 		}else if(!leaf){
 			setIcon(image3);
-			setToolTipText(null);
 			return this;
 		}else if(leaf && isJava(value) && !isSafe(value) && !isWarn(value)){
 			setIcon(image4);
-			setToolTipText(null);
 			return this;
 		}else{
 			setIcon(image5);
-			setToolTipText(null);
 			return this;
 		}
 	}
 	
 	protected boolean isSafe(Object value) {
         DefaultMutableTreeNode node =
-                (DefaultMutableTreeNode)value;
+                (DefaultMutableTreeNode) value;
         String title = (String) node.getUserObject();
-        if (jar.safe.containsKey(title)) {
+        
+        if (jar.safe.containsKey(title)){ //BAD
             return true;
         }
         return false;
     }
+	
+	protected boolean isPackageSafe(Object value) {
+        DefaultMutableTreeNode node =
+                (DefaultMutableTreeNode) value;
+        Enumeration enums = node.children();
+        int i = 0,o = 0;
+        while(enums.hasMoreElements()){
+        	DefaultMutableTreeNode child = (DefaultMutableTreeNode) enums.nextElement();
+        	String ntitle = (String) child.getUserObject();
+        	if(jar.safe.containsKey(ntitle))
+        		o++;
+        	i++;
+        }
+        if(i==o)
+        	return true;
+        return false;
+	}
+	
+	protected boolean isPackageWarn(Object value) {
+        DefaultMutableTreeNode node =
+                (DefaultMutableTreeNode) value;
+        Enumeration enums = node.children();
+        while(enums.hasMoreElements()){
+        	DefaultMutableTreeNode child = (DefaultMutableTreeNode) enums.nextElement();
+        	String ntitle = (String) child.getUserObject();
+        	if(jar.warn.containsKey(ntitle))
+        		return true;
+        }
+        return false;
+	}
 	
 	protected boolean isJar(Object value) {
         DefaultMutableTreeNode node =

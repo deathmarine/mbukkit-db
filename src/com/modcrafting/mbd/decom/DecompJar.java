@@ -1,6 +1,5 @@
 package com.modcrafting.mbd.decom;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -8,6 +7,9 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -36,18 +38,20 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -59,6 +63,7 @@ import com.modcrafting.mbd.sql.SQL;
 public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
 	HashMap<String, HashSet<HashFile>> files = new HashMap<String, HashSet<HashFile>>();
+	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
 	JTabbedPane tabbed;
 	SQL database;
 	Map<String, String> map;
@@ -185,8 +190,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		
 	    JTree tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-	    tree.getSelectionModel().addTreeSelectionListener(new TreeListener());
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
+	    tree.addMouseListener(new TreeListener(tree));
+	    
 	    
 	    JPanel panel2 = new JPanel();
 	    panel2.setLayout(new BoxLayout(panel2, 1));
@@ -274,20 +280,13 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			sb.deleteCharAt(sb.length()-1);
 		String packag = sb.toString();
 		if(!fs.isDirectory()){
+			HashSet<HashFile> set = new HashSet<HashFile>();
 			
-			//TODO: Sort lists.
-			
-			if(this.files.containsKey(packag)){
-				HashSet<HashFile> set = this.files.get(packag);
-				set.add(new HashFile(packag, fs, this));
-				System.out.println("Loading: "+packag+"."+fs.getName());
-				this.files.put(packag, set);
-			}else{
-				HashSet<HashFile> set = new HashSet<HashFile>();
-				set.add(new HashFile(packag, fs, this));
-				System.out.println("Loading: "+packag+"."+fs.getName());
-				this.files.put(packag, set);
-			}
+			if(this.files.containsKey(packag))
+				set = this.files.get(packag);
+			set.add(new HashFile(packag, fs, this));
+			System.out.println("Loading: "+packag+"."+fs.getName());
+			this.files.put(packag, set);
 		}else{
 			for(File s:fs.listFiles()){
 				recursiveFolderLoad(s);
@@ -401,37 +400,185 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		
 	}
 	
-	private class TreeListener implements TreeSelectionListener{
-		@Override
-		public void valueChanged(TreeSelectionEvent selection) {
-			//TODO: Bug on same file name under different packages.
-			String[] args = selection.getPath().toString().replace("[", "").replace("]", "").split(",");
-			if(args.length<2)
-				return;
-			if(args.length==2){
-				if(files.containsKey("")){
-					for(HashFile file :files.get("")){
-						if(file.getFile().getName().equals(args[1].trim())){
-							addTab(file.getFile().getName(), file.scrollPane, file);
-							return;
-						}
-					}
+	public void setFileSafe(final HashFile file){
+		safe.put(file.getFile().getName(), file);
+		if(open.containsKey(file.getFile().getName())){
+			SwingUtilities.invokeLater(new Runnable(){
+				@Override
+				public void run() {
+					database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
+		    		open.remove(file.getFile().getName());
+		    		database.disconnect();
 				}
-			}
-			if(args.length==3){
-				if(files.containsKey(args[1].trim().toString())){
-					for(HashFile file :files.get(args[1].trim().toString())){
-						if(file.getFile().getName().equals(args[2].trim())){
-							addTab(file.getFile().getName(), file.scrollPane, file);
-							return;
-						}
-					}
-				}
-			}
+				
+			});
 		}
 	}
 	
-	private class CloseTab extends AbstractAction {
+	private class TreeListener extends MouseAdapter implements ActionListener{
+		JTree tree;
+		TreePath path;
+		public TreeListener(JTree tree){
+			this.tree = tree;
+		}
+		
+		public TreeListener(JTree tree, TreePath path){
+			this.tree = tree;
+			this.path = path;
+		}
+		
+		public void mouseClicked(MouseEvent event) {
+			final String[] args = tree.getPathForLocation(event.getX(), event.getY()).toString().replace("[", "").replace("]", "").split(",");
+			if(SwingUtilities.isRightMouseButton(event)){
+		        TreePath selPath = tree.getPathForLocation(event.getX(), event.getY());
+		        tree.getSelectionModel().setSelectionPath(selPath);
+		        JPopupMenu popup = new JPopupMenu();
+		        for (String ac : new String[]{
+		        		"Open",
+		        		"Save",
+		        		"Acknowledge",
+		        		"Close",
+		        		"Close All"
+		        		}) {
+		        	JMenuItem menuItem = new JMenuItem(ac);
+					if(args.length==2 && opened.containsKey("")){
+						if(opened.get("").contains(args[1])){
+							menuItem.setEnabled(false);
+						}
+					}
+		        	if(selPath.toString().contains(".java") && menuItem.isEnabled()){
+			        	menuItem.addActionListener(new TreeListener(tree, selPath));
+		        	} else if(open.containsKey(args[args.length-1]) && ac.equals("Close")){
+		        		menuItem.addActionListener(new ActionListener(){
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								int index = tabbed.indexOfTab(args[args.length-1]);
+								Component co = tabbed.getComponentAt(index);
+				        		open.remove(args[args.length-1]);
+				    			tabbed.remove(co);
+								
+							}
+		        			
+		        		});
+		        	} else if(ac.equals("Close All")){
+		        		menuItem.addActionListener(new ActionListener(){
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								for(String name : open.keySet()){
+									int index = tabbed.indexOfTab(name);
+									if(index!=-1){
+										Component co = tabbed.getComponentAt(index);
+						        		open.remove(name);
+						    			tabbed.remove(co);
+									}
+								}
+								
+							}
+		        			
+		        		});
+		        	} else {
+		        		menuItem.setEnabled(false);
+		        	}
+		        	if(ac.equals("Acknowledge"))
+		        		menuItem.setEnabled(false);
+			        popup.add(menuItem);
+		        }
+		        popup.show(event.getComponent(), event.getX(), event.getY());
+		        return;
+			}
+			if(event.getClickCount()==2 && SwingUtilities.isLeftMouseButton(event)){
+				if(args.length<2)
+					return;
+				if(args.length==2){
+					if(files.containsKey("")){
+						for(HashFile file :files.get("")){
+							if(file.getFile().getName().equals(args[1].trim())){
+								addTab(file.getFile().getName(), file.scrollPane, file);
+								return;
+							}
+						}
+					}
+				}
+				if(args.length==3){
+					if(files.containsKey(args[1].trim().toString())){
+						for(HashFile file :files.get(args[1].trim().toString())){
+							if(file.getFile().getName().equals(args[2].trim())){
+								addTab(file.getFile().getName(), file.scrollPane, file);
+								return;
+							}
+						}
+					}
+				}
+			}
+			
+		}
+		@Override
+		public void actionPerformed(ActionEvent event) {
+		    JMenuItem source = (JMenuItem) event.getSource();
+		    String action = source.getText();
+	    	String[] args = path.toString().replace("[", "").replace("]", "").split(",");
+		    if (action.equals("Open")){
+				if(args.length<2)
+					return;
+				if(args.length==2){
+					if(files.containsKey("")){
+						for(HashFile file :files.get("")){
+							if(file.getFile().getName().equals(args[1].trim())){
+								addTab(file.getFile().getName(), file.scrollPane, file);
+								return;
+							}
+						}
+					}
+				}
+				if(args.length==3){
+					if(files.containsKey(args[1].trim().toString())){
+						for(HashFile file :files.get(args[1].trim().toString())){
+							if(file.getFile().getName().equals(args[2].trim())){
+								addTab(file.getFile().getName(), file.scrollPane, file);
+								return;
+							}
+						}
+					}
+				}
+		    }
+		    if (action.equals("Save")){
+				if(args.length<2)
+					return;
+				if(args.length==2){
+					if(files.containsKey("")){
+						for(final HashFile file :files.get("")){
+							if(file.getFile().getName().equals(args[1].trim())
+									&& !safe.values().contains(file)
+									&& file.getFile().getName().endsWith(".java")){
+									
+								
+								setFileSafe(file);
+								return;
+							}
+						}
+					}
+				}
+				if(args.length==3){
+					if(files.containsKey(args[1].trim().toString())){
+						for(final HashFile file :files.get(args[1].trim().toString())){
+							if(file.getFile().getName().equals(args[2].trim())
+									&& !safe.values().contains(file)
+									&& file.getFile().getName().endsWith(".java")){
+								setFileSafe(file);
+								return;
+							}
+						}
+					}
+				}
+		    }
+		    if (action.equals("Acknowledge")){
+		    	
+		    }
+			
+		}
+	}
+	
+	private class CloseTab extends AbstractAction{
 		/**
 		 * 
 		 */
@@ -452,16 +599,17 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    			tabbed.remove(co);
 	    			return;
 	    		}
-	    		if(hash.getPackage().length()>0){
+	    		if(hash.getFile().getName().endsWith(".java")){
 	        		int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
 	        		if(value==JOptionPane.CANCEL_OPTION){
 	        			return;
 	        		}else if(value==JOptionPane.YES_OPTION){
 	        			safe.put(title, hash);
 	        			if(open.containsKey(title)){
-	        				HashFile file = open.get(title);
-	            			database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
-	            			database.disconnect();
+				    		open.remove(title);		
+							HashFile file = open.get(title);
+							setFileSafe(file);
+	        				return;
 	        			}
 	        		}
 	    		}
