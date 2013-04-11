@@ -609,9 +609,10 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	        		}else if(value==JOptionPane.YES_OPTION){
 	        			safe.put(title, hash);
 	        			if(open.containsKey(title)){
-				    		open.remove(title);		
 							HashFile file = open.get(title);
 							setFileSafe(file);
+				    		open.remove(title);	
+							tabbed.remove(co);	
 	        				return;
 	        			}
 	        		}

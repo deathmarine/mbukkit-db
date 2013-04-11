@@ -45,7 +45,53 @@ public class HashFile implements SyntaxConstants {
 		textArea.setClearWhitespaceLinesEnabled(false);
 		textArea.setEditable(false);
 		textArea.setCodeFoldingEnabled(true);
-		textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVA);
+		if(file.getName().toLowerCase().endsWith(".java"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVA);
+		else if(file.getName().toLowerCase().endsWith(".xml") 
+				|| file.getName().toLowerCase().endsWith(".rss")
+				|| file.getName().toLowerCase().endsWith(".project")
+				|| file.getName().toLowerCase().endsWith(".classpath"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_XML);
+		else if(file.getName().toLowerCase().endsWith(".h"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_C);
+		else if(file.getName().toLowerCase().endsWith(".sql"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SQL);
+		else if(file.getName().toLowerCase().endsWith(".js"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVASCRIPT);
+		else if(file.getName().toLowerCase().endsWith(".php")
+				|| file.getName().toLowerCase().endsWith(".php5")
+				|| file.getName().toLowerCase().endsWith(".phtml"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_PHP);
+		else if(file.getName().toLowerCase().endsWith(".html") 
+				|| file.getName().toLowerCase().endsWith(".htm")
+				|| file.getName().toLowerCase().endsWith(".xhtm")
+				|| file.getName().toLowerCase().endsWith(".xhtml"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_HTML);
+		else if(file.getName().toLowerCase().endsWith(".js"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVASCRIPT);
+		else if(file.getName().toLowerCase().endsWith(".lua"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_LUA);
+		else if(file.getName().toLowerCase().endsWith(".bat"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_WINDOWS_BATCH);
+		else if(file.getName().toLowerCase().endsWith(".pl"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_PERL);
+		else if(file.getName().toLowerCase().endsWith(".sh"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_UNIX_SHELL);
+		else if(file.getName().toLowerCase().endsWith(".css"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_CSS);
+		else if(file.getName().toLowerCase().endsWith(".json"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JSON);
+		else if(file.getName().toLowerCase().endsWith(".txt"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_NONE);
+		else if(file.getName().toLowerCase().endsWith(".rb"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RUBY);
+		else if(file.getName().toLowerCase().endsWith(".make")
+				|| file.getName().toLowerCase().endsWith(".mak"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_MAKEFILE);
+		else if(file.getName().toLowerCase().endsWith(".py"))
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_PYTHON);
+		else
+			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_PROPERTIES_FILE);
 		
 		scrollPane = new RTextScrollPane(textArea, true);
 		scrollPane.setIconRowHeaderEnabled(true);		
