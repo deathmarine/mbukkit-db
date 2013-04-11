@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -30,7 +31,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 	private JButton submit;
 	private JButton cancel;
 	private JTextField userField;
-	private JTextField passField;
+	private JPasswordField passField;
 	private JTextArea errorArea;
 		
 	public boolean isOpen = true;
@@ -61,9 +62,9 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 		submit.addActionListener(this);
 		cancel = new JButton("Cancel");
 		cancel.addActionListener(this);
-		userField = new JTextField("Username", 10);
+		userField = new JTextField("Username", 16);
 		userField.addKeyListener(this);
-		passField = new JTextField("Password", 10);
+		passField = new JPasswordField("Password", 16);
 		passField.addKeyListener(this);
 		errorArea = new JTextArea("");
 		errorArea.setVisible(false);
@@ -138,12 +139,12 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 				if(this.userField.getText().equals("")){
 					this.errorArea.setText("Please enter a username.");
 					this.errorArea.setVisible(true);
-				}else if(this.passField.getText().equals("")){
+				}else if(this.passField.getPassword().equals("")){
 					this.errorArea.setText("Please enter a password.");
 					this.errorArea.setVisible(true);
 				}else{
 					this.username = this.userField.getText();
-					this.password = this.passField.getText();
+					this.password = new String(this.passField.getPassword());
 					if(this.checkUserAndPass(username, password)){
 						this.isOpen = false;
 					}

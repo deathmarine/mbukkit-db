@@ -9,8 +9,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeNode;
-
 import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
@@ -78,7 +76,7 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	protected boolean isPackageSafe(Object value) {
         DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode) value;
-        Enumeration enums = node.children();
+        Enumeration<?> enums = node.children();
         int i = 0,o = 0;
         while(enums.hasMoreElements()){
         	DefaultMutableTreeNode child = (DefaultMutableTreeNode) enums.nextElement();
@@ -95,7 +93,7 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	protected boolean isPackageWarn(Object value) {
         DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode) value;
-        Enumeration enums = node.children();
+        Enumeration<?> enums = node.children();
         while(enums.hasMoreElements()){
         	DefaultMutableTreeNode child = (DefaultMutableTreeNode) enums.nextElement();
         	String ntitle = (String) child.getUserObject();

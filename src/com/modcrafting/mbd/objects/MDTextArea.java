@@ -23,8 +23,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TooManyListenersException;
-
-import javax.swing.GrayFilter;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
