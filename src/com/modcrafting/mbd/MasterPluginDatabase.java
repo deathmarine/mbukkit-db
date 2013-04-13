@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
+//import com.apple.eawt.Application;
 import com.modcrafting.mbd.decom.DecompJar;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProgressWindow;
@@ -75,8 +76,20 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 		final int y = (int) (center.height * 0.2);
 		this.setBounds(x, y, center.width, center.height);
 		this.setTitle(this.getClass().getSimpleName());
-		Image img = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
-		this.setIconImage(img);
+		//Image img = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
+		String osType = System.getProperties().getProperty("os.name").toLowerCase();
+		if(osType.contains("mac")){
+			//Application app = Application.getApplication();
+			Image image = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit-icon.png").getImage();
+			//app.setDockIconImage(image);
+		}else if(osType.contains("win")){
+			Image image = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit-icon.png").getImage();
+			setIconImage(image);
+		}else{
+			Image image = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit-icon.png").getImage();
+			setIconImage(image);
+		}
+		//this.setIconImage(img);
 		
 		//Setup Console
 		MDTextArea mdt = new MDTextArea(this);
@@ -388,7 +401,7 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
                 log.info("Failed to save keywords list.");
             }
 			this.dispose();
-			ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png");
+			ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit-icon-small.png");
 			JOptionPane.showMessageDialog(null, "MBD: Bukkit or Die.\nVersion: 0.3\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
 			System.exit(0);
 		

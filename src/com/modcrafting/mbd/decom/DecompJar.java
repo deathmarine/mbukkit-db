@@ -53,6 +53,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -195,7 +197,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    JTree tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
-	    tree.addMouseListener(new TreeListener(tree));
+	    TreeListener tl = new TreeListener(tree);
+	    tree.addMouseListener(tl);
+	    //tree.addTreeSelectionListener(tl);
 	    
 	    
 	    JPanel panel2 = new JPanel();
@@ -441,7 +445,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		public TreeListener(JTree tree){
 			this.tree = tree;
 		}
-		
 		public TreeListener(JTree tree, TreePath path){
 			this.tree = tree;
 			this.path = path;
@@ -509,7 +512,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		        popup.show(event.getComponent(), event.getX(), event.getY());
 		        return;
 			}
-			if(event.getClickCount()==2 && SwingUtilities.isLeftMouseButton(event)){
+			if(event.getClickCount()==1 && SwingUtilities.isLeftMouseButton(event)){
 				if(args.length<2)
 					return;
 				if(args.length==2){
@@ -533,7 +536,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 					}
 				}
 			}
-			
 		}
 		@Override
 		public void actionPerformed(ActionEvent event) {
@@ -594,10 +596,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 					}
 				}
 		    }
-		    if (action.equals("Acknowledge")){
-		    	
-		    }
-			
+		    if (action.equals("Acknowledge")){}
 		}
 	}
 	

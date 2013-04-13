@@ -6,3 +6,5 @@ keywords.bin
 .gitignore
 
 out.jardesc
+
+resources/.DS_Store
