@@ -12,10 +12,14 @@ import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,6 +30,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -356,20 +363,77 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 		this.connection = connection;
 	}
 	
+	public void deleteCodeFiles(File zipFile) throws IOException {
+	          // get a temp file
+	   File tempFile = File.createTempFile(zipFile.getName(), null);
+	          // delete it, otherwise you cannot rename your existing zip to it.
+	   tempFile.delete();
+	   tempFile.deleteOnExit();
+	   try {
+	       Files.move(zipFile.toPath(), tempFile.toPath());
+	   } catch (IOException e) {
+	       e.printStackTrace();
+	   }
+	   
+	   /*if (!renameOk)
+	   {
+	       throw new RuntimeException("could not rename the file "+zipFile.getAbsolutePath()+" to "+tempFile.getAbsolutePath());
+	   }*/
+	   byte[] buf = new byte[1024];
+
+	   ZipInputStream zin = new ZipInputStream(new FileInputStream(tempFile));
+	   ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
+
+	   ZipEntry entry = zin.getNextEntry();
+	   while (entry != null) {
+	       String name = entry.getName();
+	       boolean toBeDeleted = false;
+	           if (name.endsWith(".java")) {
+	               toBeDeleted = true;
+	               break;
+	           }
+	       if (!toBeDeleted) {
+	           // Add ZIP entry to output stream.
+	           zout.putNextEntry(new ZipEntry(name));
+	           // Transfer bytes from the ZIP file to the output file
+	           int len;
+	           while ((len = zin.read(buf)) > 0) {
+	               zout.write(buf, 0, len);
+	           }
+	       }
+	       entry = zin.getNextEntry();
+	   }
+	   // Close the streams        
+	   zin.close();
+	   // Compress the files
+	   // Complete the ZIP file
+	   zout.close();
+	   tempFile.delete();
+	}
+	
 	public void handleFiles(final List<File> files) {
 		if (files.size() == 0) {
 			Log("No File(s) selected.");
 			return;
 		}
 				for (final File f:files) {
-					if (!f.isDirectory() && f.getName().toLowerCase().contains(".jar")) 
+					if (!f.isDirectory() && f.getName().toLowerCase().contains(".jar"))  {
+					    try {
+                            deleteCodeFiles(f);
+                        } catch (IOException e) {
+                            
+                            e.printStackTrace();
+                            return;
+                        }
 						new Thread(new Runnable(){
 							@Override
 							public void run() {
+							    
 								new DecompJar(f, datab, keyword);
 								
 							}
 						}).start();
+					}
 				}
 	}
 
