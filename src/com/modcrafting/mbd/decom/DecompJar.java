@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -47,6 +48,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
@@ -217,6 +219,11 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    this.addWindowListener(this);
 		JMenuBar mbar = new JMenuBar();
 		JMenu menu = new JMenu("Edit");
+		JMenuItem mitem = new JMenuItem("Find");
+		mitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
+		mitem.getAccessibleContext().setAccessibleDescription("Searches the currently selected tab.");
+		mitem.addActionListener(new Find(this));
+		menu.add(mitem);
 		mbar.add(menu);
 		mbar.setVisible(true);
 		this.setJMenuBar(mbar);
@@ -417,7 +424,17 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			});
 		}
 	}
-	
+	private class Find extends AbstractAction{
+		DecompJar jar;
+		public Find(DecompJar jar){
+			this.jar = jar;
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			new FindBox(jar);
+		}
+		
+	}
 	private class TreeListener extends MouseAdapter implements ActionListener{
 		JTree tree;
 		TreePath path;
