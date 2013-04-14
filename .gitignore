@@ -8,3 +8,5 @@ keywords.bin
 out.jardesc
 
 resources/.DS_Store
+
+MasterPluginDatabase.java
