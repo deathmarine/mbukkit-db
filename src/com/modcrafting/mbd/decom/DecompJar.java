@@ -199,7 +199,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
 	    TreeListener tl = new TreeListener(tree);
 	    tree.addMouseListener(tl);
-	    //tree.addTreeSelectionListener(tl);
+	    tree.addTreeSelectionListener(tl);
 	    
 	    
 	    JPanel panel2 = new JPanel();
@@ -429,6 +429,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 	}
 	private class Find extends AbstractAction{
+		private static final long serialVersionUID = 836048800878134300L;
 		DecompJar jar;
 		public Find(DecompJar jar){
 			this.jar = jar;
@@ -437,9 +438,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		public void actionPerformed(ActionEvent e) {
 			new FindBox(jar);
 		}
-		
 	}
-	private class TreeListener extends MouseAdapter implements ActionListener{
+
+	private class TreeListener extends MouseAdapter implements ActionListener, TreeSelectionListener{
 		JTree tree;
 		TreePath path;
 		public TreeListener(JTree tree){
@@ -597,6 +598,37 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				}
 		    }
 		    if (action.equals("Acknowledge")){}
+		}
+
+		@Override
+		public void valueChanged(TreeSelectionEvent e) {
+			TreePath trp = e.getPath();
+			if(trp == null){
+				return;
+			}
+			final String[] args = trp.toString().replace("[", "").replace("]", "").split(",");
+			if(args.length<2)
+				return;
+		    if(args.length==2){
+		    	if(files.containsKey("")){
+		    		for(HashFile file :files.get("")){
+		    			if(file.getFile().getName().equals(args[1].trim())){
+		    				addTab(file.getFile().getName(), file.scrollPane, file);
+		    				return;
+		    			}
+		    		}
+		    	}
+		    }
+		    if(args.length==3){
+		    	if(files.containsKey(args[1].trim().toString())){
+		    		for(HashFile file :files.get(args[1].trim().toString())){
+		    			if(file.getFile().getName().equals(args[2].trim())){
+		    				addTab(file.getFile().getName(), file.scrollPane, file);
+		    				return;
+		    			}
+		    		}
+		    	}
+		    }
 		}
 	}
 	

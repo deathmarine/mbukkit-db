@@ -49,6 +49,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
+import com.apple.eawt.Application;
 //import com.apple.eawt.Application;
 import com.modcrafting.mbd.decom.DecompJar;
 import com.modcrafting.mbd.objects.MDTextArea;
@@ -86,9 +87,9 @@ public class MasterPluginDatabase extends JFrame implements WindowListener{
 		//Image img = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		String osType = System.getProperties().getProperty("os.name").toLowerCase();
 		if(osType.contains("mac")){
-			//Application app = Application.getApplication();
+			Application app = Application.getApplication();
 			Image image = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit-icon.png").getImage();
-			//app.setDockIconImage(image);
+			app.setDockIconImage(image);
 		}else if(osType.contains("win")){
 			Image image = new ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit-icon.png").getImage();
 			setIconImage(image);
