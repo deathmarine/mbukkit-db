@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -38,6 +37,7 @@ import java.util.zip.ZipOutputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -52,7 +52,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
-//import com.apple.eawt.Application;
+import com.apple.eawt.Application;
 import com.modcrafting.mbd.decom.DecompJar;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProgressWindow;
@@ -87,13 +87,11 @@ public class MasterPluginDatabase extends JFrame implements WindowListener {
         final int y = (int) (center.height * 0.2);
         this.setBounds(x, y, center.width, center.height);
         this.setTitle(this.getClass().getSimpleName());
-        // Image img = new
-        // ImageIcon(PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
         String osType = System.getProperties().getProperty("os.name").toLowerCase();
         if (osType.contains("mac")) {
-            // Application app = Application.getApplication();
+            Application app = Application.getApplication();
             Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
-            // app.setDockIconImage(image);
+            app.setDockIconImage(image);
         } else if (osType.contains("win")) {
             Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
             setIconImage(image);
@@ -101,7 +99,6 @@ public class MasterPluginDatabase extends JFrame implements WindowListener {
             Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
             setIconImage(image);
         }
-        // this.setIconImage(img);
 
         // Setup Console
         MDTextArea mdt = new MDTextArea(this);
@@ -109,7 +106,8 @@ public class MasterPluginDatabase extends JFrame implements WindowListener {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenu consoleMenu = new JMenu("Console");
-        JMenuItem openMenuItem = new JMenuItem("Open");
+        final JMenuItem openMenuItem = new JMenuItem("Open");
+        final JFileChooser jfm = new JFileChooser();
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         JMenuItem clearMenuItem = new JMenuItem("Clear");
         fileMenu.add(openMenuItem);
@@ -118,7 +116,22 @@ public class MasterPluginDatabase extends JFrame implements WindowListener {
         openMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO: allow user to pick file
+            	if(e.getSource() == openMenuItem){
+            		jfm.setMultiSelectionEnabled(true);
+            		int value = jfm.showOpenDialog(MasterPluginDatabase.this);
+            		System.out.println(value);
+                    if(value == JFileChooser.APPROVE_OPTION){
+                    	System.out.println("Approved");
+                    	File[] fileArray = jfm.getSelectedFiles();
+                    	List<File> fileList = new ArrayList<File>();
+                    	for(File f : fileArray){
+                    		fileList.add(f);
+                    	}
+                    	handleFiles(fileList);
+                    }else{
+                    	System.out.println("Cancelled file selection");
+                    }
+            	}
             }});
             
         exitMenuItem.addActionListener(new ActionListener() {
