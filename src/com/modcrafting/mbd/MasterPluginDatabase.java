@@ -17,6 +17,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -52,7 +54,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
-import com.apple.eawt.Application;
 import com.modcrafting.mbd.decom.DecompJar;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProgressWindow;
@@ -89,9 +90,36 @@ public class MasterPluginDatabase extends JFrame implements WindowListener {
         this.setTitle(this.getClass().getSimpleName());
         String osType = System.getProperties().getProperty("os.name").toLowerCase();
         if (osType.contains("mac")) {
-            Application app = Application.getApplication();
-            Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
-            app.setDockIconImage(image);
+        	try{
+        		/*     MACIFY     */
+        		//Methods should not be privatized so we should be good.
+                Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
+            	Class<?> clazz = Class.forName("com.apple.eawt.Application");
+	            for(Method meth:clazz.getMethods()){
+	            	if(meth.getName().equals("getApplication")){
+	            		Object obj = meth.invoke(clazz, (Object[]) null);
+						for(Method metho: obj.getClass().getMethods()){
+			            	if(metho.getName().equals("setDockIconImage")){
+								metho.invoke(clazz, image);
+								break;
+			            	}
+						}
+						break;
+	            	}
+	            }
+	            /*
+            	com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
+                app.setDockIconImage(image);
+                */
+        	}catch(ClassNotFoundException ex){
+        		ex.printStackTrace();
+        	} catch (IllegalArgumentException e1) {
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				e1.printStackTrace();
+			} catch (InvocationTargetException e1) {
+				e1.printStackTrace();
+			}
         } else if (osType.contains("win")) {
             Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
             setIconImage(image);
