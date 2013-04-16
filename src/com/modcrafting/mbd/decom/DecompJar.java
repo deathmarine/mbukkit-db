@@ -420,9 +420,17 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			SwingUtilities.invokeLater(new Runnable(){
 				@Override
 				public void run() {
-					database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
+                                    new Thread(new Runnable(){
+
+                                        @Override
+                                        public void run() {
+                                            database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
+                                            database.disconnect();
+                                        }
+                                        
+                                    }).start();
+					
 		    		open.remove(file.getFile().getName());
-		    		database.disconnect();
 				}
 				
 			});
@@ -451,6 +459,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			this.path = path;
 		}
 		
+        @Override
 		public void mouseClicked(MouseEvent event) {
 			TreePath trp = tree.getPathForLocation(event.getX(), event.getY());
 			if(trp==null)
