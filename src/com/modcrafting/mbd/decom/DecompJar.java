@@ -61,9 +61,10 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-import com.modcrafting.mbd.MasterPluginDatabase;
+import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.sql.SQL;
+//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
@@ -83,18 +84,24 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		this.map = map;
 		this.file = file;
 		ProgressWindow pw = new ProgressWindow(this);
-		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
+//		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
+		Image img = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		this.setIconImage(img);
 		try{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
 		String[] cl = new String[] { "java", "-jar",
-				MasterPluginDatabase.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
-				"-dgs=true", file.getAbsolutePath(), MasterPluginDatabase.PATH + File.separator + "decomp" };
+				Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
+				"-dgs=true", file.getAbsolutePath(), Chekkit.PATH + File.separator + "decomp" };
+//		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+//				+ File.separator + file.getName());
+//		String[] cl = new String[] { "java", "-jar",
+//				MasterPluginDatabase.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
+//				"-dgs=true", file.getAbsolutePath(), MasterPluginDatabase.PATH + File.separator + "decomp" };
 		ProcessBuilder builder = new ProcessBuilder(cl);
 		builder.redirectErrorStream(true);
 		try {
@@ -240,10 +247,14 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	}
 	
 	private File[] extract(File file) {
-		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+//		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+//				+ File.separator + file.getName());
+		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
 		System.out.println("Extracting Contents...");
-		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+//		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+//				+ File.separator);
+		File dir = new File(Chekkit.PATH + File.separator + "ext"
 				+ File.separator);
 		dir.mkdir();
 		File newDir = new File(dir,file.getName());
@@ -277,7 +288,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	
 	public void recursiveFolderLoad(File fs){
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
-		String dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+//		String dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+//				+ File.separator).getAbsolutePath();
+		String dir = new File(Chekkit.PATH + File.separator + "ext"
 				+ File.separator).getAbsolutePath();
 		StringBuilder sb = new StringBuilder();
 		int ss = fs.getAbsolutePath().split(pattern).length;
@@ -375,9 +388,13 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			this.dispose();
 		}
 
-		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+//		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
+//				+ File.separator + file.getName());
+//		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+//				+ File.separator);
+		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
-		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
+		File dir = new File(Chekkit.PATH + File.separator + "ext"
 				+ File.separator);
 		dir.mkdir();
 		File newDir = new File(dir,file.getName());

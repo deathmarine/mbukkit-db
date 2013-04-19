@@ -7,12 +7,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.modcrafting.mbd.MasterPluginDatabase;
+import com.modcrafting.mbd.Chekkit;
+//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class SQL {
-	MasterPluginDatabase plugin;
+	//MasterPluginDatabase plugin;
+	Chekkit plugin;
 	Connection conn;
-	public SQL(MasterPluginDatabase masterPluginDatabase) {
+//	public SQL(MasterPluginDatabase masterPluginDatabase) {
+//		this.plugin = masterPluginDatabase;
+//	}
+	public SQL(Chekkit masterPluginDatabase) {
 		this.plugin = masterPluginDatabase;
 	}
 	public void connect(){

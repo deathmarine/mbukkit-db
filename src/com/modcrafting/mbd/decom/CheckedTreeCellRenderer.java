@@ -9,7 +9,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import com.modcrafting.mbd.MasterPluginDatabase;
+
+import com.modcrafting.mbd.Chekkit;
+//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	private static final long serialVersionUID = -9076467828472979936L;
@@ -23,14 +25,22 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	Icon image7;
 	Icon image8;
 	public CheckedTreeCellRenderer(DecompJar jar){
-		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"star.png");
-		this.image2 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
-		this.image3 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj.png");
-		this.image4 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"java.png");
-		this.image5 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"file.png");
-		this.image6 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
-		this.image7 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
-		this.image8 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
+		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"star.png");
+		this.image2 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
+		this.image3 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj.png");
+		this.image4 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"java.png");
+		this.image5 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"file.png");
+		this.image6 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
+		this.image7 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
+		this.image8 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
+//		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"star.png");
+//		this.image2 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
+//		this.image3 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj.png");
+//		this.image4 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"java.png");
+//		this.image5 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"file.png");
+//		this.image6 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
+//		this.image7 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
+//		this.image8 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
 		this.jar = jar;
 	}
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {

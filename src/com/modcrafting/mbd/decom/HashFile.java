@@ -21,7 +21,9 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-import com.modcrafting.mbd.MasterPluginDatabase;
+import com.modcrafting.mbd.Chekkit;
+
+//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class HashFile implements SyntaxConstants {
 	private File file;
@@ -95,7 +97,8 @@ public class HashFile implements SyntaxConstants {
 		
 		scrollPane = new RTextScrollPane(textArea, true);
 		scrollPane.setIconRowHeaderEnabled(true);		
-		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
+//		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
+		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
 		try {
 			this.load();
 		} catch (NoSuchAlgorithmException e) {

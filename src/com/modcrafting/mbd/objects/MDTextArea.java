@@ -23,22 +23,28 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TooManyListenersException;
+
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultEditorKit;
 
-import com.modcrafting.mbd.MasterPluginDatabase;
+import com.modcrafting.mbd.Chekkit;
+
+//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class MDTextArea extends JTextArea implements MouseListener, ActionListener, DropTargetListener{
 	/**
 	 * 
 	 */
-	MasterPluginDatabase mdb;  
- 	Image image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
+//	MasterPluginDatabase mdb;  
+	Chekkit mdb;
+// 	Image image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
+ 	Image image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
 	private static final long serialVersionUID = 5406400669307759665L;
-	public MDTextArea(MasterPluginDatabase mdb){
+//	public MDTextArea(MasterPluginDatabase mdb){
+	public MDTextArea(Chekkit mdb){
 		super();
 		this.mdb = mdb;
 		this.setBackground(Color.WHITE);
@@ -184,7 +190,9 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
         g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
         
-		g.drawImage(image, 0, 0, this);
+        if(!System.getProperties().getProperty("os.name").toLowerCase().contains("mac")){
+        	g.drawImage(image, 0, 0, this);
+        }
 	 	super.paintComponent(g);  
 	}  
 }
