@@ -97,7 +97,6 @@ public class HashFile implements SyntaxConstants {
 		
 		scrollPane = new RTextScrollPane(textArea, true);
 		scrollPane.setIconRowHeaderEnabled(true);		
-//		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
 		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
 		try {
 			this.load();

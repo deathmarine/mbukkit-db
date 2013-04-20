@@ -38,6 +38,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -64,7 +65,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.sql.SQL;
-//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
@@ -348,13 +348,11 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		if(!open.containsKey(file)){
 			open.put(title, file);
 			if(file.list.size()>0 && !prevOpenBadFiles.contains(title)){
-				StringBuilder sb = new StringBuilder();
-				sb.append("The following files contains markers at:\n");
-				for(String er: file.list){
-					sb.append(er).append("\n");
-				}
+				JList<String> list = new JList<String>(file.list.toArray(new String[0]));
+				JScrollPane jsp = new JScrollPane(list);
+				jsp.setPreferredSize(new Dimension(750,225));
 				prevOpenBadFiles.add(title);
-				JOptionPane.showMessageDialog(this, sb.toString(), "Warning!", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, jsp, "Warning!", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -362,18 +360,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	@Override
 	public void hyperlinkUpdate(HyperlinkEvent event) {
 		System.out.println(event.getURL());
-	}
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -412,30 +398,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 	}
 
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	private void setFileSafe(final HashFile file){
 		safe.put(file.getFile().getName(), file);
 		if(open.containsKey(file.getFile().getName())){
@@ -461,6 +423,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 //			});
 		}
 	}
+	
 	private class Find extends AbstractAction{
 		private static final long serialVersionUID = 836048800878134300L;
 		DecompJar jar;
@@ -709,4 +672,17 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			tabbed.remove(co);
 		}
 	}
+	
+	@Override
+	public void windowActivated(WindowEvent arg0) {}
+	@Override
+	public void windowClosed(WindowEvent arg0) {}
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {}
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {}
+	@Override
+	public void windowIconified(WindowEvent arg0) {}
+	@Override
+	public void windowOpened(WindowEvent arg0) {}
 }
