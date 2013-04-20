@@ -77,6 +77,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> warn = new HashMap<String, HashFile>();
 	List<String> prevOpenBadFiles = new ArrayList<String>();
+	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
 	public DecompJar(File file, SQL sql, Map<String, String> map){
 		long time = System.currentTimeMillis();
@@ -246,6 +247,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		pw.close();
 	}
 	
+	@ SuppressWarnings ("resource")
 	private File[] extract(File file) {
 //		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
 //				+ File.separator + file.getName());
@@ -377,30 +379,33 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	@Override
 	public void windowClosing(WindowEvent ev) {
 		if(open.size()>0){
-    		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have files open.\n\nAre you sure you want to close?", "OpenWindows", JOptionPane.YES_NO_OPTION);
+    		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have files open.\nAre you sure you want to close?", "OpenWindows", JOptionPane.YES_NO_OPTION);
     		if(value==JOptionPane.NO_OPTION || value==JOptionPane.NO_OPTION){
     			this.setVisible(true);
     			return;
     		}else if(value==JOptionPane.YES_OPTION){
+    			this.database.shutdown(this.databaseUpdates);
     			this.dispose();
     		}
 		}else{
+			this.database.shutdown(this.databaseUpdates);
 			this.dispose();
 		}
-
-//		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
-//				+ File.separator + file.getName());
-//		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
-//				+ File.separator);
-		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
-				+ File.separator + file.getName());
-		File dir = new File(Chekkit.PATH + File.separator + "ext"
-				+ File.separator);
-		dir.mkdir();
-		File newDir = new File(dir,file.getName());
-		FileUtils.deleteFolder(newDir);
-		FileUtils.deleteFolder(newFile);
-
+		//More efficient deletion
+		new Thread(
+			new Runnable(){
+			@Override
+			public void run(){
+				File newFile = new File(Chekkit.PATH + File.separator + "decomp"
+						+ File.separator + file.getName());
+				File dir = new File(Chekkit.PATH + File.separator + "ext"
+						+ File.separator);
+				dir.mkdir();
+				File newDir = new File(dir,file.getName());
+				FileUtils.deleteFolder(newDir);
+				FileUtils.deleteFolder(newFile);
+			}
+		}).start();
 		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"Delete the source file?", "Deletion", JOptionPane.OK_CANCEL_OPTION);
 		if(value==JOptionPane.YES_OPTION){
 			FileUtils.deleteFolder(file);
@@ -431,26 +436,29 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		
 	}
 	
-	public void setFileSafe(final HashFile file){
+	private void setFileSafe(final HashFile file){
 		safe.put(file.getFile().getName(), file);
 		if(open.containsKey(file.getFile().getName())){
-			SwingUtilities.invokeLater(new Runnable(){
-				@Override
-				public void run() {
-                                    new Thread(new Runnable(){
+			open.remove(file.getFile().getName());
+			//database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
 
-                                        @Override
-                                        public void run() {
-                                            database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
-                                            database.disconnect();
-                                        }
-                                        
-                                    }).start();
-					
-		    		open.remove(file.getFile().getName());
-				}
-				
-			});
+//			SwingUtilities.invokeLater(new Runnable(){
+//				@Override
+//				public void run() {
+//                                    new Thread(new Runnable(){
+//
+//                                        @Override
+//                                        public void run() {
+//                                            database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
+//                                            database.disconnect();
+//                                        }
+//                                        
+//                                    }).start();
+//					
+//		    		open.remove(file.getFile().getName());
+//				}
+//				
+//			});
 		}
 	}
 	private class Find extends AbstractAction{
@@ -659,9 +667,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	}
 	
 	private class CloseTab extends AbstractAction{
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 2301441154974782485L;
 		String title;
 		public CloseTab(String title) {
@@ -687,7 +692,12 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	        			safe.put(title, hash);
 	        			if(open.containsKey(title)){
 							HashFile file = open.get(title);
-							setFileSafe(file);
+							//setFileSafe(file);
+							databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
+									file.getPackage() + "','" +
+									file.getFile().getName() + "','" +
+									file.getHash() +
+									"')");
 				    		open.remove(title);	
 							tabbed.remove(co);	
 	        				return;

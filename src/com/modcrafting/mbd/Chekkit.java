@@ -17,14 +17,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
+//import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+//import java.sql.Connection;
+//import java.sql.DriverManager;
+//import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,24 +59,26 @@ import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.sql.SQL;
-
+@ SuppressWarnings ("rawtypes")
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
-    public final static String database = "jdbc:mysql://server.modcrafting.com:3306/dbo_master";
+//    public final static String database = "jdbc:mysql://server.modcrafting.com:3306/dbo_master";
 //    public final static Logger log = Logger.getLogger("MasterPluginDatabase");
     public final static Logger log = Logger.getLogger("Chekkit");
     public Properties properties;
-    private Connection connection;
+//    private Connection connection;
     public Console console;
     public SQL datab;
-    private JList actionlist;
+	private JList actionlist;
     private Map<String, String> keyword = new HashMap<String, String>();
+//    public static String PATH = new File(MasterPluginDatabase.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "mbd.jar", "");
+    public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar",  "");
 
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         ProgressWindow pw = new ProgressWindow(this);
         this.properties = properties;
-        datab = new SQL(this);
+        datab = new SQL(this, properties);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -94,11 +96,9 @@ public class Chekkit extends JFrame implements WindowListener {
         	try{
         		//No touchy!
                 Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
-                @ SuppressWarnings ("rawtypes")
 				Class util = Class.forName("com.apple.eawt.Application");
                 Method getApplication = util.getMethod("getApplication", new Class[0]);
                 Object application = getApplication.invoke(util);
-                @ SuppressWarnings ("rawtypes")
 				Class params[] = new Class[1];
                 params[0] = Image.class;
                 Method setDockIconImage = util.getMethod("setDockIconImage", params);
@@ -175,6 +175,7 @@ public class Chekkit extends JFrame implements WindowListener {
             log.info("Failed to load keywords list.");
             keyword.put(".getName().equals", "[WARN] Possible player name check");
             keyword.put(".getDisplayName().equals", "[WARN] Possible player name check");
+            keyword.put(".setDisplayName(\"", "[WARN] Setting player display name directly");
             keyword.put(".setBanned(", "[WARN] Banning player");
             keyword.put("new URL(", "[WARN] Setting up URL connection");
             keyword.put(".openConnection(", "[WARN] Opens URL connection");
@@ -297,9 +298,7 @@ public class Chekkit extends JFrame implements WindowListener {
         JOptionPane.showMessageDialog(null, string, "Error!", 1);
     }
 
-//    public static String PATH = new File(MasterPluginDatabase.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "mbd.jar", "");
-    public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "mbd.jar", "");
-
+    @ SuppressWarnings ("resource")
     public static void main(String[] args) {
         List<String> argList = new ArrayList<String>();
         for (String s : args) {
@@ -319,7 +318,7 @@ public class Chekkit extends JFrame implements WindowListener {
             }
             if (username.length() < 1 || password.length() < 1) {
                 System.out.println("Please enter your username.");
-                Scanner scan = new Scanner(System.in);
+				Scanner scan = new Scanner(System.in);
                 username = scan.nextLine();
                 System.out.println("Please enter your password.");
                 password = scan.nextLine();
@@ -400,31 +399,30 @@ public class Chekkit extends JFrame implements WindowListener {
         }
     }
 
-    public Connection getConnection() {
-        try {
-            if (connection != null && !connection.isClosed())
-                return connection;
-            setConnection(DriverManager.getConnection(database, properties));
-            return connection;
-        } catch (SQLException ex) {
-            try {
-                String message = ex.getCause().getMessage();
-                if (message.contains("is not allowed to connect to this MySQL server")) {
-                    log.severe("Unable to connection to database: Please check your Username and Password.");
-                } else {
-                    log.severe("Unable to connect to the site.");
-                    ex.printStackTrace();
-                }
-                System.exit(0);
-            } catch (Exception ex2) {
-            }
-        }
-        return null;
-    }
+//    public Connection getConnection() {
+//        try {
+//            if (connection != null && !connection.isClosed())
+//                return connection;
+//            setConnection(DriverManager.getConnection(database, properties));
+//            return connection;
+//        } catch (SQLException ex) {
+//            try {
+//                String message = ex.getCause().getMessage();
+//                if (message.contains("is not allowed to connect to this MySQL server")) {
+//                    log.severe("Unable to connection to database: Please check your Username and Password.");
+//                } else {
+//                    log.severe("Unable to connect to the site.");
+//                    ex.printStackTrace();
+//                }
+//                System.exit(0);
+//            } catch (Exception ex2) {}
+//        }
+//        return null;
+//    }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
+//    public void setConnection(Connection connection) {
+//        this.connection = connection;
+//    }
 
     public void deleteCodeFiles(File zipFile) throws IOException {
         // get a temp file
@@ -509,18 +507,6 @@ public class Chekkit extends JFrame implements WindowListener {
     }
 
     @Override
-    public void windowActivated(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void windowClosed(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void windowClosing(WindowEvent ev) {
         int value = JOptionPane.showConfirmDialog(ev.getWindow(), "Are you sure you want to close?", "Confirm", JOptionPane.OK_CANCEL_OPTION);
         if (value == JOptionPane.CANCEL_OPTION && value == JOptionPane.NO_OPTION) {
@@ -540,32 +526,16 @@ public class Chekkit extends JFrame implements WindowListener {
         }
 
     }
-
     @Override
-    public void windowDeactivated(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
+    public void windowActivated(WindowEvent arg0) {}
     @Override
-    public void windowDeiconified(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
+    public void windowClosed(WindowEvent arg0) {}
     @Override
-    public void windowIconified(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
+    public void windowDeactivated(WindowEvent arg0) {}
     @Override
-    public void windowOpened(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    
-
+    public void windowDeiconified(WindowEvent arg0) {}
+    @Override
+    public void windowIconified(WindowEvent arg0) {}
+    @Override
+    public void windowOpened(WindowEvent arg0) {}
 }
-
