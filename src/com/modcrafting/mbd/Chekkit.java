@@ -494,7 +494,7 @@ public class Chekkit extends JFrame implements WindowListener {
                     @Override
                     public void run() {
 
-                        new DecompJar(f, datab, keyword);
+                        new DecompJar(f, datab, keyword, new File(PATH + File.separator + "progressHide.opt").exists());
 
                     }
                 }).start();
