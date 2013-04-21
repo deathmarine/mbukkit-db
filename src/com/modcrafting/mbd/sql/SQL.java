@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Properties;
 
 import com.modcrafting.mbd.Chekkit;
+import com.modcrafting.mbd.objects.UpdateHolder;
 
 public class SQL {
 	//private Chekkit plugin;
 	private Connection conn;
 	private Properties props;
 	private PreparedStatement ps = null;
-	private List<String> updates = new ArrayList<String>();
+	private List<UpdateHolder> updates = new ArrayList<UpdateHolder>();
 	
 	private String url = "jdbc:mysql://server.modcrafting.com:3306/dbo_master";
 	public SQL(Chekkit masterPluginDatabase, Properties p) {
@@ -32,22 +33,27 @@ public class SQL {
         this.conn = connection;
     }
 	
-	public void shutdown(){
-		for(String s : this.updates){
-			this.ps = null;
-			try {
-				if(conn == null || conn.isClosed()){
-					this.connect();
-				}
-				this.ps = conn.prepareStatement(s);
-				this.ps.executeUpdate();
-				this.ps = null;
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			this.updates.remove(s);
-		}
-	}
+    public void shutdown() {
+        PreparedStatement statement;
+        try {
+            if (conn == null || conn.isClosed()) {
+                this.connect();
+            }
+            conn.setAutoCommit(false);
+            statement = conn.prepareStatement("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES(?,?,?)");
+            for(UpdateHolder s : this.updates){
+                statement.setObject(1, s.getPack());
+                statement.setObject(2, s.getClas());
+                statement.setObject(3, s.getHash());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            conn.commit();
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	public void shutdown(List<String> list){
 		for(String s : list){
@@ -97,25 +103,7 @@ public class SQL {
 	}
 	
 	public void setAddress(String packag, String clazz, String hash) {
-		String str = "REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
-				packag + "','" +
-				clazz + "','" +
-				hash +
-				"')";
-		this.updates.add(str);
-//		try {
-//			if(conn == null || conn.isClosed()){
-//				connect();
-//			}
-//			PreparedStatement ps = conn.prepareStatement("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES(?,?,?)");
-//			ps.setString(1, packag);
-//			ps.setString(2, clazz);
-//			ps.setString(3, hash);
-//			ps.executeUpdate();
-//			ps.close();
-//		} catch (SQLException ex) {
-//			ex.printStackTrace();
-//		}
+		this.updates.add(new UpdateHolder(packag, clazz, hash));
 	}
 	
 	public List<String> getHash(String packag, String clazz) {
