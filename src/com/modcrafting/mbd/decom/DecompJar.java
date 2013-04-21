@@ -84,8 +84,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		database = sql;
 		this.map = map;
 		this.file = file;
+		ProgressWindow pw = null;
 		if (progressDisplay) {
-		    ProgressWindow pw = new ProgressWindow(this);
+		    pw = new ProgressWindow(this);
 		}
 //		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		Image img = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
