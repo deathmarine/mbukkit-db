@@ -477,7 +477,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
             int selected = tabbed.getSelectedIndex();
             if (selected != -1) {
                 closeOpenTab(selected);
-                System.out.println(tabbed.getTitleAt(selected));
             } else {
                 Chekkit.log.severe("No tab selected");
             }
