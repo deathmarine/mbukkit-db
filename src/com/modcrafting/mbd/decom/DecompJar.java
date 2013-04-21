@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.MenuItem;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -235,10 +236,16 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		JMenuBar mbar = new JMenuBar();
 		JMenu menu = new JMenu("Edit");
 		JMenuItem mitem = new JMenuItem("Find");
+        JMenu menu2 = new JMenu("File");
+        JMenuItem mitem2 = new JMenuItem("Close current file");
+        menu2.add(mitem2);
 		mitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
 		mitem.getAccessibleContext().setAccessibleDescription("Searches the currently selected tab.");
-		mitem.addActionListener(new Find(this));
+		mitem2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+        mitem2.getAccessibleContext().setAccessibleDescription("Closes the current tab");
+		mitem2.addActionListener(new CloseCurrentTab(this));
 		menu.add(mitem);
+		mbar.add(menu2);
 		mbar.add(menu);
 		mbar.setVisible(true);
 		this.setJMenuBar(mbar);
@@ -440,6 +447,22 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			new FindBox(jar);
 		}
 	}
+	
+	private class CloseCurrentTab extends AbstractAction{
+        private static final long serialVersionUID = 836048800878134300L;
+        DecompJar jar;
+        public CloseCurrentTab(DecompJar jar){
+            this.jar = jar;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JMenuItem me = (JMenuItem) e.getSource();
+            int selected = tabbed.getSelectedIndex();
+            
+            closeOpenTab(selected);
+            System.out.println(tabbed.getTitleAt(selected));
+        }
+    }
 
 	private class TreeListener extends MouseAdapter implements ActionListener, TreeSelectionListener{
 		JTree tree;
@@ -644,38 +667,44 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			int index = tabbed.indexOfTab(title);
-			Component co = tabbed.getComponentAt(index);
-	    	if(open.containsKey(title)){
-	    		HashFile hash = open.get(title);
-	    		if(safe.containsKey(title) || title.endsWith(".MF")){
-	        		open.remove(title);
-	    			tabbed.remove(co);
-	    			return;
-	    		}
-	    		if(hash.getFile().getName().endsWith(".java")){
-	        		int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
-	        		if(value==JOptionPane.CANCEL_OPTION){
-	        			return;
-	        		}else if(value==JOptionPane.YES_OPTION){
-	        			safe.put(title, hash);
-	        			if(open.containsKey(title)){
-							HashFile file = open.get(title);
-							//setFileSafe(file);
-							databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
-									file.getPackage() + "','" +
-									file.getFile().getName() + "','" +
-									file.getHash() +
-									"')");
-				    		open.remove(title);	
-							tabbed.remove(co);	
-	        				return;
-	        			}
-	        		}
-	    		}
-	    		open.remove(title);
-	    	}
-			tabbed.remove(co);
+			closeOpenTab(index);
+			
 		}
+	}
+	
+	public void closeOpenTab(int index) {
+	    Component co = tabbed.getComponentAt(index);
+	    String title = tabbed.getTitleAt(index);
+        if(open.containsKey(title)){
+            HashFile hash = open.get(title);
+            if(safe.containsKey(title) || title.endsWith(".MF")){
+                open.remove(title);
+                tabbed.remove(co);
+                return;
+            }
+            if(hash.getFile().getName().endsWith(".java")){
+                int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(value==JOptionPane.CANCEL_OPTION){
+                    return;
+                }else if(value==JOptionPane.YES_OPTION){
+                    safe.put(title, hash);
+                    if(open.containsKey(title)){
+                        HashFile file = open.get(title);
+                        //setFileSafe(file);
+                        databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
+                                file.getPackage() + "','" +
+                                file.getFile().getName() + "','" +
+                                file.getHash() +
+                                "')");
+                        open.remove(title); 
+                        tabbed.remove(co);  
+                        return;
+                    }
+                }
+            }
+            open.remove(title);
+        }
+        tabbed.remove(co);
 	}
 	
 	@Override
