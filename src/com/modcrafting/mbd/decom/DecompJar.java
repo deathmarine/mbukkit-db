@@ -79,12 +79,14 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	List<String> prevOpenBadFiles = new ArrayList<String>();
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
-	public DecompJar(File file, SQL sql, Map<String, String> map){
+	public DecompJar(File file, SQL sql, Map<String, String> map, Boolean progressDisplay){
 		long time = System.currentTimeMillis();
 		database = sql;
 		this.map = map;
 		this.file = file;
-		ProgressWindow pw = new ProgressWindow(this);
+		if (progressDisplay) {
+		    ProgressWindow pw = new ProgressWindow(this);
+		}
 //		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		Image img = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		this.setIconImage(img);
@@ -244,7 +246,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		
 		
 		System.out.println("Done in : "+(System.currentTimeMillis()-time)+"ms");
-		pw.close();
+		if (progressDisplay) {
+		    pw.close();
+		}
 	}
 	
 	@ SuppressWarnings ("resource")
