@@ -1,5 +1,7 @@
 package com.modcrafting.mbd.decom;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.BorderFactory;
@@ -8,25 +10,27 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
 
-public class FindBox extends JFrame{
+public class FindBox extends JDialog{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4125409760166690462L;
 	JCheckBox mcase;
-    JCheckBox wrap;
+    JCheckBox regex;
     JCheckBox wholew;
     JCheckBox reverse;
     JButton findButton;
-    JButton nextButton;
     JTextField textField;
     DecompJar base;
 	public FindBox(DecompJar base) {
@@ -34,24 +38,35 @@ public class FindBox extends JFrame{
 		
         JLabel label = new JLabel("Find What:");
         textField = new JTextField();
+
+		int pos = base.tabbed.getSelectedIndex();
+		if(pos>=0){
+			String title = base.tabbed.getTitleAt(pos);
+			HashFile hfile = base.open.get(title);
+			textField.setText(hfile.textArea.getSelectedText());
+		}
         mcase = new JCheckBox("Match Case");
-        wrap = new JCheckBox("Wrap Around");
+        regex = new JCheckBox("Regex");
         wholew = new JCheckBox("Whole Words");
         reverse = new JCheckBox("Search Backwards");
         
         findButton = new JButton("Find");
         findButton.addActionListener(new FindButton());
-        
-        nextButton = new JButton("Find Next...");
-        findButton.addActionListener(new FindButton());
+        this.getRootPane().setDefaultButton(findButton);
         
         mcase.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        wrap.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        regex.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         wholew.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         reverse.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
- 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		final Dimension center = new Dimension((int)(screenSize.width*0.35), (int)(screenSize.height*0.20));
+		final int x = (int) (center.width * 0.2);
+		final int y = (int) (center.height * 0.2);
+		this.setBounds(x, y, center.width, center.height);
+		this.setResizable(false);
+        GroupLayout layout = new GroupLayout(getRootPane());
+        getRootPane().setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
  
@@ -64,14 +79,13 @@ public class FindBox extends JFrame{
                         .addComponent(mcase)
                         .addComponent(wholew))
                     .addGroup(layout.createParallelGroup(Alignment.LEADING)
-                        .addComponent(wrap)
+                        .addComponent(regex)
                         .addComponent(reverse))))
             .addGroup(layout.createParallelGroup(Alignment.LEADING)
-                .addComponent(findButton)
-                .addComponent(nextButton))
+                .addComponent(findButton))
         );
         
-        layout.linkSize(SwingConstants.HORIZONTAL, findButton, nextButton);
+        layout.linkSize(SwingConstants.HORIZONTAL, findButton);
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                 .addComponent(label)
@@ -81,16 +95,15 @@ public class FindBox extends JFrame{
                 .addGroup(layout.createSequentialGroup()
                     .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(mcase)
-                        .addComponent(wrap))
+                        .addComponent(regex))
                     .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(wholew)
-                        .addComponent(reverse)))
-                .addComponent(nextButton))
+                        .addComponent(reverse))))
         );
  
-        this.setTitle("Find");
-        this.pack();
-        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        this.setName("Find");
+        //this.pack();
+        //this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         this.setVisible(true);
     }
 	private class FindButton extends AbstractAction{
@@ -101,24 +114,23 @@ public class FindBox extends JFrame{
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			JButton button = (JButton) event.getSource();
-			String name = button.getText();
-			if(name.equals("Find")){
-				int pos = base.tabbed.getSelectedIndex();
-				String title = base.tabbed.getTitleAt(pos);
-				HashFile hfile = base.open.get(title);
-				Document doc = hfile.textArea.getDocument();
-				try {
-					String sg = doc.getText(0, doc.getLength()-1);
-					int ps = sg.indexOf(textField.getText());
-					hfile.textArea.select(ps, ps+textField.getText().length());
-				} catch (BadLocationException e) {
-					e.printStackTrace();
-				}
-			}
-			if(name.equals("Find Next...")){
-				
-			}
+			int pos = base.tabbed.getSelectedIndex();
+			String title = base.tabbed.getTitleAt(pos);
+			HashFile hfile = base.open.get(title);
+			SearchContext context = new SearchContext();
+      		if (textField.getText().length() == 0)
+		         return;
+      		
+      		context.setSearchFor(textField.getText());
+      		context.setMatchCase(mcase.isSelected());
+      		context.setRegularExpression(regex.isSelected());
+      		context.setSearchForward(!reverse.isSelected());
+      		context.setWholeWord(wholew.isSelected());
+      		
+            if (!SearchEngine.find(hfile.textArea, context)) {
+               hfile.textArea.setSelectionStart(0);
+               hfile.textArea.setSelectionEnd(0);
+            }
 		}
 		
 	}

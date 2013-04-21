@@ -247,6 +247,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		JMenuBar mbar = new JMenuBar();
 		JMenu menu = new JMenu("Edit");
 		JMenuItem mitem = new JMenuItem("Find");
+		mitem.addActionListener(new Find(this));
+		mitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
+		mitem.getAccessibleContext().setAccessibleDescription("Searches the currently selected tab.");
         JMenu menu2 = new JMenu("File");
         JMenuItem mitem2 = new JMenuItem("Close current file");
         menu2.add(mitem2);
