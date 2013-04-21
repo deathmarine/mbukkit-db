@@ -366,7 +366,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			gbc.weightx = 1;
 			pnlTab.add(lblTitle, gbc);
 			gbc.gridx++;
-			gbc.weightx = 0;
+			gbc.insets = new Insets(0, 5, 0, 0);
+			gbc.anchor = GridBagConstraints.EAST;
 			pnlTab.add(btnClose, gbc);
 			tabbed.setTabComponentAt(index, pnlTab);
 			btnClose.addMouseListener(new CloseTab(title));
