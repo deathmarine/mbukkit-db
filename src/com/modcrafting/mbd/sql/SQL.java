@@ -48,6 +48,8 @@ public class SQL {
                 statement.addBatch();
             }
             statement.executeBatch();
+            conn.commit();
+            conn.setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
