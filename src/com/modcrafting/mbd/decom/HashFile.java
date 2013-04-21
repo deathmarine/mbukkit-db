@@ -1,5 +1,6 @@
 package com.modcrafting.mbd.decom;
 
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,8 +21,6 @@ import javax.swing.text.BadLocationException;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
-
-import com.modcrafting.mbd.Chekkit;
 
 //import com.modcrafting.mbd.MasterPluginDatabase;
 
@@ -97,7 +96,7 @@ public class HashFile implements SyntaxConstants {
 		
 		scrollPane = new RTextScrollPane(textArea, true);
 		scrollPane.setIconRowHeaderEnabled(true);		
-		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
+		this.image = (Icon) new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/warn.png")));
 		try {
 			this.load();
 		} catch (NoSuchAlgorithmException e) {

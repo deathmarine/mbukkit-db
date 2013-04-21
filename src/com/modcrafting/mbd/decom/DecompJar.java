@@ -92,8 +92,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		if (!progressDisplay) {
 		    pw = new ProgressWindow(this);
 		}
-//		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
-		Image img = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
+		Image img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
 		this.setIconImage(img);
 		System.out.println(useNimbus);
 		try {
@@ -110,6 +109,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
         }
 		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
+		
 		String[] cl = new String[] { "java", "-jar",
 				Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
 				"-dgs=true", file.getAbsolutePath(), Chekkit.PATH + File.separator + "decomp" };
@@ -361,9 +361,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			pnlTab.setOpaque(false);
 			
 			JLabel lblTitle = new JLabel(title);
-			Icon close = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"icon_close.png");
+			ImageIcon close = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/icon_close.png")));
 			JLabel btnClose = new JLabel(close);
-			//btnClose.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.gridx = 0;
 			gbc.gridy = 0;

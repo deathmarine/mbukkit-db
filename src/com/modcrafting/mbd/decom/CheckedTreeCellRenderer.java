@@ -1,7 +1,7 @@
 package com.modcrafting.mbd.decom;
 
 import java.awt.Component;
-import java.io.File;
+import java.awt.Toolkit;
 import java.util.Enumeration;
 
 import javax.swing.Icon;
@@ -9,8 +9,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import com.modcrafting.mbd.Chekkit;
 //import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
@@ -25,22 +23,22 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	Icon image7;
 	Icon image8;
 	public CheckedTreeCellRenderer(DecompJar jar){
-		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"star.png");
-		this.image2 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
-		this.image3 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj.png");
-		this.image4 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"java.png");
-		this.image5 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"file.png");
-		this.image6 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
-		this.image7 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
-		this.image8 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
-//		this.image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"star.png");
-//		this.image2 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
-//		this.image3 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj.png");
-//		this.image4 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"java.png");
-//		this.image5 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"file.png");
-//		this.image6 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"warn.png");
-//		this.image7 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
-//		this.image8 = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
+		this.image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/star.png")));
+		this.image2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-tiny.png")));
+		this.image3 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/package_obj.png")));
+		this.image4 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/java.png")));
+		this.image5 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/file.png")));
+		this.image6 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/warn.png")));
+		this.image7 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/package_obj_star.png")));
+		this.image8 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/package_obj_warn.png")));
+//		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"star.png");
+//		this.image2 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
+//		this.image3 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj.png");
+//		this.image4 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"java.png");
+//		this.image5 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"file.png");
+//		this.image6 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
+//		this.image7 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
+//		this.image8 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
 		this.jar = jar;
 	}
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {

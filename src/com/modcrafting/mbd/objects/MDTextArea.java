@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -41,7 +42,7 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
 //	MasterPluginDatabase mdb;  
 	Chekkit mdb;
 // 	Image image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
- 	Image image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
+	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/fedora.png"))).getImage();
 	private static final long serialVersionUID = 5406400669307759665L;
 //	public MDTextArea(MasterPluginDatabase mdb){
 	public MDTextArea(Chekkit mdb){

@@ -17,14 +17,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-//import java.lang.reflect.InvocationTargetException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-//import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +57,10 @@ import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.sql.SQL;
+//import java.lang.reflect.InvocationTargetException;
+//import java.sql.Connection;
+//import java.sql.DriverManager;
+//import java.sql.SQLException;
 @ SuppressWarnings ("rawtypes")
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
@@ -108,7 +109,7 @@ public class Chekkit extends JFrame implements WindowListener {
         if (osType.contains("mac")) {
         	try{
         		//No touchy!
-                Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
+                Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
 				Class util = Class.forName("com.apple.eawt.Application");
                 Method getApplication = util.getMethod("getApplication", new Class[0]);
                 Object application = getApplication.invoke(util);
@@ -120,10 +121,10 @@ public class Chekkit extends JFrame implements WindowListener {
         		ex.printStackTrace();
         	}
         } else if (osType.contains("win")) {
-            Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
+        	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
             setIconImage(image);
         } else {
-            Image image = new ImageIcon(PATH + File.separator + "resources" + File.separator + "bukkit-icon.png").getImage();
+        	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
             setIconImage(image);
         }
 
@@ -183,7 +184,9 @@ public class Chekkit extends JFrame implements WindowListener {
         JPanel p2 = new JPanel();
         this.actionlist = new JList();
         try {
-            keyword = (Map<String, String>) SLAPI.load("keywords.bin");
+        	ObjectInputStream ois = new ObjectInputStream(this.getClass().getResourceAsStream("/resources/keywords.bin"));
+        	keyword = (Map<String, String>)ois.readObject();
+        	ois.close();
         } catch (Exception e) {
             log.info("Failed to load keywords list.");
             keyword.put(".getName().equals", "[WARN] Possible player name check");
@@ -558,8 +561,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 log.info("Failed to save keywords list.");
             }
             this.dispose();
-//            ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH + File.separator + "resources" + File.separator + "bukkit-icon-small.png");
-            ImageIcon img = new ImageIcon(Chekkit.PATH + File.separator + "resources" + File.separator + "bukkit-icon-small.png");
+            ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-small.png")));
             JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: 0.4\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
             System.exit(0);
 

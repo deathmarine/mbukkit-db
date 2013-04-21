@@ -2,7 +2,6 @@
 .classpath
 /bin
 /.settings
-keywords.bin
 .gitignore
 
 out.jardesc
