@@ -8,3 +8,5 @@ keywords.bin
 out.jardesc
 
 .DS_Store
+/nbproject/
+/build.xml
