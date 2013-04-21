@@ -1,13 +1,11 @@
 package com.modcrafting.mbd.decom;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.MenuItem;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,7 +37,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -61,11 +58,11 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.plaf.metal.MetalIconFactory;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.modcrafting.mbd.Chekkit;
@@ -78,7 +75,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
 	JTabbedPane tabbed;
 	SQL database;
-	
+	Theme theme;
 	Map<String, String> map;
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
@@ -253,14 +250,18 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
         JMenu menu2 = new JMenu("File");
         JMenuItem mitem2 = new JMenuItem("Close current file");
         menu2.add(mitem2);
-		mitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
-		mitem.getAccessibleContext().setAccessibleDescription("Searches the currently selected tab.");
 		mitem2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
         mitem2.getAccessibleContext().setAccessibleDescription("Closes the current tab");
 		mitem2.addActionListener(new CloseCurrentTab(this));
 		menu.add(mitem);
 		mbar.add(menu2);
 		mbar.add(menu);
+		menu2 = new JMenu("Themes");
+		menu2.add(new JMenuItem(new ThemeAction("Default", "default.xml")));
+		menu2.add(new JMenuItem(new ThemeAction("Dark", "dark.xml")));
+		menu2.add(new JMenuItem(new ThemeAction("Eclipse", "eclipse.xml")));
+		menu2.add(new JMenuItem(new ThemeAction("Visual Studio", "vs.xml")));
+		mbar.add(menu2);
 		mbar.setVisible(true);
 		this.setJMenuBar(mbar);
 	    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -377,13 +378,15 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		if(!open.containsKey(file)){
 			open.put(title, file);
 			if(file.list.size()>0 && !prevOpenBadFiles.contains(title)){
-				JList<String> list = new JList<String>(file.list.toArray(new String[0]));
+				JList list = new JList(file.list.toArray(new String[0]));
 				JScrollPane jsp = new JScrollPane(list);
 				jsp.setPreferredSize(new Dimension(750,225));
 				prevOpenBadFiles.add(title);
 				JOptionPane.showMessageDialog(this, jsp, "Warning!", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+		if(theme!=null)
+			theme.apply(file.textArea);
 	}
 
 	@Override
@@ -737,4 +740,32 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	public void windowIconified(WindowEvent arg0) {}
 	@Override
 	public void windowOpened(WindowEvent arg0) {}
+	
+	private class ThemeAction extends AbstractAction {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6618680171943723199L;
+		private String xml;
+
+		public ThemeAction(String name, String xml) {
+			putValue(NAME, name);
+			this.xml = "/"+xml;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			InputStream in = getClass().getResourceAsStream(xml);
+			try {
+				if(in!=null)
+					theme = Theme.load(in);
+				for(HashFile hf : open.values()){
+					theme.apply(hf.textArea);
+				}
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		}
+
+	}
 }
