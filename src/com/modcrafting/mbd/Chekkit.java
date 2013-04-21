@@ -52,6 +52,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.BevelBorder;
 
 import com.modcrafting.mbd.decom.DecompJar;
@@ -66,6 +67,8 @@ public class Chekkit extends JFrame implements WindowListener {
 //    public final static Logger log = Logger.getLogger("MasterPluginDatabase");
     public final static Logger log = Logger.getLogger("Chekkit");
     public Properties properties;
+    public static Boolean useNimbus = false;
+    public static Boolean hideProgress = false;
 //    private Connection connection;
     public Console console;
     public SQL datab;
@@ -79,11 +82,21 @@ public class Chekkit extends JFrame implements WindowListener {
         ProgressWindow pw = new ProgressWindow(this);
         this.properties = properties;
         datab = new SQL(this, properties);
+        
+        
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName()) && useNimbus) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
+
         }
+        
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         final Dimension center = new Dimension((int) (screenSize.width * 0.75), (int) (screenSize.height * 0.75));
@@ -304,6 +317,26 @@ public class Chekkit extends JFrame implements WindowListener {
         for (String s : args) {
             argList.add(s);
         }
+        File propF = new File(Chekkit.PATH + File.separator + "config.properties");
+        if (propF.exists()) {
+            try {
+                Properties config = new Properties();
+                config.load(new FileInputStream(propF));
+                useNimbus = Boolean.parseBoolean((String) config.get("enable-nimbus"));
+                hideProgress = Boolean.parseBoolean((String) ("hide-progress"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                Properties config = new Properties();
+                config.put("enable-nimbus", useNimbus.toString());
+                config.put("hide-progress", hideProgress.toString());
+                config.store(new FileOutputStream(propF), "The Chekkit config.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         String username = new String();
         String password = new String();
         if (argList.contains("--nogui")) {
@@ -357,8 +390,15 @@ public class Chekkit extends JFrame implements WindowListener {
                     public void run() {
                         try {
                             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                                if ("Nimbus".equals(info.getName()) && useNimbus) {
+                                    UIManager.setLookAndFeel(info.getClassName());
+                                    break;
+                                }
+                            }
                         } catch (Exception e) {
-                            e.printStackTrace(); // Never happens
+                                e.printStackTrace();
+                           
                         }
                         Toolkit.getDefaultToolkit().setDynamicLayout(true);
                         Properties props = new Properties();
@@ -375,7 +415,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 e.printStackTrace();
             }
         } else {
-            UserPassWindow upw = new UserPassWindow();
+            UserPassWindow upw = new UserPassWindow(useNimbus);
             final String user = upw.getUsername();
             final String pass = upw.getPassword();
             SwingUtilities.invokeLater(new Runnable() {
@@ -494,7 +534,7 @@ public class Chekkit extends JFrame implements WindowListener {
                     @Override
                     public void run() {
 
-                        new DecompJar(f, datab, keyword, new File(PATH + File.separator + "progressHide.opt").exists());
+                        new DecompJar(f, datab, keyword, hideProgress, useNimbus);
 
                     }
                 }).start();
@@ -520,7 +560,7 @@ public class Chekkit extends JFrame implements WindowListener {
             this.dispose();
 //            ImageIcon img = new ImageIcon(MasterPluginDatabase.PATH + File.separator + "resources" + File.separator + "bukkit-icon-small.png");
             ImageIcon img = new ImageIcon(Chekkit.PATH + File.separator + "resources" + File.separator + "bukkit-icon-small.png");
-            JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: 0.3\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+            JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: 0.4\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
             System.exit(0);
 
         }

@@ -1,10 +1,12 @@
 package com.modcrafting.mbd.decom;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.MenuItem;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -35,6 +37,7 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -53,10 +56,12 @@ import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.plaf.metal.MetalIconFactory;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -73,6 +78,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
 	JTabbedPane tabbed;
 	SQL database;
+	
 	Map<String, String> map;
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
@@ -80,7 +86,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	List<String> prevOpenBadFiles = new ArrayList<String>();
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
-	public DecompJar(File file, SQL sql, Map<String, String> map, Boolean progressDisplay){
+	public DecompJar(File file, SQL sql, Map<String, String> map, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
 		database = sql;
 		this.map = map;
@@ -92,11 +98,19 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 //		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		Image img = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
 		this.setIconImage(img);
-		try{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+		System.out.println(useNimbus);
+		try {
+		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName()) && useNimbus) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+                e.printStackTrace();
+           
+        }
 		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
 		String[] cl = new String[] { "java", "-jar",
@@ -343,7 +357,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			pnlTab.setOpaque(false);
 			
 			JLabel lblTitle = new JLabel(title);
-			JButton btnClose = new JButton("x");
+			Icon close = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"icon_close.png");
+			JLabel btnClose = new JLabel(close);
+			//btnClose.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.gridx = 0;
 			gbc.gridy = 0;
@@ -353,7 +369,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			gbc.weightx = 0;
 			pnlTab.add(btnClose, gbc);
 			tabbed.setTabComponentAt(index, pnlTab);
-			btnClose.addActionListener(new CloseTab(title));
+			btnClose.addMouseListener(new CloseTab(title));
 		}else{
 			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
 		}
@@ -404,7 +420,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				FileUtils.deleteFolder(newFile);
 			}
 		}).start();
-		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"Delete the source file?", "Deletion", JOptionPane.OK_CANCEL_OPTION);
+		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"Delete the source file?", "Deletion", JOptionPane.YES_NO_OPTION);
 		if(value==JOptionPane.YES_OPTION){
 			FileUtils.deleteFolder(file);
 		}
@@ -657,15 +673,14 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 	}
 	
-	private class CloseTab extends AbstractAction{
-		private static final long serialVersionUID = 2301441154974782485L;
+	private class CloseTab extends MouseAdapter{
 		String title;
 		public CloseTab(String title) {
 			this.title = title;
 		}
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void mouseClicked(MouseEvent e) {
 			int index = tabbed.indexOfTab(title);
 			closeOpenTab(index);
 			
