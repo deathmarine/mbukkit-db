@@ -85,7 +85,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		this.map = map;
 		this.file = file;
 		ProgressWindow pw = null;
-		if (progressDisplay) {
+		if (!progressDisplay) {
 		    pw = new ProgressWindow(this);
 		}
 //		Image img = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"bukkit.png").getImage();
@@ -247,7 +247,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		
 		
 		System.out.println("Done in : "+(System.currentTimeMillis()-time)+"ms");
-		if (progressDisplay) {
+		if (!progressDisplay) {
 		    pw.close();
 		}
 	}
