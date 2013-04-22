@@ -33,18 +33,12 @@ import javax.swing.text.DefaultEditorKit;
 
 import com.modcrafting.mbd.Chekkit;
 
-//import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class MDTextArea extends JTextArea implements MouseListener, ActionListener, DropTargetListener{
-	/**
-	 * 
-	 */
-//	MasterPluginDatabase mdb;  
+	
 	Chekkit mdb;
-// 	Image image = new ImageIcon(MasterPluginDatabase.PATH+File.separator+"resources"+File.separator+"fedora.png").getImage();
 	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/fedora.png"))).getImage();
 	private static final long serialVersionUID = 5406400669307759665L;
-//	public MDTextArea(MasterPluginDatabase mdb){
 	public MDTextArea(Chekkit mdb){
 		super();
 		this.mdb = mdb;
@@ -85,47 +79,20 @@ public class MDTextArea extends JTextArea implements MouseListener, ActionListen
 	public void actionPerformed(ActionEvent arg0) {
 		this.setText("");						
 	}
-
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public void mouseEntered(MouseEvent e) {}
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public void mouseExited(MouseEvent e) {}
 	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public void mousePressed(MouseEvent e) {}
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public void mouseReleased(MouseEvent e) {}
 	@Override
-	public void dragEnter(DropTargetDragEvent arg0) {
-
-	}
-
+	public void dragEnter(DropTargetDragEvent arg0) {}
 	@Override
-	public void dragExit(DropTargetEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
+	public void dragExit(DropTargetEvent arg0) {}
 	@Override
-	public void dragOver(DropTargetDragEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	public void dragOver(DropTargetDragEvent arg0) {}
 
 	@SuppressWarnings("unchecked")
 	@Override

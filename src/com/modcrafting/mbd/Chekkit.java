@@ -6,8 +6,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -38,13 +36,11 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -53,34 +49,27 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.BevelBorder;
 
 import com.modcrafting.mbd.decom.DecompJar;
+import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
-import com.modcrafting.mbd.objects.ProgressWindow;
+import com.modcrafting.mbd.objects.ProcessPanel;
 import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.sql.SQL;
-//import java.lang.reflect.InvocationTargetException;
-//import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.SQLException;
+
 @ SuppressWarnings ("rawtypes")
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
-//    public final static String database = "jdbc:mysql://server.modcrafting.com:3306/dbo_master";
-//    public final static Logger log = Logger.getLogger("MasterPluginDatabase");
     public final static Logger log = Logger.getLogger("Chekkit");
     public Properties properties;
     public static Boolean useNimbus = false;
     public static Boolean hideProgress = false;
-//    private Connection connection;
     public Console console;
+    public static ProcessPanel processPanel = new ProcessPanel();
     public SQL datab;
-	private JList actionlist;
     private Map<String, String> keyword = new HashMap<String, String>();
-//    public static String PATH = new File(MasterPluginDatabase.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "mbd.jar", "");
     public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar",  "");
 
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
-        ProgressWindow pw = new ProgressWindow(this);
         this.properties = properties;
         datab = new SQL(this, properties);
         
@@ -138,15 +127,24 @@ public class Chekkit extends JFrame implements WindowListener {
         final JFileChooser jfm = new JFileChooser();
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         JMenuItem clearMenuItem = new JMenuItem("Clear");
+        JMenuItem keysMenuItem = new JMenuItem("Keywords");
         fileMenu.add(openMenuItem);
         fileMenu.add(exitMenuItem);
         consoleMenu.add(clearMenuItem);
+        consoleMenu.add(keysMenuItem);
+        
+        keysMenuItem.addActionListener(new ActionListener(){
+        	@Override
+        	public void actionPerformed(ActionEvent e){
+        		new KeywordFrame(keyword);
+        	}
+        });
+        
         openMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
             	if(e.getSource() == openMenuItem){
             		jfm.setMultiSelectionEnabled(true);
-//            		int value = jfm.showOpenDialog(MasterPluginDatabase.this);
             		int value = jfm.showOpenDialog(Chekkit.this);
             		System.out.println(value);
                     if(value == JFileChooser.APPROVE_OPTION){
@@ -162,19 +160,18 @@ public class Chekkit extends JFrame implements WindowListener {
                     }
             	}
             }});
-            
         exitMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Frame frame = Frame.getFrames()[0]; 
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }});
-
         clearMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 console.getText().setText("Drag files Into the text box to analyze.\nOr select file(s) from the menu.\n");
             }});
+       
         menuBar.add(fileMenu);
         menuBar.add(consoleMenu);
         this.setJMenuBar(menuBar);
@@ -182,7 +179,7 @@ public class Chekkit extends JFrame implements WindowListener {
         panel.setBorder(BorderFactory.createTitledBorder("Console"));
         panel.add(new JScrollPane(mdt));
         JPanel p2 = new JPanel();
-        this.actionlist = new JList();
+//        this.actionlist = new JList();
         try {
         	ObjectInputStream ois = new ObjectInputStream(this.getClass().getResourceAsStream("/resources/keywords.bin"));
         	keyword = (Map<String, String>)ois.readObject();
@@ -208,93 +205,10 @@ public class Chekkit extends JFrame implements WindowListener {
             keyword.put("org.ow2", "[SERVERE] Using ASM");
             keyword.put("org.objectweb.asm", "[SERVERE] Using ASM");
         }
-
-        this.actionlist.setListData(keyword.keySet().toArray());
-        this.actionlist.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == 3) {
-                    int index = actionlist.locationToIndex(e.getPoint());
-                    actionlist.setSelectedIndex(index);
-                    final String name = (String) actionlist.getSelectedValue();
-                    if (name == null)
-                        return;
-                    JPopupMenu popup = new JPopupMenu();
-                    for (String ac : new String[] { "Add", "Edit", "Delete" }) {
-                        JMenuItem menuItem = new JMenuItem(ac);
-                        menuItem.addActionListener(new ActionListener() {
-
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                JMenuItem source = (JMenuItem) e.getSource();
-                                String action = source.getText();
-                                if (action.equalsIgnoreCase("edit")) {
-                                    String check = JOptionPane.showInputDialog("Enter the new keyword(s) to search for:");
-                                    if (check == null || check.length() < 1) {
-                                        errorMessage("You must enter a string!");
-                                        return;
-                                    }
-                                    String message = JOptionPane.showInputDialog("Enter the message to display:");
-                                    if (message == null || message.length() < 1) {
-                                        errorMessage("You must enter a string!");
-                                        return;
-                                    }
-                                    keyword.remove(name);
-                                    keyword.put(check, message);
-                                    actionlist.setListData(keyword.keySet().toArray());
-                                    System.out.println("\nEditted Keyword: " + name + " to " + check + " : " + message + "\n");
-                                }
-                                if (action.equalsIgnoreCase("add")) {
-                                    String check = JOptionPane.showInputDialog("Enter the keyword(s) to search for:");
-                                    if (check == null || check.length() < 1) {
-                                        errorMessage("You must enter a string!");
-                                        return;
-                                    }
-                                    String message = JOptionPane.showInputDialog("Enter the message to display:");
-                                    if (message == null || message.length() < 1) {
-                                        errorMessage("You must enter a string!");
-                                        return;
-                                    }
-
-                                    keyword.put(check, message);
-                                    actionlist.setListData(keyword.keySet().toArray());
-                                    System.out.println("\nAdded Keyword: " + check + " : " + message + "\n");
-                                }
-                                if (action.equalsIgnoreCase("delete")) {
-                                    keyword.remove(name);
-                                    actionlist.setListData(keyword.keySet().toArray());
-                                    System.out.println("\nRemoved Keyword: " + name + "\n");
-                                }
-
-                            }
-
-                        });
-                        popup.add(menuItem);
-                    }
-                    popup.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-            }
-
-        });
-        p2.setLayout(new BoxLayout(p2, 1));
-        p2.setBorder(BorderFactory.createTitledBorder("Keywords"));
-        p2.add(new JScrollPane(this.actionlist));
+        
+        p2.setLayout(new BoxLayout(p2, BoxLayout.Y_AXIS));
+        p2.setBorder(BorderFactory.createTitledBorder("Processes"));
+        p2.add(processPanel);
         JSplitPane sp = new JSplitPane(1, panel, p2);
         sp.setBorder(new BevelBorder(1));
         sp.setDividerSize(10);
@@ -307,7 +221,6 @@ public class Chekkit extends JFrame implements WindowListener {
         this.addWindowListener(this);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.setVisible(true);
-        pw.close();
     }
 
     public void errorMessage(String string) {
@@ -410,7 +323,6 @@ public class Chekkit extends JFrame implements WindowListener {
                         props.put("password", arg[1]);
                         props.put("useUnicode", "true");
                         props.put("characterEncoding", "utf8");
-//                        new MasterPluginDatabase(props);
                         new Chekkit(props);
                     }
                 });
@@ -435,37 +347,11 @@ public class Chekkit extends JFrame implements WindowListener {
                     props.put("password", pass);
                     props.put("useUnicode", "true");
                     props.put("characterEncoding", "utf8");
-//                    new MasterPluginDatabase(props);
                     new Chekkit(props);
                 }
             });
         }
     }
-
-//    public Connection getConnection() {
-//        try {
-//            if (connection != null && !connection.isClosed())
-//                return connection;
-//            setConnection(DriverManager.getConnection(database, properties));
-//            return connection;
-//        } catch (SQLException ex) {
-//            try {
-//                String message = ex.getCause().getMessage();
-//                if (message.contains("is not allowed to connect to this MySQL server")) {
-//                    log.severe("Unable to connection to database: Please check your Username and Password.");
-//                } else {
-//                    log.severe("Unable to connect to the site.");
-//                    ex.printStackTrace();
-//                }
-//                System.exit(0);
-//            } catch (Exception ex2) {}
-//        }
-//        return null;
-//    }
-
-//    public void setConnection(Connection connection) {
-//        this.connection = connection;
-//    }
 
     public void deleteCodeFiles(File zipFile) throws IOException {
         // get a temp file
@@ -564,9 +450,7 @@ public class Chekkit extends JFrame implements WindowListener {
             ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-small.png")));
             JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: 0.4\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
             System.exit(0);
-
         }
-
     }
     @Override
     public void windowActivated(WindowEvent arg0) {}

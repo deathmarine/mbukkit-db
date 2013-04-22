@@ -62,7 +62,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.CodeTab;
-import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.sql.SQL;
 
 public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
@@ -79,18 +78,15 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	List<String> prevOpenBadFiles = new ArrayList<String>();
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
+	private int processID;
 	public DecompJar(File file, SQL sql, Map<String, String> map, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
+		processID = Chekkit.processPanel.addProcess("Opening " + file.getName().replaceAll(".jar", ""));
 		database = sql;
 		this.map = map;
 		this.file = file;
-		ProgressWindow pw = null;
-		if (!progressDisplay) {
-		    pw = new ProgressWindow(this);
-		}
 		Image img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
 		this.setIconImage(img);
-		System.out.println(useNimbus);
 		try {
 		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -105,7 +101,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
         }
 		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
-		
 		String[] cl = new String[] { "java", "-jar",
 				Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
 				"-dgs=true", file.getAbsolutePath(), Chekkit.PATH + File.separator + "decomp" };
@@ -131,10 +126,11 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			System.out.println("Failed");
 			this.dispose();
 		}
+		Chekkit.processPanel.setBarValue(processID, 25);
 		for(File fs : extract(newFile)){
 			recursiveFolderLoad(fs);
 		}
-
+		Chekkit.processPanel.setBarValue(processID, 50);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		final Dimension center = new Dimension((int)(screenSize.width*0.75), (int)(screenSize.height*0.75));
 		final int x = (int) (center.width * 0.2);
@@ -148,6 +144,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    DefaultMutableTreeNode top = new DefaultMutableTreeNode(file.getName());
 	    List<String> list = Arrays.asList(files.keySet().toArray(new String[0]));
 	    Collections.sort(list);
+	    Chekkit.processPanel.setBarValue(processID, 75);
 	    for(String packs : list){
 	    	if(packs.length()>0){
 	    		//TODO: Needs Better Package Breakdown
@@ -182,7 +179,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 					for(String hash : database.getHash(packs, f.getFile().getName())){
 						if(f.checkDiffs(hash)){
 							safe.put(f.getFile().getName(), f);
-							System.out.println("SAFE:"+f.getFile().getName());
 						}
 					}
 					System.out.println("Checking warnings for: "+f.getFile().getName());
@@ -205,7 +201,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		    	}
 	    	}
 	    }
-		
 	    JTree tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
@@ -229,7 +224,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    panel.setLayout(new BoxLayout(panel, 1));
 	    panel.setBorder(BorderFactory.createTitledBorder("Code"));
 	    panel.add(tabbed);
-	    
 		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, panel2, panel);
 	    this.getContentPane().add(sp);
 	    this.addWindowListener(this);
@@ -255,15 +249,14 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		menu2.add(new JMenuItem(new ThemeAction("Visual Studio", "vs.xml")));
 		mbar.add(menu2);
 		mbar.setVisible(true);
+		Chekkit.processPanel.setBarValue(processID, 100);
 		this.setJMenuBar(mbar);
 	    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setVisible(true);
 		
+		Chekkit.processPanel.removeProcess(processID);
 		
 		System.out.println("Done in : "+(System.currentTimeMillis()-time)+"ms");
-		if (!progressDisplay) {
-		    pw.close();
-		}
 	}
 	
 	@ SuppressWarnings ("resource")
@@ -304,6 +297,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	}
 	
 	public void recursiveFolderLoad(File fs){
+		
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
 		String dir = new File(Chekkit.PATH + File.separator + "ext"
 				+ File.separator).getAbsolutePath();
@@ -392,11 +386,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
     			this.setVisible(true);
     			return;
     		}else if(value==JOptionPane.YES_OPTION){
-    			this.database.shutdown(this.databaseUpdates);
     			this.dispose();
     		}
 		}else{
-			this.database.shutdown(this.databaseUpdates);
 			this.dispose();
 		}
 		//More efficient deletion
@@ -404,6 +396,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			new Runnable(){
 			@Override
 			public void run(){
+				processID = Chekkit.processPanel.addProcess("Deleting leftover files from " + file.getName().replaceAll(".yml", ""));
 				File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 						+ File.separator + file.getName());
 				File dir = new File(Chekkit.PATH + File.separator + "ext"
@@ -411,7 +404,14 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				dir.mkdir();
 				File newDir = new File(dir,file.getName());
 				FileUtils.deleteFolder(newDir);
+				Chekkit.processPanel.setBarValue(processID, 50);
 				FileUtils.deleteFolder(newFile);
+				Chekkit.processPanel.setBarValue(processID, 100);
+				Chekkit.processPanel.removeProcess(processID);
+				processID = Chekkit.processPanel.addProcess("Updating database for " + file.getName().replaceAll(".yml", ""));
+				database.shutdown(databaseUpdates);
+				Chekkit.processPanel.setBarValue(processID, 100);
+				Chekkit.processPanel.removeProcess(processID);
 			}
 		}).start();
 		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"Delete the source file?", "Deletion", JOptionPane.YES_NO_OPTION);

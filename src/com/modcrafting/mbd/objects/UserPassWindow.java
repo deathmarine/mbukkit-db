@@ -64,10 +64,6 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
         }
         panel = new JPanel();
-        // Border compound = BorderFactory.createCompoundBorder(
-        // BorderFactory.createRaisedBevelBorder(),
-        // BorderFactory.createLoweredBevelBorder());
-        // panel.setBorder(compound);
         this.setSize(300, 150);
         this.setAlwaysOnTop(true);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
