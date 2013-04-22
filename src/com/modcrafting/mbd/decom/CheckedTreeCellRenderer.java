@@ -22,6 +22,7 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	Icon image6;
 	Icon image7;
 	Icon image8;
+	Icon image9;
 	public CheckedTreeCellRenderer(DecompJar jar){
 		this.image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/star.png")));
 		this.image2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-tiny.png")));
@@ -31,19 +32,15 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 		this.image6 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/warn.png")));
 		this.image7 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/package_obj_star.png")));
 		this.image8 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/package_obj_warn.png")));
-//		this.image = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"star.png");
-//		this.image2 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"bukkit_small.png");
-//		this.image3 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj.png");
-//		this.image4 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"java.png");
-//		this.image5 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"file.png");
-//		this.image6 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"warn.png");
-//		this.image7 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_star.png");
-//		this.image8 = new ImageIcon(Chekkit.PATH+File.separator+"resources"+File.separator+"package_obj_warn.png");
+		this.image9 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/badskull_small.png")));
 		this.jar = jar;
 	}
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-		if (isSafe(value) && isJava(value)){
+		if(!leaf && isBannedPack(value)){
+			setIcon(image9);
+			return this;
+		}else if (isSafe(value) && isJava(value)){
 			setIcon(image);
 			return this;
 		}else if(isWarn(value) && isJava(value)){
@@ -68,6 +65,15 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 			setIcon(image5);
 			return this;
 		}
+	}
+	protected boolean isBannedPack(Object value){
+        DefaultMutableTreeNode node =
+                (DefaultMutableTreeNode) value;
+        String title = (String) node.getUserObject();
+        for(String b: jar.bannedPackage)
+    		if(title.startsWith(b))
+    			return true;
+		return false;
 	}
 	
 	protected boolean isSafe(Object value) {

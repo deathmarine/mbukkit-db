@@ -48,6 +48,8 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.BevelBorder;
 
+import org.fife.ui.rsyntaxtextarea.Theme;
+
 import com.modcrafting.mbd.decom.DecompJar;
 import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
@@ -66,6 +68,8 @@ public class Chekkit extends JFrame implements WindowListener {
     public static ProcessPanel processPanel = new ProcessPanel();
     public SQL datab;
     private Map<String, String> keyword = new HashMap<String, String>();
+    private List<String> bannedpackage = new ArrayList<String>();
+    private static Theme theme;
     public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar",  "");
 
     @SuppressWarnings("unchecked")
@@ -109,9 +113,6 @@ public class Chekkit extends JFrame implements WindowListener {
         	}catch(Exception ex){
         		ex.printStackTrace();
         	}
-        } else if (osType.contains("win")) {
-        	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
-            setIconImage(image);
         } else {
         	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
             setIconImage(image);
@@ -179,11 +180,8 @@ public class Chekkit extends JFrame implements WindowListener {
         panel.setBorder(BorderFactory.createTitledBorder("Console"));
         panel.add(new JScrollPane(mdt));
         JPanel p2 = new JPanel();
-//        this.actionlist = new JList();
         try {
-        	ObjectInputStream ois = new ObjectInputStream(this.getClass().getResourceAsStream("/resources/keywords.bin"));
-        	keyword = (Map<String, String>)ois.readObject();
-        	ois.close();
+        	keyword = (Map<String, String>)SLAPI.load("keywords.bin");
         } catch (Exception e) {
             log.info("Failed to load keywords list.");
             keyword.put(".getName().equals", "[WARN] Possible player name check");
@@ -202,9 +200,21 @@ public class Chekkit extends JFrame implements WindowListener {
             keyword.put("backdoor", "[SEVERE] Use of the string \"backdoor\"");
             keyword.put("abstract enum", "[SEVERE] Use of abstract enum - investigate");
             keyword.put("\"op ", "[SEVERE] Setting op status");
-            keyword.put("org.ow2", "[SERVERE] Using ASM");
-            keyword.put("org.objectweb.asm", "[SERVERE] Using ASM");
+            keyword.put("org.ow2", "[SEVERE] Using ASM");
+            keyword.put("org.objectweb.asm", "[SEVERE] Using ASM");
+            keyword.put(".shutdown();", "[SEVERE] Shutdown server attempt.");
+            keyword.put("Thread", "[WARN] Odd Use of threading.");
+            keyword.put("Process", "[SEVERE] Execution of external processes.");
+            keyword.put("System.getSecurityManager()", "[SEVERE] Checking for security manager.");
+            keyword.put("System.set", "[SEVERE] Attempt to modify system configuration.");
+            keyword.put("Runtime.getRuntime()", "[SEVERE] Runtime modification.");
+            
         }
+        bannedpackage.add("org.bukkit");
+        bannedpackage.add("lib.PatPeter");
+        bannedpackage.add("org.kitteh.tagapi");
+        bannedpackage.add("com.comphenix.protocol");
+        
         
         p2.setLayout(new BoxLayout(p2, BoxLayout.Y_AXIS));
         p2.setBorder(BorderFactory.createTitledBorder("Processes"));
@@ -227,7 +237,6 @@ public class Chekkit extends JFrame implements WindowListener {
         JOptionPane.showMessageDialog(null, string, "Error!", 1);
     }
 
-    @ SuppressWarnings ("resource")
     public static void main(String[] args) {
         List<String> argList = new ArrayList<String>();
         for (String s : args) {
@@ -423,7 +432,7 @@ public class Chekkit extends JFrame implements WindowListener {
                     @Override
                     public void run() {
 
-                        new DecompJar(f, datab, keyword, hideProgress, useNimbus);
+                        new DecompJar(f, datab, keyword, bannedpackage, hideProgress, useNimbus);
 
                     }
                 }).start();
@@ -464,4 +473,12 @@ public class Chekkit extends JFrame implements WindowListener {
     public void windowIconified(WindowEvent arg0) {}
     @Override
     public void windowOpened(WindowEvent arg0) {}
+
+	public static Theme getTheme() {
+		return theme;
+	}
+
+	public static void setTheme(Theme theme) {
+		Chekkit.theme = theme;
+	}
 }

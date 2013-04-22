@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -70,21 +71,22 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
 	JTabbedPane tabbed;
 	SQL database;
-	Theme theme;
 	Map<String, String> map;
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> warn = new HashMap<String, HashFile>();
+	List<String> bannedPackage;
 	List<String> prevOpenBadFiles = new ArrayList<String>();
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
 	private int processID;
-	public DecompJar(File file, SQL sql, Map<String, String> map, Boolean progressDisplay, Boolean useNimbus){
+	public DecompJar(File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
 		processID = Chekkit.processPanel.addProcess("Opening " + file.getName().replaceAll(".jar", ""));
 		database = sql;
 		this.map = map;
 		this.file = file;
+		this.bannedPackage = banpack;
 		Image img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
 		this.setIconImage(img);
 		try {
@@ -145,6 +147,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    List<String> list = Arrays.asList(files.keySet().toArray(new String[0]));
 	    Collections.sort(list);
 	    Chekkit.processPanel.setBarValue(processID, 75);
+	    String badpack = new String();
 	    for(String packs : list){
 	    	if(packs.length()>0){
 	    		//TODO: Needs Better Package Breakdown
@@ -171,6 +174,13 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    		}
 	    		 *Start Rework
 	    		*/
+	            for(String b: banpack){
+	        		if(packs.startsWith(b)){
+	        			badpack = b; 
+	        		}
+	            }
+	    		
+	    		
 		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(packs);
 		    	for(HashFile f: files.get(packs)){
 			    	DefaultMutableTreeNode dmtn1 = new DefaultMutableTreeNode(f.getFile().getName());
@@ -200,6 +210,10 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			    	top.add(dmtn1);
 		    	}
 	    	}
+	    }
+	    if(badpack.length()>0){
+			Icon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/badskull_large.png")));
+            JOptionPane.showMessageDialog(this, "Restricted Library \""+badpack+"\" was found.\nRecommend Deny.", "Restricted Lib", JOptionPane.PLAIN_MESSAGE, img2);
 	    }
 	    JTree tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -338,24 +352,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			CodeTab ct = new CodeTab(title);
 			ct.getButton().addMouseListener(new CloseTab(title));
 			tabbed.setTabComponentAt(index, ct);
-			
-//			JPanel pnlTab = new JPanel(new GridBagLayout());
-//			pnlTab.setOpaque(false);
-//			
-//			JLabel lblTitle = new JLabel(title);
-//			ImageIcon close = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/icon_close.png")));
-//			JLabel btnClose = new JLabel(close);
-//			GridBagConstraints gbc = new GridBagConstraints();
-//			gbc.gridx = 0;
-//			gbc.gridy = 0;
-//			gbc.weightx = 1;
-//			pnlTab.add(lblTitle, gbc);
-//			gbc.gridx++;
-//			gbc.insets = new Insets(0, 5, 0, 0);
-//			gbc.anchor = GridBagConstraints.EAST;
-//			pnlTab.add(btnClose, gbc);
-//			tabbed.setTabComponentAt(index, pnlTab);
-//			btnClose.addMouseListener(new CloseTab(title));
 		}else{
 			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
 		}
@@ -369,8 +365,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				JOptionPane.showMessageDialog(this, jsp, "Warning!", JOptionPane.ERROR_MESSAGE);
 			}
 		}
-		if(theme!=null)
-			theme.apply(file.textArea);
+		if(Chekkit.getTheme()!=null)
+			Chekkit.getTheme().apply(file.textArea);
 	}
 
 	@Override
@@ -728,16 +724,18 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 
 		public ThemeAction(String name, String xml) {
 			putValue(NAME, name);
-			this.xml = "/"+xml;
+			this.xml = "/themes/"+xml;
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			InputStream in = getClass().getResourceAsStream(xml);
 			try {
-				if(in!=null)
-					theme = Theme.load(in);
-				for(HashFile hf : open.values()){
-					theme.apply(hf.textArea);
+				if(in!=null){
+					Theme theme = Theme.load(in);
+					Chekkit.setTheme(theme);
+					for(HashFile hf : open.values()){
+						theme.apply(hf.textArea);
+					}
 				}
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
