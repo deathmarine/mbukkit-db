@@ -208,6 +208,7 @@ public class Chekkit extends JFrame implements WindowListener {
             keyword.put("System.getSecurityManager()", "[SEVERE] Checking for security manager.");
             keyword.put("System.set", "[SEVERE] Attempt to modify system configuration.");
             keyword.put("Runtime.getRuntime()", "[SEVERE] Runtime modification.");
+			keyword.put("opme", "[SEVERE] Investigate.");
             
         }
         bannedpackage.add("org.bukkit");

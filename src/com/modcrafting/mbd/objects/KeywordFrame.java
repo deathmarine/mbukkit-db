@@ -10,14 +10,14 @@ import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 @ SuppressWarnings ({"unchecked", "rawtypes"})
-public class KeywordFrame extends JFrame implements ActionListener, MouseListener{
+public class KeywordFrame extends JDialog implements ActionListener, MouseListener{
 
 	private static final long serialVersionUID = -9357517243027081L;
 	public boolean isOpen = false;
@@ -31,7 +31,7 @@ public class KeywordFrame extends JFrame implements ActionListener, MouseListene
 	String selected = null;
 	
 	public KeywordFrame(Map<String, String> map){
-		super("Keywords");
+		this.setName("Keywords");
 		this.keywords = map;
 		this.createGUI();
 		this.isOpen = true;
@@ -126,23 +126,30 @@ public class KeywordFrame extends JFrame implements ActionListener, MouseListene
 		}else if(e.getSource() == reset){
 			keywords.clear();
 			keywords.put(".getName().equals", "[WARN] Possible player name check");
-            keywords.put(".getDisplayName().equals", "[WARN] Possible player name check");
-            keywords.put(".setDisplayName(\"", "[WARN] Setting player display name directly");
-            keywords.put(".setBanned(", "[WARN] Banning player");
-            keywords.put("new URL(", "[WARN] Setting up URL connection");
-            keywords.put(".openConnection(", "[WARN] Opens URL connection");
-            keywords.put(".dispatchCommand(", "[WARN] Dispatches a command");
-            keywords.put("http", "[WARN] Making HTTP(S) connection");
-            keywords.put("getDefinedMethod", "[WARN] Getting defined method");
-            keywords.put("getMethod", "[WARN] Getting method");
-            keywords.put("ClassLoader.class", "[WARN] Use of ClassLoader");
-            keywords.put("hack", "[WARN] Use of the string \"hack\"");
-            keywords.put(".setOp(", "[SEVERE] Setting OP status");
-            keywords.put("backdoor", "[SEVERE] Use of the string \"backdoor\"");
-            keywords.put("abstract enum", "[SEVERE] Use of abstract enum - investigate");
-            keywords.put("\"op ", "[SEVERE] Setting op status");
-            keywords.put("org.ow2", "[SERVERE] Using ASM");
-            keywords.put("org.objectweb.asm", "[SERVERE] Using ASM");
+			keywords.put(".getDisplayName().equals", "[WARN] Possible player name check");
+			keywords.put(".setDisplayName(\"", "[WARN] Setting player display name directly");
+			keywords.put(".setBanned(", "[WARN] Banning player");
+			keywords.put("new URL(", "[WARN] Setting up URL connection");
+			keywords.put(".openConnection(", "[WARN] Opens URL connection");
+			keywords.put(".dispatchCommand(", "[WARN] Dispatches a command");
+			keywords.put("http", "[WARN] Making HTTP(S) connection");
+			keywords.put("getDefinedMethod", "[WARN] Getting defined method");
+			keywords.put("getMethod", "[WARN] Getting method");
+			keywords.put("ClassLoader.class", "[WARN] Use of ClassLoader");
+			keywords.put("hack", "[WARN] Use of the string \"hack\"");
+			keywords.put(".setOp(", "[SEVERE] Setting OP status");
+			keywords.put("backdoor", "[SEVERE] Use of the string \"backdoor\"");
+			keywords.put("abstract enum", "[SEVERE] Use of abstract enum - investigate");
+			keywords.put("\"op ", "[SEVERE] Setting op status");
+			keywords.put("org.ow2", "[SEVERE] Using ASM");
+			keywords.put("org.objectweb.asm", "[SEVERE] Using ASM");
+			keywords.put(".shutdown();", "[SEVERE] Shutdown server attempt.");
+			keywords.put("Thread", "[WARN] Odd Use of threading.");
+			keywords.put("Process", "[SEVERE] Execution of external processes.");
+			keywords.put("System.getSecurityManager()", "[SEVERE] Checking for security manager.");
+			keywords.put("System.set", "[SEVERE] Attempt to modify system configuration.");
+			keywords.put("Runtime.getRuntime()", "[SEVERE] Runtime modification.");
+			keywords.put("opme", "[SEVERE] Investigate.");
             list.setListData(keywords.keySet().toArray());
             System.out.println("\nReset keywords to default values.\n");
 		}
