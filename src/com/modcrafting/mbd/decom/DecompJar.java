@@ -2,10 +2,7 @@ package com.modcrafting.mbd.decom;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,10 +32,8 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -66,6 +61,7 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.modcrafting.mbd.Chekkit;
+import com.modcrafting.mbd.objects.CodeTab;
 import com.modcrafting.mbd.objects.ProgressWindow;
 import com.modcrafting.mbd.sql.SQL;
 
@@ -113,11 +109,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		String[] cl = new String[] { "java", "-jar",
 				Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
 				"-dgs=true", file.getAbsolutePath(), Chekkit.PATH + File.separator + "decomp" };
-//		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
-//				+ File.separator + file.getName());
-//		String[] cl = new String[] { "java", "-jar",
-//				MasterPluginDatabase.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
-//				"-dgs=true", file.getAbsolutePath(), MasterPluginDatabase.PATH + File.separator + "decomp" };
 		ProcessBuilder builder = new ProcessBuilder(cl);
 		builder.redirectErrorStream(true);
 		try {
@@ -214,8 +205,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		    	}
 	    	}
 	    }
-	    database.disconnect();
-		System.out.println("Disconnecting from database...");
 		
 	    JTree tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -279,13 +268,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	
 	@ SuppressWarnings ("resource")
 	private File[] extract(File file) {
-//		File newFile = new File(MasterPluginDatabase.PATH + File.separator + "decomp"
-//				+ File.separator + file.getName());
 		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
 				+ File.separator + file.getName());
 		System.out.println("Extracting Contents...");
-//		File dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
-//				+ File.separator);
 		File dir = new File(Chekkit.PATH + File.separator + "ext"
 				+ File.separator);
 		dir.mkdir();
@@ -320,8 +305,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	
 	public void recursiveFolderLoad(File fs){
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
-//		String dir = new File(MasterPluginDatabase.PATH + File.separator + "ext"
-//				+ File.separator).getAbsolutePath();
 		String dir = new File(Chekkit.PATH + File.separator + "ext"
 				+ File.separator).getAbsolutePath();
 		StringBuilder sb = new StringBuilder();
@@ -357,30 +340,35 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			tabbed.addTab(title, rTextScrollPane);
 			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
 			int index = tabbed.indexOfTab(title);
-			JPanel pnlTab = new JPanel(new GridBagLayout());
-			pnlTab.setOpaque(false);
 			
-			JLabel lblTitle = new JLabel(title);
-			ImageIcon close = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/icon_close.png")));
-			JLabel btnClose = new JLabel(close);
-			GridBagConstraints gbc = new GridBagConstraints();
-			gbc.gridx = 0;
-			gbc.gridy = 0;
-			gbc.weightx = 1;
-			pnlTab.add(lblTitle, gbc);
-			gbc.gridx++;
-			gbc.insets = new Insets(0, 5, 0, 0);
-			gbc.anchor = GridBagConstraints.EAST;
-			pnlTab.add(btnClose, gbc);
-			tabbed.setTabComponentAt(index, pnlTab);
-			btnClose.addMouseListener(new CloseTab(title));
+			CodeTab ct = new CodeTab(title);
+			ct.getButton().addMouseListener(new CloseTab(title));
+			tabbed.setTabComponentAt(index, ct);
+			
+//			JPanel pnlTab = new JPanel(new GridBagLayout());
+//			pnlTab.setOpaque(false);
+//			
+//			JLabel lblTitle = new JLabel(title);
+//			ImageIcon close = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/icon_close.png")));
+//			JLabel btnClose = new JLabel(close);
+//			GridBagConstraints gbc = new GridBagConstraints();
+//			gbc.gridx = 0;
+//			gbc.gridy = 0;
+//			gbc.weightx = 1;
+//			pnlTab.add(lblTitle, gbc);
+//			gbc.gridx++;
+//			gbc.insets = new Insets(0, 5, 0, 0);
+//			gbc.anchor = GridBagConstraints.EAST;
+//			pnlTab.add(btnClose, gbc);
+//			tabbed.setTabComponentAt(index, pnlTab);
+//			btnClose.addMouseListener(new CloseTab(title));
 		}else{
 			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
 		}
 		if(!open.containsKey(file)){
 			open.put(title, file);
 			if(file.list.size()>0 && !prevOpenBadFiles.contains(title)){
-				JList list = new JList(file.list.toArray(new String[0]));
+				JList<String> list = new JList<String>(file.list.toArray(new String[0]));
 				JScrollPane jsp = new JScrollPane(list);
 				jsp.setPreferredSize(new Dimension(750,225));
 				prevOpenBadFiles.add(title);
@@ -472,13 +460,13 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	
 	private class CloseCurrentTab extends AbstractAction{
         private static final long serialVersionUID = 836048800878134300L;
-        DecompJar jar;
+        //DecompJar jar;
         public CloseCurrentTab(DecompJar jar){
-            this.jar = jar;
+            //this.jar = jar;
         }
         @Override
         public void actionPerformed(ActionEvent e) {
-            JMenuItem me = (JMenuItem) e.getSource();
+            //JMenuItem me = (JMenuItem) e.getSource();
             int selected = tabbed.getSelectedIndex();
             if (selected != -1) {
                 closeOpenTab(selected);
@@ -487,6 +475,41 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
             }
         }
     }
+	
+	public void closeOpenTab(int index) {
+	    Component co = tabbed.getComponentAt(index);
+	    String title = tabbed.getTitleAt(index);
+        if(open.containsKey(title)){
+            HashFile hash = open.get(title);
+            if(safe.containsKey(title) || title.endsWith(".MF")){
+                open.remove(title);
+                tabbed.remove(co);
+                return;
+            }
+            if(hash.getFile().getName().endsWith(".java")){
+                int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(value==JOptionPane.CANCEL_OPTION){
+                    return;
+                }else if(value==JOptionPane.YES_OPTION){
+                    safe.put(title, hash);
+                    if(open.containsKey(title)){
+                        HashFile file = open.get(title);
+                        //setFileSafe(file);
+                        databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
+                                file.getPackage() + "','" +
+                                file.getFile().getName() + "','" +
+                                file.getHash() +
+                                "')");
+                        open.remove(title); 
+                        tabbed.remove(co);  
+                        return;
+                    }
+                }
+            }
+            open.remove(title);
+        }
+        tabbed.remove(co);
+	}
 
 	private class TreeListener extends MouseAdapter implements ActionListener, TreeSelectionListener{
 		JTree tree;
@@ -695,54 +718,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 	}
 	
-	public void closeOpenTab(int index) {
-	    Component co = tabbed.getComponentAt(index);
-	    String title = tabbed.getTitleAt(index);
-        if(open.containsKey(title)){
-            HashFile hash = open.get(title);
-            if(safe.containsKey(title) || title.endsWith(".MF")){
-                open.remove(title);
-                tabbed.remove(co);
-                return;
-            }
-            if(hash.getFile().getName().endsWith(".java")){
-                int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
-                if(value==JOptionPane.CANCEL_OPTION){
-                    return;
-                }else if(value==JOptionPane.YES_OPTION){
-                    safe.put(title, hash);
-                    if(open.containsKey(title)){
-                        HashFile file = open.get(title);
-                        //setFileSafe(file);
-                        databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
-                                file.getPackage() + "','" +
-                                file.getFile().getName() + "','" +
-                                file.getHash() +
-                                "')");
-                        open.remove(title); 
-                        tabbed.remove(co);  
-                        return;
-                    }
-                }
-            }
-            open.remove(title);
-        }
-        tabbed.remove(co);
-	}
-	
-	@Override
-	public void windowActivated(WindowEvent arg0) {}
-	@Override
-	public void windowClosed(WindowEvent arg0) {}
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {}
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {}
-	@Override
-	public void windowIconified(WindowEvent arg0) {}
-	@Override
-	public void windowOpened(WindowEvent arg0) {}
-	
 	private class ThemeAction extends AbstractAction {
 
 		/**
@@ -768,6 +743,18 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				ioe.printStackTrace();
 			}
 		}
-
 	}
+	
+	@Override
+	public void windowActivated(WindowEvent arg0) {}
+	@Override
+	public void windowClosed(WindowEvent arg0) {}
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {}
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {}
+	@Override
+	public void windowIconified(WindowEvent arg0) {}
+	@Override
+	public void windowOpened(WindowEvent arg0) {}
 }
