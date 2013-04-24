@@ -1,0 +1,61 @@
+<project name="Chekkit" default="package">
+	<property environment="env" />
+	<property name="env.BUILD_NUMBER" value="0" />
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="Chekkit.classpath">
+        <pathelement location="bin"/>
+    </path>
+
+	<target name="init" description="Initialize directories, etc.">
+        <mkdir dir="bin"/>
+        <mkdir dir="dist"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+                <exclude name="php/*.*"/>
+            </fileset>
+        </copy>
+	</target>
+
+	<target name="clean" depends="init" description="Clean up all the temp stuff and previous builds">
+		<delete>
+			<fileset dir="bin" />
+			<fileset dir="dist" />
+		</delete>
+	</target>
+        <echo message="${ant.project.name}: ${ant.file}"/>
+
+	<target name="compile" depends="clean, init" description="Compile all the code">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="Chekkit.classpath"/>
+        	<compilerarg value="-Xlint:none"/>
+        </javac>
+	</target>
+
+	<target name="package" depends="compile" description="Make the distributable jar file">
+		<delete dir="bin/php"/>
+		<copy todir="bin" overwrite="true">
+			<fileset dir="lib" includes="*.jar" />
+		</copy>
+        <copy includeemptydirs="false" todir="bin/resources">
+			<fileset dir="src/resources" includes="*.png" />
+        </copy>      
+        <copy includeemptydirs="false" todir="bin/themes">
+			<fileset dir="src/themes" includes="*.xml" />
+        </copy>        
+        <copy includeemptydirs="false" todir="bin">
+			<fileset dir="src" includes="theme.dtd" />
+        </copy>
+		<jar basedir="bin" jarfile="dist/${ant.project.name}.jar" defaultexcludes="true">
+			<manifest>
+			    <attribute name="Main-Class" value="com.modcrafting.mbd.Chekkit"/>
+			    <attribute name="Class-Path" value="lib/mysql-connector-java-5.1.23-bin.jar"/>
+			</manifest>
+		</jar>
+	</target>
+
+
+</project>
