@@ -361,6 +361,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				JList<String> list = new JList<String>(file.list.toArray(new String[0]));
 				JScrollPane jsp = new JScrollPane(list);
 				jsp.setPreferredSize(new Dimension(750,225));
+				jsp.setMaximumSize(new Dimension(1000,300));
 				prevOpenBadFiles.add(title);
 				JOptionPane.showMessageDialog(this, jsp, "Warning!", JOptionPane.ERROR_MESSAGE);
 			}
