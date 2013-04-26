@@ -1,5 +1,6 @@
 package com.modcrafting.mbd.objects;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -43,7 +44,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
     private JButton cancel;
     private JTextField userField;
     private JPasswordField passField;
-    private JTextArea errorArea;
+    private JLabel errorArea;
     private JCheckBox remember;
 
     public boolean isOpen = true;
@@ -134,9 +135,9 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
         if (pass != "") {
             remember.setSelected(true);
         }
-        errorArea = new JTextArea("");
+        errorArea = new JLabel("");
         errorArea.setVisible(false);
-
+        errorArea.setForeground(Color.RED);
         submit.setSize(50, 15);
         cancel.setSize(50, 15);
         panel.add(submit);
@@ -168,6 +169,15 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             wr.flush();
             wr.close();
             httpcon.disconnect();
+            String ver = httpcon.getHeaderField("X-Chekkit-Version");
+            if (ver != null) {
+                if (!ver.equals(Chekkit.VERSION)) {
+                    this.errorArea.setText("A later version, " + ver + " is available.");
+                    this.errorArea.setVisible(true);
+                    return false;
+                }
+            }
+            
             StringBuilder builder = new StringBuilder();
             BufferedReader br = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
             String line;
