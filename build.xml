@@ -48,7 +48,23 @@
         </copy>        
         <copy includeemptydirs="false" todir="bin">
 			<fileset dir="src" includes="theme.dtd" />
+        </copy>        
+        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea" includes="*.properties" />
+        </copy>       
+        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/focusabletip">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea/focusabletip" includes="*.properties" />
+        </copy>    
+        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/focusabletip">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea/focusabletip" includes="*.png" />
         </copy>
+        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/modes">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea/modes" includes="*.flex" />
+        </copy>        
+        <copy includeemptydirs="false" todir="bin/org/fife/ui/rtextarea">
+			<fileset dir="src/org/fife/ui/rtextarea" includes="*.properties" />
+        </copy>     
+		
 		<jar basedir="bin" jarfile="dist/${ant.project.name}.jar" defaultexcludes="true">
 			<manifest>
 			    <attribute name="Main-Class" value="com.modcrafting.mbd.Chekkit"/>
