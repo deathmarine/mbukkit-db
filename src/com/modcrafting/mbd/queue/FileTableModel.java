@@ -7,7 +7,7 @@ public class FileTableModel extends AbstractTableModel {
     @Override
     public int getRowCount() {
         // TODO Auto-generated method stub
-        return this.;
+        return 0;
     }
 
     @Override
