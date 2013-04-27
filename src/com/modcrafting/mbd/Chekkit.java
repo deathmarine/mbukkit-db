@@ -55,6 +55,7 @@ import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProcessPanel;
 import com.modcrafting.mbd.objects.UserPassWindow;
+import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
 
 @ SuppressWarnings ("rawtypes")
@@ -130,7 +131,9 @@ public class Chekkit extends JFrame implements WindowListener {
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         JMenuItem clearMenuItem = new JMenuItem("Clear");
         JMenuItem keysMenuItem = new JMenuItem("Keywords");
+        JMenuItem queueMenuItem = new JMenuItem("Open queue");
         fileMenu.add(openMenuItem);
+        fileMenu.add(queueMenuItem);
         fileMenu.add(exitMenuItem);
         consoleMenu.add(clearMenuItem);
         consoleMenu.add(keysMenuItem);
@@ -140,6 +143,13 @@ public class Chekkit extends JFrame implements WindowListener {
         	public void actionPerformed(ActionEvent e){
         		new KeywordFrame(keyword);
         	}
+        });
+        
+        queueMenuItem.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                new QueueWindow();
+            }
         });
         
         openMenuItem.addActionListener(new ActionListener() {
