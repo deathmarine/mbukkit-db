@@ -58,7 +58,7 @@ import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
 
-@ SuppressWarnings ("rawtypes")
+@SuppressWarnings("rawtypes")
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
     public final static Logger log = Logger.getLogger("Chekkit");
@@ -72,14 +72,13 @@ public class Chekkit extends JFrame implements WindowListener {
     private List<String> bannedpackage = new ArrayList<String>();
     private static Theme theme;
     public static final String VERSION = "1.5";
-    public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar",  "");
+    public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar", "");
 
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         this.properties = properties;
         datab = new SQL(this, properties);
-        
-        
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -92,7 +91,6 @@ public class Chekkit extends JFrame implements WindowListener {
             e.printStackTrace();
 
         }
-        
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         final Dimension center = new Dimension((int) (screenSize.width * 0.75), (int) (screenSize.height * 0.75));
@@ -102,21 +100,21 @@ public class Chekkit extends JFrame implements WindowListener {
         this.setTitle(this.getClass().getSimpleName());
         String osType = System.getProperties().getProperty("os.name").toLowerCase();
         if (osType.contains("mac")) {
-        	try{
-        		//No touchy!
+            try {
+                // No touchy!
                 Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
-				Class util = Class.forName("com.apple.eawt.Application");
+                Class util = Class.forName("com.apple.eawt.Application");
                 Method getApplication = util.getMethod("getApplication", new Class[0]);
                 Object application = getApplication.invoke(util);
-				Class params[] = new Class[1];
+                Class params[] = new Class[1];
                 params[0] = Image.class;
                 Method setDockIconImage = util.getMethod("setDockIconImage", params);
                 setDockIconImage.invoke(application, image);
-        	}catch(Exception ex){
-        		ex.printStackTrace();
-        	}
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         } else {
-        	Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
+            Image image = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
             setIconImage(image);
         }
 
@@ -137,53 +135,56 @@ public class Chekkit extends JFrame implements WindowListener {
         fileMenu.add(exitMenuItem);
         consoleMenu.add(clearMenuItem);
         consoleMenu.add(keysMenuItem);
-        
-        keysMenuItem.addActionListener(new ActionListener(){
-        	@Override
-        	public void actionPerformed(ActionEvent e){
-        		new KeywordFrame(keyword);
-        	}
-        });
-        
-        queueMenuItem.addActionListener(new ActionListener(){
+
+        keysMenuItem.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e){
+            public void actionPerformed(ActionEvent e) {
+                new KeywordFrame(keyword);
+            }
+        });
+
+        queueMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 new QueueWindow();
             }
         });
-        
+
         openMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	if(e.getSource() == openMenuItem){
-            		jfm.setMultiSelectionEnabled(true);
-            		int value = jfm.showOpenDialog(Chekkit.this);
-            		System.out.println(value);
-                    if(value == JFileChooser.APPROVE_OPTION){
-                    	System.out.println("Approved");
-                    	File[] fileArray = jfm.getSelectedFiles();
-                    	List<File> fileList = new ArrayList<File>();
-                    	for(File f : fileArray){
-                    		fileList.add(f);
-                    	}
-                    	handleFiles(fileList);
-                    }else{
-                    	System.out.println("Cancelled file selection");
+                if (e.getSource() == openMenuItem) {
+                    jfm.setMultiSelectionEnabled(true);
+                    int value = jfm.showOpenDialog(Chekkit.this);
+                    System.out.println(value);
+                    if (value == JFileChooser.APPROVE_OPTION) {
+                        System.out.println("Approved");
+                        File[] fileArray = jfm.getSelectedFiles();
+                        List<File> fileList = new ArrayList<File>();
+                        for (File f : fileArray) {
+                            fileList.add(f);
+                        }
+                        handleFiles(fileList);
+                    } else {
+                        System.out.println("Cancelled file selection");
                     }
-            	}
-            }});
+                }
+            }
+        });
         exitMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Frame frame = Frame.getFrames()[0]; 
+                Frame frame = Frame.getFrames()[0];
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-            }});
+            }
+        });
         clearMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 console.getText().setText("Drag files Into the text box to analyze.\nOr select file(s) from the menu.\n");
-            }});
-       
+            }
+        });
+
         menuBar.add(fileMenu);
         menuBar.add(consoleMenu);
         this.setJMenuBar(menuBar);
@@ -192,7 +193,7 @@ public class Chekkit extends JFrame implements WindowListener {
         panel.add(new JScrollPane(mdt));
         JPanel p2 = new JPanel();
         try {
-        	keyword = (Map<String, String>)SLAPI.load("keywords.bin");
+            keyword = (Map<String, String>) SLAPI.load("keywords.bin");
         } catch (Exception e) {
             log.info("Failed to load keywords list.");
             keyword.put(".getName().equals", "[WARN] Possible player name check");
@@ -219,15 +220,14 @@ public class Chekkit extends JFrame implements WindowListener {
             keyword.put("System.getSecurityManager()", "[SEVERE] Checking for security manager.");
             keyword.put("System.set", "[SEVERE] Attempt to modify system configuration.");
             keyword.put("Runtime.getRuntime()", "[SEVERE] Runtime modification.");
-			keyword.put("opme", "[SEVERE] Investigate.");
-            
+            keyword.put("opme", "[SEVERE] Investigate.");
+
         }
         bannedpackage.add("org.bukkit");
         bannedpackage.add("lib.PatPeter");
         bannedpackage.add("org.kitteh.tagapi");
         bannedpackage.add("com.comphenix.protocol");
-        
-        
+
         p2.setLayout(new BoxLayout(p2, BoxLayout.Y_AXIS));
         p2.setBorder(BorderFactory.createTitledBorder("Processes"));
         p2.add(processPanel);
@@ -288,7 +288,7 @@ public class Chekkit extends JFrame implements WindowListener {
             }
             if (username.length() < 1 || password.length() < 1) {
                 System.out.println("Please enter your username.");
-				Scanner scan = new Scanner(System.in);
+                Scanner scan = new Scanner(System.in);
                 username = scan.nextLine();
                 System.out.println("Please enter your password.");
                 password = scan.nextLine();
@@ -334,8 +334,8 @@ public class Chekkit extends JFrame implements WindowListener {
                                 }
                             }
                         } catch (Exception e) {
-                                e.printStackTrace();
-                           
+                            e.printStackTrace();
+
                         }
                         Toolkit.getDefaultToolkit().setDynamicLayout(true);
                         Properties props = new Properties();
@@ -402,7 +402,7 @@ public class Chekkit extends JFrame implements WindowListener {
             boolean toBeDeleted = false;
             if (name.endsWith(".java")) {
                 toBeDeleted = true;
-                   log.info("Deleting " + name);
+                log.info("Deleting " + name);
             }
             if (!toBeDeleted) {
                 // Add ZIP entry to output stream.
@@ -437,7 +437,7 @@ public class Chekkit extends JFrame implements WindowListener {
                     log.severe("Java source file removal failed!");
                     log.severe(e.getMessage());
                     e.printStackTrace();
-                    
+
                     return;
                 }
                 new Thread(new Runnable() {
@@ -473,24 +473,36 @@ public class Chekkit extends JFrame implements WindowListener {
             System.exit(0);
         }
     }
-    @Override
-    public void windowActivated(WindowEvent arg0) {}
-    @Override
-    public void windowClosed(WindowEvent arg0) {}
-    @Override
-    public void windowDeactivated(WindowEvent arg0) {}
-    @Override
-    public void windowDeiconified(WindowEvent arg0) {}
-    @Override
-    public void windowIconified(WindowEvent arg0) {}
-    @Override
-    public void windowOpened(WindowEvent arg0) {}
 
-	public static Theme getTheme() {
-		return theme;
-	}
+    @Override
+    public void windowActivated(WindowEvent arg0) {
+    }
 
-	public static void setTheme(Theme theme) {
-		Chekkit.theme = theme;
-	}
+    @Override
+    public void windowClosed(WindowEvent arg0) {
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent arg0) {
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent arg0) {
+    }
+
+    @Override
+    public void windowIconified(WindowEvent arg0) {
+    }
+
+    @Override
+    public void windowOpened(WindowEvent arg0) {
+    }
+
+    public static Theme getTheme() {
+        return theme;
+    }
+
+    public static void setTheme(Theme theme) {
+        Chekkit.theme = theme;
+    }
 }
