@@ -39,7 +39,6 @@ public class QueueWindow extends JFrame {
                 ""};
 
         table = new JTable(null, columnNames);
-        table
         
         contentPane.add(table, BorderLayout.CENTER);
         
