@@ -56,7 +56,7 @@ public class QueueWindow extends JFrame {
                     KeyState ks = BukkitDevTools.checkAPIKey(key);
                     if (ks != KeyState.STAFF) {
                         if (ks == KeyState.NORMAL) {
-                            JOptionPane.showMessageDialog(this, "The API key you supplied was for a non-=staff account.", "Invalid API key", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(this, "The API key you supplied was for a non-staff account.", "Invalid API key", JOptionPane.WARNING_MESSAGE);
                         }
                         if (ks == KeyState.INVALID) {
                             JOptionPane.showMessageDialog(this, "The API key you supplied was invalid (not a valid account).", "Invalid API key", JOptionPane.WARNING_MESSAGE);
