@@ -52,7 +52,7 @@ public class QueueFile {
      */
     private long postDate;
 
-    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed) {
+    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate) {
         this.id = id;
         this.size = size;
         this.author = author;
@@ -62,6 +62,7 @@ public class QueueFile {
         this.projectName = projectName;
         this.projectLink = projectLink;
         this.claimed = claimed;
+        this.postDate = postDate;
         
     }
     //TODO: Lombok?
@@ -96,6 +97,10 @@ public class QueueFile {
     
     public String getFileDownloadURL() {
         return this.directLink;
+    }
+    
+    public long getUploadTime() {
+        return this.postDate;
     }
     
     public void setFileStatus(FileStatus fs, String reason) {

@@ -1,12 +1,16 @@
 package com.modcrafting.mbd.queue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.modcrafting.mbd.Chekkit;
 
 public class BukkitDevTools {
 
@@ -59,8 +63,12 @@ public class BukkitDevTools {
      * @return A list of QueueFiles
      */
     public static List<QueueFile> parseFiles(String key) {
+        List<QueueFile> qfl = new ArrayList<QueueFile>(); 
+        
         try {
-            Document doc1 = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + key).get();
+            Connection c =  Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + key);
+            c.timeout(180000);
+            Document doc1 = c.get();
             Element filesTable = doc1.getElementById("files");
             if (filesTable == null) {
                 throw new Exception("Couldn't find the files table.");
@@ -77,31 +85,35 @@ public class BukkitDevTools {
                     throw new Exception("Wrong number of info blocks.");
                 }
                 // *cringe*
-                int fileId = Integer.parseInt(infoBlocks.get(0).getAllElements().get(0).attr("value"));
+                //int fileId = 0;
+                int fileId = Integer.parseInt(infoBlocks.get(0).child(0).getAllElements().get(0).attr("value"));
+                //Chekkit.log.info(infoBlocks.get(0).child(0).toString());
                 String projectName = infoBlocks.get(1).getAllElements().get(0).text();
-                String projectURL = infoBlocks.get(1).getAllElements().get(0).attr("href");
+                String projectURL = infoBlocks.get(1).child(0).attr("href");
                 String fileTitle = infoBlocks.get(2).getAllElements().get(0).text();
-                String filePageURL = "http://dev.bukkit.org" + infoBlocks.get(2).getAllElements().get(0).attr("href");
+                String filePageURL = "http://dev.bukkit.org" + infoBlocks.get(2).child(0).attr("href");
                 String fileDirectLink = infoBlocks.get(3).getAllElements().get(0).attr("href");
-                String size = infoBlocks.get(3).text().trim();
+                String size = infoBlocks.get(4).text().trim();
                 int bytes = BukkitDevTools.sizeToBytes(size);
-                String uploader = infoBlocks.get(4).getAllElements().get(0).text().trim();
-                long date = Long.parseLong(infoBlocks.get(5).getAllElements().get(0).attr("data-epoch"));
+                String uploader = infoBlocks.get(5).getAllElements().get(0).text().trim();
+                long date = Long.parseLong(infoBlocks.get(6).child(0).attr("data-epoch"));
                 String claimed = infoBlocks.get(3).text();
                 if (!claimed.contains("(Under Review")) {
                     claimed = null;
                 } else {
-                    claimed = claimed.substring(claimed.indexOf("(Under Review by " + 17)).trim();
+                    claimed = claimed.substring(claimed.indexOf("(Under Review by ") + 17).trim();
                     claimed = claimed.substring(0, claimed.length() - 1);
                 }
                 
-                QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed);
+                QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed, date);
+                qfl.add(qf);
             }
             
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
+        return qfl;
     }
 
 }

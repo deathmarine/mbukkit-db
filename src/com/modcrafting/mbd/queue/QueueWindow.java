@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.JDialog;
@@ -103,7 +104,7 @@ public class QueueWindow extends JFrame {
             }
             
         }
-
+        final String APIKey = key;
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 463, 334);
         
@@ -179,8 +180,16 @@ public class QueueWindow extends JFrame {
         SwingUtilities.invokeLater(new Runnable(){
           @Override
           public void run() {
-             table = null;
-             
+             //table = null;
+             List<QueueFile> qfl = BukkitDevTools.parseFiles(APIKey);
+             for (QueueFile q : qfl) {
+                 String c = q.getClaimed();
+                 if (c == null) {
+                     c = "Nope";
+                 }
+                 Chekkit.log.info(q.getAuthor() + " has uploaded " + q.getTitle() + " at " + q.getFileDownloadURL() + " on " + q.getUploadTime() + " for project " + q.getProjectName() + ". It's under review: " + c);
+                 
+             }
           }
         });
         
