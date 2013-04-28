@@ -93,7 +93,7 @@ public class BukkitDevTools {
                 String fileTitle = infoBlocks.get(2).child(0).text();
                 String filePageURL = "http://dev.bukkit.org" + infoBlocks.get(2).child(0).attr("href");
                 String fileDirectLink = infoBlocks.get(3).child(0).attr("href");
-                Chekkit.log.info(infoBlocks.get(3).child(0).toString());
+                //Chekkit.log.info(infoBlocks.get(3).child(0).toString());
                 String size = infoBlocks.get(4).text().trim();
                 int bytes = BukkitDevTools.sizeToBytes(size);
                 String uploader = infoBlocks.get(5).text().trim();
