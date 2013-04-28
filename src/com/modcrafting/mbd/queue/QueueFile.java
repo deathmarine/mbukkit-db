@@ -41,8 +41,18 @@ public class QueueFile {
      * The link to the file's project.
      */
     private String projectLink;
+    
+    /**
+     * null if unclaimed, a String with the staff's name if claimed.
+     */
+    private String claimed;
+    
+    /**
+     * When the file was uploaded (epoch time)
+     */
+    private long postDate;
 
-    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink) {
+    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed) {
         this.id = id;
         this.size = size;
         this.author = author;
@@ -51,12 +61,17 @@ public class QueueFile {
         this.directLink = directLink;
         this.projectName = projectName;
         this.projectLink = projectLink;
+        this.claimed = claimed;
         
     }
     //TODO: Lombok?
     
     public String getAuthor() {
         return this.author;
+    }
+    
+    public String getClaimed() {
+        return this.claimed;
     }
     
     public int getSize() {

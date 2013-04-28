@@ -1,6 +1,7 @@
 package com.modcrafting.mbd.queue;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
@@ -18,6 +19,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -26,6 +28,16 @@ import javax.swing.JTable;
 
 import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.UserPassWindow;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.SpringLayout;
+import javax.swing.JProgressBar;
+import java.awt.Component;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JCheckBoxMenuItem;
 
 public class QueueWindow extends JFrame {
 
@@ -41,6 +53,7 @@ public class QueueWindow extends JFrame {
      */
     public QueueWindow(Boolean useNimbus) {
         super("File queue");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(QueueWindow.class.getResource("/resources/bukkit-icon.png")));
         String key = null;
         try {
             Properties prop = new Properties();
@@ -92,19 +105,85 @@ public class QueueWindow extends JFrame {
         }
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 450, 300);
+        setBounds(100, 100, 463, 334);
+        
+        JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+        
+        JMenu mnFile = new JMenu("File");
+        menuBar.add(mnFile);
+        
+        JMenuItem mntmExit = new JMenuItem("Exit");
+        mnFile.add(mntmExit);
+        
+        JMenu mnView = new JMenu("View");
+        menuBar.add(mnView);
+        
+        JCheckBoxMenuItem chckbxmntmShowClaimedFiles = new JCheckBoxMenuItem("Show claimed files");
+        mnView.add(chckbxmntmShowClaimedFiles);
+        
+        JMenuItem mntmRefreshQueue = new JMenuItem("Refresh queue");
+        mnView.add(mntmRefreshQueue);
         contentPane = new JPanel();
 
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        contentPane.setLayout(new BorderLayout(0, 0));
         setContentPane(contentPane);
         String[] columnNames = { "File title", "Author", "Size", "Submitted", "" };
+        SpringLayout sl_contentPane = new SpringLayout();
+        contentPane.setLayout(sl_contentPane);
 
-        table = new JTable(new FileTableModel());
-
-        contentPane.add(table, BorderLayout.CENTER);
-
+        table = new JTable(new DefaultTableModel(
+            null,
+            new String[] {
+                "Title", "Size", "Author", "Project", "Status"
+            }
+        ) {
+            /**
+             * 
+             */
+            private static final long serialVersionUID = 5344763309058756161L;
+           
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        
+        sl_contentPane.putConstraint(SpringLayout.NORTH, table, 10, SpringLayout.NORTH, contentPane);
+        sl_contentPane.putConstraint(SpringLayout.WEST, table, 0, SpringLayout.WEST, contentPane);
+        sl_contentPane.putConstraint(SpringLayout.EAST, table, 0, SpringLayout.EAST, contentPane);
+        JScrollPane newPane = new JScrollPane(table);
+        sl_contentPane.putConstraint(SpringLayout.NORTH, newPane, 0, SpringLayout.NORTH, contentPane);
+        sl_contentPane.putConstraint(SpringLayout.WEST, newPane, 0, SpringLayout.WEST, contentPane);
+        sl_contentPane.putConstraint(SpringLayout.SOUTH, newPane, -20, SpringLayout.SOUTH, contentPane);
+        sl_contentPane.putConstraint(SpringLayout.EAST, newPane, 0, SpringLayout.EAST, contentPane);
+        contentPane.add(newPane);
+        
+        Component verticalGlue = Box.createVerticalGlue();
+        sl_contentPane.putConstraint(SpringLayout.EAST, verticalGlue, -69, SpringLayout.EAST, contentPane);
+        contentPane.add(verticalGlue);
+        
+        JLabel lblNewLabel = new JLabel("Loading queue...");
+        sl_contentPane.putConstraint(SpringLayout.WEST, lblNewLabel, 10, SpringLayout.WEST, table);
+        contentPane.add(lblNewLabel);
+        
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        sl_contentPane.putConstraint(SpringLayout.SOUTH, lblNewLabel, -2, SpringLayout.SOUTH, progressBar);
+        sl_contentPane.putConstraint(SpringLayout.SOUTH, table, -6, SpringLayout.NORTH, progressBar);
+        sl_contentPane.putConstraint(SpringLayout.SOUTH, verticalGlue, -6, SpringLayout.NORTH, progressBar);
+        sl_contentPane.putConstraint(SpringLayout.SOUTH, progressBar, 0, SpringLayout.SOUTH, contentPane);
+        sl_contentPane.putConstraint(SpringLayout.EAST, progressBar, -10, SpringLayout.EAST, contentPane);
+        contentPane.add(progressBar);
+        this.setMinimumSize(this.getSize());
         this.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable(){
+          @Override
+          public void run() {
+             table = null;
+             
+          }
+        });
+        
+        
     }
-
 }
