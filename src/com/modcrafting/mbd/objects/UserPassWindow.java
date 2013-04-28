@@ -174,8 +174,12 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                 if (!ver.equals(Chekkit.VERSION)) {
                     this.errorArea.setText("A later version, " + ver + " is available.");
                     this.errorArea.setVisible(true);
+                    
                     return false;
                 }
+                
+            } else {
+                System.out.println("WARN: Skipped update check due to missing header.");
             }
             
             StringBuilder builder = new StringBuilder();

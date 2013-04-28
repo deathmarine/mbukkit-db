@@ -3,10 +3,21 @@ require_once("./include/membersite_config.php");
 
 if(isset($_POST['submitted']))
 {
-   if($fgmembersite->RegisterUser())
+   
+   $regKey = '';
+   $_POST['key'] = hash("whirlpool", $_POST['key']);
+   if ($_POST['key'] != "227d12052ca566f38c7c92fc57157d8592a8240f73d4b054fc0122bf5951d34ccb3e9ec5b8210167f6bfb6663529ca159d2814023f38b9c0571226449507ec8a")
    {
-        $fgmembersite->RedirectToURL("thank-you.html");
+        $regKey = 'Invalid key!';
    }
+   else
+   {
+        if($fgmembersite->RegisterUser())
+        {
+             $fgmembersite->RedirectToURL("thank-you.html");
+        }
+   }
+    
 }
 
 ?>
@@ -57,6 +68,11 @@ if(isset($_POST['submitted']))
     </noscript>    
     <div id='register_password_errorloc' class='error' style='clear:both'></div>
 </div>
+<div class='container'>
+    <label for='username' >Registration key*:</label><br/>
+    <input type='text' name='key' id='key' value='' maxlength="50" /><br/>
+    <span id='register_key_errorloc' class='error'><?php echo $regKey; ?></span>
+</div>
 
 <div class='container'>
     <input type='submit' name='Submit' value='Submit' />
@@ -84,6 +100,8 @@ Uses the excellent form validation script from JavaScript-coder.com-->
     frmvalidator.addValidation("username","req","Please provide a username");
     
     frmvalidator.addValidation("password","req","Please provide a password");
+    
+    frmvalidator.addValidation("key","req","Please provide the registration key");
 
 // ]]>
 </script>
