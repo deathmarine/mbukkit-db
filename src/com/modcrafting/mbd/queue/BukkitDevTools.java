@@ -88,14 +88,14 @@ public class BukkitDevTools {
                 //int fileId = 0;
                 int fileId = Integer.parseInt(infoBlocks.get(0).child(0).getAllElements().get(0).attr("value"));
                 //Chekkit.log.info(infoBlocks.get(0).child(0).toString());
-                String projectName = infoBlocks.get(1).getAllElements().get(0).text();
+                String projectName = infoBlocks.get(1).text();
                 String projectURL = infoBlocks.get(1).child(0).attr("href");
-                String fileTitle = infoBlocks.get(2).getAllElements().get(0).text();
+                String fileTitle = infoBlocks.get(2).child(0).text();
                 String filePageURL = "http://dev.bukkit.org" + infoBlocks.get(2).child(0).attr("href");
-                String fileDirectLink = infoBlocks.get(3).getAllElements().get(0).attr("href");
+                String fileDirectLink = infoBlocks.get(3).child(0).attr("href");
                 String size = infoBlocks.get(4).text().trim();
                 int bytes = BukkitDevTools.sizeToBytes(size);
-                String uploader = infoBlocks.get(5).getAllElements().get(0).text().trim();
+                String uploader = infoBlocks.get(5).text().trim();
                 long date = Long.parseLong(infoBlocks.get(6).child(0).attr("data-epoch"));
                 String claimed = infoBlocks.get(3).text();
                 if (!claimed.contains("(Under Review")) {
