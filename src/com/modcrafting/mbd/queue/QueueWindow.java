@@ -40,6 +40,7 @@ public class QueueWindow extends JFrame {
      * Create the frame.
      */
     public QueueWindow(Boolean useNimbus) {
+        super("File queue");
         String key = null;
         try {
             Properties prop = new Properties();
