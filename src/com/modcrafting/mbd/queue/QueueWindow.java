@@ -36,17 +36,14 @@ public class QueueWindow extends JFrame implements ActionListener{
     private JProgressBar progressBar = new JProgressBar();
     private JLabel label = new JLabel("");
     private String APIKey = "";
-    private JTable table = new JTable(new DefaultTableModel(null,new String[] {"Title", "Size", "Author", "Project", "Status"}){
-        private static final long serialVersionUID = 5344763309058756161L;
-        public boolean isCellEditable(int row, int column) {
-            return false;
-        }
-    });
+    private JTable table = new JTable();
     private JMenuItem refreshQueue = new JMenuItem("Refresh Queue");
     private JMenuItem exit = new JMenuItem("Exit");
     private JCheckBoxMenuItem showClaimed = new JCheckBoxMenuItem("Show Claimed Files");
     private Thread thisThread;
     private boolean isThreadRunning = false;
+    private JScrollPane scrollPane;
+    private SpringLayout sl_contentPane = new SpringLayout();
     
     /**
      * Initialize the object
@@ -57,6 +54,7 @@ public class QueueWindow extends JFrame implements ActionListener{
         	return;
         }
         this.createFrame();
+        this.showLabel("Loading Queue...");
         this.getQueue();
     }
 
@@ -75,7 +73,7 @@ public class QueueWindow extends JFrame implements ActionListener{
     }
     
     private void hideProgressBar(){
-    	this.progressBar = null;
+    	this.progressBar.setVisible(false);
     }
     
     private void createFrame(){
@@ -98,18 +96,11 @@ public class QueueWindow extends JFrame implements ActionListener{
         
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
-        SpringLayout sl_contentPane = new SpringLayout();
         contentPane.setLayout(sl_contentPane);
         
         sl_contentPane.putConstraint(SpringLayout.NORTH, table, 10, SpringLayout.NORTH, contentPane);
         sl_contentPane.putConstraint(SpringLayout.WEST, table, 0, SpringLayout.WEST, contentPane);
         sl_contentPane.putConstraint(SpringLayout.EAST, table, 0, SpringLayout.EAST, contentPane);
-        JScrollPane newPane = new JScrollPane(table);
-        sl_contentPane.putConstraint(SpringLayout.NORTH, newPane, 0, SpringLayout.NORTH, contentPane);
-        sl_contentPane.putConstraint(SpringLayout.WEST, newPane, 0, SpringLayout.WEST, contentPane);
-        sl_contentPane.putConstraint(SpringLayout.SOUTH, newPane, -20, SpringLayout.SOUTH, contentPane);
-        sl_contentPane.putConstraint(SpringLayout.EAST, newPane, 0, SpringLayout.EAST, contentPane);
-        contentPane.add(newPane);
         
         Component verticalGlue = Box.createVerticalGlue();
         sl_contentPane.putConstraint(SpringLayout.EAST, verticalGlue, -69, SpringLayout.EAST, contentPane);
@@ -132,18 +123,53 @@ public class QueueWindow extends JFrame implements ActionListener{
     	this.thisThread = new Thread(new Runnable(){
     		@Override
     		public void run(){
-    			showLabel("Loading Queue...");
     			showProgressBar();
     			List<QueueFile> qfl = BukkitDevTools.parseFiles(APIKey);
+    			Object[][] files = new Object[qfl.size()][5];
+    			String[] columnNames = {"Title", "Project", "Size", "Author", "Claimed By"};
+    			int index = 0;
                 for (QueueFile q : qfl) {
                 	if(isThreadRunning){
                 		String c = q.getClaimed();
                         if (c == null) {
-                            c = "Nope";
+                            c = "";
+                            files[index][0] = q.getTitle();
+                            files[index][1] = q.getProjectName();
+                            files[index][2] = q.getSize();
+                            files[index][3] = q.getAuthor();
+                            files[index][4] = c;
+                            index++;
+                        }else if(showClaimed.isSelected()){
+                        	files[index][0] = q.getTitle();
+                            files[index][1] = q.getProjectName();
+                            files[index][2] = q.getSize();
+                            files[index][3] = q.getAuthor();
+                            files[index][4] = c;
+                            index++;
                         }
                         //System.out.println(q.getAuthor() + " has uploaded " + q.getTitle() + " at " + q.getFileDownloadURL() + " on " + q.getUploadTime() + " for project " + q.getProjectName() + ". It's under review: " + c); 
+                	}else{
+                		return;
                 	}
                 }
+                table = new JTable(new DefaultTableModel(files,columnNames){
+                    private static final long serialVersionUID = 5344763309058756161L;
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                });
+                table.setAutoCreateRowSorter(true);
+                
+                scrollPane = new JScrollPane(table);
+                sl_contentPane.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.NORTH, contentPane);
+                sl_contentPane.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, contentPane);
+                sl_contentPane.putConstraint(SpringLayout.SOUTH, scrollPane, -20, SpringLayout.SOUTH, contentPane);
+                sl_contentPane.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, contentPane);
+                
+                contentPane.add(scrollPane);
+                table.setVisible(true);
+                contentPane.repaint();
+                
                 hideLabel();
                 hideProgressBar();
     		}
@@ -202,12 +228,22 @@ public class QueueWindow extends JFrame implements ActionListener{
         return true;
     }
 
+    
 	
     @ Override
 	public void actionPerformed(ActionEvent e) {
        	if(e.getSource() == this.exit){
     		this.isThreadRunning = false;
     		this.dispose();
+    	}else if(e.getSource() == this.refreshQueue){
+    		this.contentPane.remove(this.scrollPane);
+    		this.contentPane.repaint();
+    		this.showLabel("Refreshing Queue...");
+    		this.getQueue();
+    	}else if(e.getSource() == this.showClaimed){
+    		this.contentPane.remove(this.scrollPane);
+    		this.showLabel("Getting Claimed...");
+    		this.getQueue();
     	}
     }
 }

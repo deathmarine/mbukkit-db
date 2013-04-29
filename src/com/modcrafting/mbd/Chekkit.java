@@ -128,7 +128,7 @@ public class Chekkit extends JFrame implements WindowListener {
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         JMenuItem clearMenuItem = new JMenuItem("Clear");
         JMenuItem keysMenuItem = new JMenuItem("Keywords");
-        JMenuItem queueMenuItem = new JMenuItem("Open queue");
+        JMenuItem queueMenuItem = new JMenuItem("Open Queue");
         fileMenu.add(openMenuItem);
         fileMenu.add(queueMenuItem);
         fileMenu.add(exitMenuItem);
