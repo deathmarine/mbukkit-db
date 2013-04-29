@@ -13,6 +13,12 @@ public class QueueFile {
     private int size;
     
     /**
+     * Human-readable String version of filesize
+     */
+    
+    private String readableSize;
+    
+    /**
      * The BukkitDev username of the uploader.
      */
     private String author;
@@ -51,8 +57,13 @@ public class QueueFile {
      * When the file was uploaded (epoch time)
      */
     private long postDate;
+    
+    /**
+     * Whether the user that created the file is staff
+     */
+    private Boolean isStaff;
 
-    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate) {
+    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate, String readableSize, Boolean isStaff) {
         this.id = id;
         this.size = size;
         this.author = author;
@@ -63,6 +74,8 @@ public class QueueFile {
         this.projectLink = projectLink;
         this.claimed = claimed;
         this.postDate = postDate;
+        this.readableSize = readableSize;
+        this.isStaff = isStaff;
         
     }
     //TODO: Lombok?
@@ -95,12 +108,20 @@ public class QueueFile {
         return this.fileLink;
     }
     
+    public Boolean getCreatedByStaff() {
+        return this.isStaff;
+    }
+    
     public String getFileDownloadURL() {
         return this.directLink;
     }
     
     public long getUploadTime() {
         return this.postDate;
+    }
+    
+    public String getReadableSize() {
+        return this.readableSize;
     }
     
     public void setFileStatus(FileStatus fs, String reason) {
