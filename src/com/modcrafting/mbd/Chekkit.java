@@ -15,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -58,7 +57,7 @@ import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "resource"})
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
     public final static Logger log = Logger.getLogger("Chekkit");
@@ -146,7 +145,12 @@ public class Chekkit extends JFrame implements WindowListener {
         queueMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new QueueWindow(useNimbus);
+                new Thread(new Runnable(){
+                	@Override
+                	public void run(){
+                		new QueueWindow(useNimbus);
+                	}
+                }).start();
             }
         });
 
