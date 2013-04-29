@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,7 +30,7 @@ import javax.swing.table.DefaultTableModel;
 
 import com.modcrafting.mbd.Chekkit;
 
-public class QueueWindow extends JFrame implements ActionListener{
+public class QueueWindow extends JFrame implements ActionListener, WindowListener{
 
     private static final long serialVersionUID = 1856749858855789365L;
     
@@ -40,7 +42,9 @@ public class QueueWindow extends JFrame implements ActionListener{
     private JMenuItem refreshQueue = new JMenuItem("Refresh Queue");
     private JMenuItem exit = new JMenuItem("Exit");
     private JCheckBoxMenuItem showClaimed = new JCheckBoxMenuItem("Show Claimed Files");
+    private JCheckBoxMenuItem autoRefresh = new JCheckBoxMenuItem("Auto Refresh (30s)");
     private Thread thisThread;
+    private Thread refreshThread;
     private boolean isThreadRunning = false;
     private JScrollPane scrollPane;
     private SpringLayout sl_contentPane = new SpringLayout();
@@ -48,12 +52,12 @@ public class QueueWindow extends JFrame implements ActionListener{
     /**
      * Initialize the object
      */
-    public QueueWindow(Boolean useNimbus) {
+    public QueueWindow(Boolean useNimbus, JFrame parent) {
         super("File Queue");
         if(!this.getAPI()){
         	return;
         }
-        this.createFrame();
+        this.createFrame(parent);
         this.showLabel("Loading Queue...");
         this.getQueue();
     }
@@ -76,7 +80,7 @@ public class QueueWindow extends JFrame implements ActionListener{
     	this.progressBar.setVisible(false);
     }
     
-    private void createFrame(){
+    private void createFrame(JFrame parent){
     	this.setIconImage(Toolkit.getDefaultToolkit().getImage(QueueWindow.class.getResource("/resources/bukkit-icon.png")));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setBounds(100, 100, 463, 334);
@@ -85,7 +89,9 @@ public class QueueWindow extends JFrame implements ActionListener{
         setJMenuBar(menuBar);
         JMenu mnFile = new JMenu("File");
         menuBar.add(mnFile);
+        mnFile.add(this.autoRefresh);
         mnFile.add(this.exit);
+        this.autoRefresh.addActionListener(this);
         this.exit.addActionListener(this);
         JMenu mnView = new JMenu("View");
         menuBar.add(mnView);
@@ -115,8 +121,33 @@ public class QueueWindow extends JFrame implements ActionListener{
         sl_contentPane.putConstraint(SpringLayout.SOUTH, this.progressBar, 0, SpringLayout.SOUTH, this.contentPane);
         sl_contentPane.putConstraint(SpringLayout.EAST, this.progressBar, -10, SpringLayout.EAST, this.contentPane);
         contentPane.add(this.progressBar);
+        
+        this.setSize((int)(parent.getSize().getWidth()*0.75), (int)(parent.getSize().getHeight()*0.75));
+		int x = (int)(parent.getLocation().getX()+((parent.getSize().getWidth() - this.getSize().getWidth())/2));
+		int y = (int)(parent.getLocation().getY()+((parent.getSize().getHeight() - this.getSize().getHeight())/2));
+		this.setLocation(x, y);
+        
         this.setMinimumSize(this.getSize());
         this.setVisible(true);
+    }
+    
+    private void refreshThread(){
+    	this.refreshThread = new Thread(new Runnable(){
+    		@Override
+    		public void run(){
+    			while(autoRefresh.isSelected()){
+    				try {
+						Thread.sleep(30000);
+						contentPane.remove(scrollPane);
+						showLabel("Automatic Queue Refresh...");
+						getQueue();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+    			}
+    		}
+    	});
+    	this.refreshThread.start();
     }
     
     private void getQueue(){
@@ -128,6 +159,7 @@ public class QueueWindow extends JFrame implements ActionListener{
     			Object[][] files = new Object[qfl.size()][5];
     			String[] columnNames = {"Title", "Project", "Size", "Author", "Claimed By"};
     			int index = 0;
+    			int claimed = 0;
                 for (QueueFile q : qfl) {
                 	if(isThreadRunning){
                 		String c = q.getClaimed();
@@ -140,18 +172,22 @@ public class QueueWindow extends JFrame implements ActionListener{
                             files[index][4] = c;
                             index++;
                         }else if(showClaimed.isSelected()){
+                        	claimed++;
                         	files[index][0] = q.getTitle();
                             files[index][1] = q.getProjectName();
                             files[index][2] = q.getSize();
                             files[index][3] = q.getAuthor();
                             files[index][4] = c;
                             index++;
+                        }else{
+                        	claimed++;
                         }
                         //System.out.println(q.getAuthor() + " has uploaded " + q.getTitle() + " at " + q.getFileDownloadURL() + " on " + q.getUploadTime() + " for project " + q.getProjectName() + ". It's under review: " + c); 
                 	}else{
                 		return;
                 	}
                 }
+                QueueWindow.this.setTitle("File Queue: " + (index+claimed) + " Total Files, " + claimed + " Claimed");
                 table = new JTable(new DefaultTableModel(files,columnNames){
                     private static final long serialVersionUID = 5344763309058756161L;
                     public boolean isCellEditable(int row, int column) {
@@ -172,6 +208,7 @@ public class QueueWindow extends JFrame implements ActionListener{
                 
                 hideLabel();
                 hideProgressBar();
+                isThreadRunning = false;
     		}
     	});
     	this.isThreadRunning = true;
@@ -230,7 +267,8 @@ public class QueueWindow extends JFrame implements ActionListener{
 
     
 	
-    @ Override
+    @ SuppressWarnings ("deprecation")
+	@ Override
 	public void actionPerformed(ActionEvent e) {
        	if(e.getSource() == this.exit){
     		this.isThreadRunning = false;
@@ -244,6 +282,30 @@ public class QueueWindow extends JFrame implements ActionListener{
     		this.contentPane.remove(this.scrollPane);
     		this.showLabel("Getting Claimed...");
     		this.getQueue();
+    	}else if(e.getSource() == this.autoRefresh){
+    		if(this.autoRefresh.isSelected()){
+    			this.refreshThread();
+    		}else{
+    			this.refreshThread.stop();
+    		}
     	}
     }
+
+
+	@ Override
+	public void windowClosing(WindowEvent e) {
+		this.isThreadRunning = false;
+	}
+	@ Override
+	public void windowOpened(WindowEvent e) {}
+	@ Override
+	public void windowClosed(WindowEvent e) {}
+	@ Override
+	public void windowIconified(WindowEvent e) {}
+	@ Override
+	public void windowDeiconified(WindowEvent e) {}
+	@ Override
+	public void windowActivated(WindowEvent e) {}
+	@ Override
+	public void windowDeactivated(WindowEvent e) {}
 }

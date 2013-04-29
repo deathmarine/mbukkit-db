@@ -148,7 +148,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 new Thread(new Runnable(){
                 	@Override
                 	public void run(){
-                		new QueueWindow(useNimbus);
+                		new QueueWindow(useNimbus, Chekkit.this);
                 	}
                 }).start();
             }
