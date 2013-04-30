@@ -25,10 +25,6 @@ public class BukkitDevTools {
     public static void sendBukkitDevPM(String user, String subject, String message, String key) {
         try {
             String url = "http://dev.bukkit.org/home/send-private-message/?api-key=" + key;
-            //subject = URLEncoder.encode(subject, "UTF-8");
-            //user = URLEncoder.encode(user, "UTF-8");
-            //message = URLEncoder.encode(message, "UTF-8");
-            //message = message + "++++++++++++++++++++++++";
             Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").ignoreHttpErrors(true).post();
             Chekkit.log.info(doc.toString());
         } catch (Exception e) {
