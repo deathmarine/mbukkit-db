@@ -1,6 +1,9 @@
 package com.modcrafting.mbd.queue;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +19,23 @@ import com.modcrafting.mbd.Chekkit;
 
 public class BukkitDevTools {
 
-    public BukkitDevTools() {}
+    public BukkitDevTools() {
+    }
+
+    public static void sendBukkitDevPM(String user, String subject, String message, String key) {
+        try {
+            String url = "http://dev.bukkit.org/home/send-private-message/?api-key=" + key;
+            //subject = URLEncoder.encode(subject, "UTF-8");
+            //user = URLEncoder.encode(user, "UTF-8");
+            //message = URLEncoder.encode(message, "UTF-8");
+            //message = message + "++++++++++++++++++++++++";
+            Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").ignoreHttpErrors(true).post();
+            Chekkit.log.info(doc.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            
+        }
+    }
 
     public static KeyState checkAPIKey(String key) {
         try {
@@ -51,7 +70,7 @@ public class BukkitDevTools {
         }
 
     }
-    
+
     public static String prettyTime(long timestamp) {
         PrettyTime p = new PrettyTime();
         return p.format(new Date(timestamp * 1000));
@@ -114,8 +133,7 @@ public class BukkitDevTools {
     /**
      * This is a ridiculously messy method that parses the approval queue
      * 
-     * @param key
-     *            - The API key to use
+     * @param key - The API key to use
      * @return A list of QueueFiles
      */
     public static ApprovalQueue parseFiles(String key) {

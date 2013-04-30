@@ -210,6 +210,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 }
 
                 QueueWindow.this.setTitle("File Queue: " + (index + claimed) + " Total Files, " + claimed + " Claimed");
+                
                 final DefaultTableModel model = new DefaultTableModel(files, columnNames) {
                     private static final long serialVersionUID = 5344763309058756161L;
 

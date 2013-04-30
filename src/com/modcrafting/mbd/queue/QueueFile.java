@@ -1,5 +1,8 @@
 package com.modcrafting.mbd.queue;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class QueueFile {
     
     /**
@@ -126,6 +129,15 @@ public class QueueFile {
     
     public Boolean hasNumberInTitle() {
         return this.title.matches(".*\\d.*");
+    }
+    
+    public void sendVersionPM(String APIKey) {
+        String editURL = this.fileLink + "edit/";
+        long theFuture = System.currentTimeMillis() + (86400 * 7 * 1000);
+        Date nextWeek = new Date(theFuture);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String date = sdf.format(nextWeek);
+        BukkitDevTools.sendBukkitDevPM(this.author, "Your file, " + this.title, "Hi " + this.author + "!\n\nThanks for uploading your file for " + this.projectName + ". Before it can be approved, you need to edit the file and add a version number to it. Example: 'LiteKits v1.0'.\n\nTo do this now, hit the button below and add the version to the 'Name' field.\n\n[[" + editURL + "|{{http://i.imgur.com/TvLphUs.png|}}]]\n\nPlease note that if you do not add a version before " + date + ", your file will be deleted and you'll need to upload it again.\n\nThanks!", APIKey);
     }
     
     public void setFileStatus(FileStatus fs, String reason) {
