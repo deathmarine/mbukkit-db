@@ -124,6 +124,10 @@ public class QueueFile {
         return this.readableSize;
     }
     
+    public Boolean hasNumberInTitle() {
+        return this.title.matches(".*\\d.*");
+    }
+    
     public void setFileStatus(FileStatus fs, String reason) {
         switch(fs) {
             case NORMAL:
