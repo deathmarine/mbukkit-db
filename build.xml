@@ -83,7 +83,7 @@
 			<zipgroupfileset dir="lib"
 				includes="mysql-connector-java-5.1.23-bin.jar" />
 			<zipgroupfileset dir="lib" includes="jsoup-1.7.2.jar" />
-			<zipgroupfileset dir="dist" includes="prettytime.jar" />
+			<zipgroupfileset dir="lib" includes="prettytime.jar" />
 			<zipgroupfileset dir="dist" includes="temp.jar" />
 		</zip>
 		<delete file="dist/temp.jar" />
