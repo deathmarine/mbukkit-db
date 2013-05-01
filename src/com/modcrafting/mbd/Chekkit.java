@@ -15,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -68,6 +67,7 @@ public class Chekkit extends JFrame implements WindowListener {
     public Console console;
     public static ProcessPanel processPanel = new ProcessPanel();
     public SQL datab;
+    public static String username = new String();
     private Map<String, String> keyword = new HashMap<String, String>();
     private List<String> bannedpackage = new ArrayList<String>();
     private static Theme theme;
@@ -77,7 +77,7 @@ public class Chekkit extends JFrame implements WindowListener {
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         this.properties = properties;
-        datab = new SQL(this, properties);
+        datab = new SQL(properties);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -274,7 +274,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 e.printStackTrace();
             }
         }
-        String username = new String();
+        //String username = new String();
         String password = new String();
         if (argList.contains("--nogui")) {
             for (String ar : args) {
@@ -292,6 +292,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 username = scan.nextLine();
                 System.out.println("Please enter your password.");
                 password = scan.nextLine();
+                scan.close();
             }
             try {
                 String prop = "submitted=1&username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");

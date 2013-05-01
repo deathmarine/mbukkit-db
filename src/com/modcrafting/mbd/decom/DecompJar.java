@@ -63,14 +63,16 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.CodeTab;
+import com.modcrafting.mbd.objects.NoteDialog;
 import com.modcrafting.mbd.sql.SQL;
 
 public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
 	HashMap<String, HashSet<HashFile>> files = new HashMap<String, HashSet<HashFile>>();
 	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
+	public String mainclass;
 	JTabbedPane tabbed;
-	SQL database;
+	public SQL database;
 	Map<String, String> map;
 	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
 	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
@@ -267,6 +269,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		this.setJMenuBar(mbar);
 	    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setVisible(true);
+		new NoteDialog(this);
 		
 		Chekkit.processPanel.removeProcess(processID);
 		
