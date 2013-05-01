@@ -191,7 +191,11 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                             files[index][5] = "Awaiting approval";
                             index++;
                         } else if (showClaimed.isSelected()) {
-                            files[index][0] = q.getTitle();
+                            if (!q.hasNumberInTitle()) {
+                                files[index][0] = "{" + q.getTitle();
+                            } else {
+                                files[index][0] = q.getTitle();
+                            }
                             files[index][1] = q.getProjectName();
                             files[index][2] = q.getSize();
                             files[index][3] = q.getAuthor();
@@ -231,10 +235,10 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                     private static final long serialVersionUID = 1L;
                     DefaultTableCellRenderer defaultRender=new DefaultTableCellRenderer();
                     DefaultTableCellRenderer staffText=new DefaultTableCellRenderer(); {staffText.setForeground(Color.GREEN);}
-                    DefaultTableCellRenderer colorText=new DefaultTableCellRenderer(); {colorText.setForeground(Color.RED);}
+                    DefaultTableCellRenderer colorText=new DefaultTableCellRenderer(); {colorText.setForeground(Color.RED); Chekkit.log.warning(colorText.getText());}
                     @Override
                     public TableCellRenderer getCellRenderer(int column, int row) {
-                        if (column == 0 && !((String) model.getValueAt(row, column)).matches(".*\\d.*"))  {
+                        if (column == 0 && ((String) model.getValueAt(row, column)).startsWith("{"))  {
                             return colorText;
                         }
                      
