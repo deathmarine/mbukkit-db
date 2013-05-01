@@ -127,6 +127,8 @@ public class HashFile implements SyntaxConstants {
 					}
 				}
 			}
+			if(file.getName().toLowerCase().contains("plugin.yml") && line.startsWith("main: "))
+				jar.mainclass = line.replace("main: ", "").trim();
 			sb.append(line).append("\n");
 			lineNum++;
 		}

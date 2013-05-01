@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Properties;
 
 import com.modcrafting.mbd.Chekkit;
+import com.modcrafting.mbd.objects.Treple;
 import com.modcrafting.mbd.objects.UpdateHolder;
 
 public class SQL {
-	//private Chekkit plugin;
 	private Connection conn;
 	private Properties props;
 	private PreparedStatement ps = null;
 	private List<UpdateHolder> updates = new ArrayList<UpdateHolder>();
 	
 	private String url = "jdbc:mysql://server.modcrafting.com:3306/dbo_master";
-	public SQL(Chekkit masterPluginDatabase, Properties p) {
+	public SQL(Properties p) {
 		//this.plugin = masterPluginDatabase;
 		this.props = p;
 	}
@@ -129,6 +129,50 @@ public class SQL {
 			ex.printStackTrace();
 		}
 		return hash;
+	}
+
+	
+	public List<Treple> getNotes(String main_class) {
+		List<Treple> notes = new ArrayList<Treple>();
+		try {
+			if(conn == null || conn.isClosed()){
+				connect();
+			}
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM notes WHERE main_class = ?");
+			ps.setString(1, main_class);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()){
+				notes.add(new Treple(rs.getString("username"), rs.getString("notes"), rs.getLong("time")));
+			}
+			if(!ps.isClosed() && ps != null){
+				ps.close();
+			}
+			if(!rs.isClosed() && rs != null){
+				rs.close();
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		}
+		return notes;
+	}
+	
+	public void setNote(String main_class, String username, String note) {
+		try {
+			if(conn == null || conn.isClosed()){
+				connect();
+			}
+			PreparedStatement ps = conn.prepareStatement("REPLACE INTO notes (main_class,username,notes,time) VALUES(?,?,?,?)");
+			ps.setString(1, main_class);
+			ps.setString(2, username);
+			ps.setString(3, note);
+			ps.setLong(4, System.currentTimeMillis());
+			ps.execute();
+			if(!ps.isClosed() && ps != null){
+				ps.close();
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 }

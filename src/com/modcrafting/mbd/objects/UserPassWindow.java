@@ -35,7 +35,6 @@ import com.modcrafting.mbd.Chekkit;
 public class UserPassWindow extends JFrame implements ActionListener, KeyListener {
 
     private static final long serialVersionUID = 6328274426699959338L;
-    private String username = "";
     private String password = "";
 
     private JPanel panel;
@@ -146,7 +145,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
     }
 
     public String getUsername() {
-        return this.username;
+        return Chekkit.username;
     }
 
     public String getPassword() {
@@ -155,7 +154,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
     public boolean checkUserAndPass(String user, String pass) {
         try {
-            String prop = "submitted=1&username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+            String prop = "submitted=1&username=" + URLEncoder.encode(Chekkit.username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
             HttpURLConnection httpcon = (HttpURLConnection) ((new URL("http://server.modcrafting.com:2063/check.php").openConnection()));
             httpcon.setDoOutput(true);
             httpcon.setDoInput(true);
@@ -220,7 +219,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                 
             }
 
-            this.username = arg[0];
+            Chekkit.username = arg[0];
             this.password = arg[1];
             return true;
         } catch (Exception e) {
@@ -243,9 +242,9 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                     this.errorArea.setText("Please enter a password.");
                     this.errorArea.setVisible(true);
                 } else {
-                    this.username = this.userField.getText();
+                	Chekkit.username = this.userField.getText();
                     this.password = new String(this.passField.getPassword());
-                    if (this.checkUserAndPass(username, password)) {
+                    if (this.checkUserAndPass(Chekkit.username, password)) {
                         this.isOpen = false;
                     }
                 }
