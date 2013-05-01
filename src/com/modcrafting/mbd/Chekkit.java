@@ -57,7 +57,7 @@ import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "resource"})
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
     public final static Logger log = Logger.getLogger("Chekkit");
@@ -129,7 +129,7 @@ public class Chekkit extends JFrame implements WindowListener {
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         JMenuItem clearMenuItem = new JMenuItem("Clear");
         JMenuItem keysMenuItem = new JMenuItem("Keywords");
-        JMenuItem queueMenuItem = new JMenuItem("Open queue");
+        JMenuItem queueMenuItem = new JMenuItem("Open Queue");
         fileMenu.add(openMenuItem);
         fileMenu.add(queueMenuItem);
         fileMenu.add(exitMenuItem);
@@ -146,7 +146,12 @@ public class Chekkit extends JFrame implements WindowListener {
         queueMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new QueueWindow();
+                new Thread(new Runnable(){
+                	@Override
+                	public void run(){
+                		new QueueWindow(useNimbus, Chekkit.this);
+                	}
+                }).start();
             }
         });
 

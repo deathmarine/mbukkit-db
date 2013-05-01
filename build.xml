@@ -1,83 +1,92 @@
 <project name="Chekkit" default="package">
 	<property environment="env" />
 	<property name="env.BUILD_NUMBER" value="0" />
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
-    <path id="Chekkit.classpath">
-        <pathelement location="bin"/>
-        <pathelement location="lib/jsoup-1.7.2.jar"/>
-    </path>
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+	<path id="Chekkit.classpath">
+		<pathelement location="bin" />
+		<pathelement location="lib/jsoup-1.7.2.jar" />
+		<pathelement location="lib/prettytime.jar" />
+	</path>
 
 	<target name="init" description="Initialize directories, etc.">
-        <mkdir dir="bin"/>
-        <mkdir dir="dist"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.java"/>
-                <exclude name="php/*.*"/>
-            </fileset>
-        </copy>
+		<mkdir dir="bin" />
+		<mkdir dir="dist" />
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.java" />
+				<exclude name="php/*.*" />
+			</fileset>
+		</copy>
 	</target>
 
-	<target name="clean" depends="init" description="Clean up all the temp stuff and previous builds">
+	<target name="clean" depends="init"
+		description="Clean up all the temp stuff and previous builds">
 		<delete>
 			<fileset dir="bin" />
 			<fileset dir="dist" />
 		</delete>
 	</target>
-        <echo message="${ant.project.name}: ${ant.file}"/>
+	<echo message="${ant.project.name}: ${ant.file}" />
 
 	<target name="compile" depends="clean, init" description="Compile all the code">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
-            <src path="src"/>
-            <classpath refid="Chekkit.classpath"/>
-        	<compilerarg value="-Xlint:none"/>
-        </javac>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin"
+			includeantruntime="false" source="${source}" target="${target}">
+			<src path="src" />
+			<classpath refid="Chekkit.classpath" />
+			<compilerarg value="-Xlint:none" />
+		</javac>
 	</target>
 
 	<target name="package" depends="compile" description="Make the distributable jar file">
-		<delete dir="bin/php"/>
-		<!--<copy includeemptydirs="false" todir="bin/lib" overwrite="true">
-			<fileset dir="lib" includes="*.jar" />
-		</copy>-->
-        <copy includeemptydirs="false" todir="bin/resources">
+		<delete dir="bin/php" />
+		<!--<copy includeemptydirs="false" todir="bin/lib" overwrite="true"> <fileset 
+			dir="lib" includes="*.jar" /> </copy> -->
+		<copy includeemptydirs="false" todir="bin/resources">
 			<fileset dir="src/resources" includes="*.png" />
-        </copy>      
-        <copy includeemptydirs="false" todir="bin/themes">
+		</copy>
+		<copy includeemptydirs="false" todir="bin/themes">
 			<fileset dir="src/themes" includes="*.xml" />
-        </copy>        
-        <copy includeemptydirs="false" todir="bin">
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
 			<fileset dir="src" includes="theme.dtd" />
-        </copy>        
-        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea">
+		</copy>
+		<copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea">
 			<fileset dir="src/org/fife/ui/rsyntaxtextarea" includes="*.properties" />
-        </copy>       
-        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/focusabletip">
-			<fileset dir="src/org/fife/ui/rsyntaxtextarea/focusabletip" includes="*.properties" />
-        </copy>    
-        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/focusabletip">
-			<fileset dir="src/org/fife/ui/rsyntaxtextarea/focusabletip" includes="*.png" />
-        </copy>
-        <copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/modes">
-			<fileset dir="src/org/fife/ui/rsyntaxtextarea/modes" includes="*.flex" />
-        </copy>        
-        <copy includeemptydirs="false" todir="bin/org/fife/ui/rtextarea">
+		</copy>
+		<copy includeemptydirs="false"
+			todir="bin/org/fife/ui/rsyntaxtextarea/focusabletip">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea/focusabletip"
+				includes="*.properties" />
+		</copy>
+		<copy includeemptydirs="false"
+			todir="bin/org/fife/ui/rsyntaxtextarea/focusabletip">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea/focusabletip"
+				includes="*.png" />
+		</copy>
+		<copy includeemptydirs="false" todir="bin/org/fife/ui/rsyntaxtextarea/modes">
+			<fileset dir="src/org/fife/ui/rsyntaxtextarea/modes"
+				includes="*.flex" />
+		</copy>
+		<copy includeemptydirs="false" todir="bin/org/fife/ui/rtextarea">
 			<fileset dir="src/org/fife/ui/rtextarea" includes="*.properties" />
-        </copy>     
-		
+		</copy>
+
 		<jar basedir="bin" jarfile="dist/temp.jar" defaultexcludes="true">
 			<manifest>
-			    <attribute name="Main-Class" value="com.modcrafting.mbd.Chekkit"/>
-			    <!--<attribute name="Class-Path" value="lib/mysql-connector-java-5.1.23-bin.jar"/>-->
+				<attribute name="Main-Class" value="com.modcrafting.mbd.Chekkit" />
+				<!--<attribute name="Class-Path" value="lib/mysql-connector-java-5.1.23-bin.jar"/> -->
 			</manifest>
 		</jar>
 		<zip destfile="dist/${ant.project.name}.jar">
-		    <zipgroupfileset dir="lib" includes="mysql-connector-java-5.1.23-bin.jar"/>
-		    <zipgroupfileset dir="lib" includes="jsoup-1.7.2.jar"/>
-		    <zipgroupfileset dir="dist" includes="temp.jar"/>
+			<zipgroupfileset dir="lib"
+				includes="mysql-connector-java-5.1.23-bin.jar" />
+			<zipgroupfileset dir="lib" includes="jsoup-1.7.2.jar" />
+			<zipgroupfileset dir="lib" includes="prettytime.jar" />
+			<zipgroupfileset dir="dist" includes="temp.jar" />
 		</zip>
-		<delete file="dist/temp.jar"/>
+		<delete file="dist/temp.jar" />
 	</target>
 
 
