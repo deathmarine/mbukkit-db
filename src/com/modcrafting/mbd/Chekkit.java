@@ -72,6 +72,7 @@ public class Chekkit extends JFrame implements WindowListener {
     private List<String> bannedpackage = new ArrayList<String>();
     private static Theme theme;
     public static final String VERSION = "1.5";
+    public static Boolean showAbout = true;
     public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar", "");
 
     @SuppressWarnings("unchecked")
@@ -265,6 +266,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 Properties config = new Properties();
                 config.load(new FileInputStream(propF));
                 useNimbus = Boolean.parseBoolean((String) config.get("enable-nimbus"));
+                showAbout = Boolean.parseBoolean((String) config.get("about-on-close"));
                 hideProgress = Boolean.parseBoolean((String) ("hide-progress"));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -274,6 +276,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 Properties config = new Properties();
                 config.put("enable-nimbus", useNimbus.toString());
                 config.put("hide-progress", hideProgress.toString());
+                config.put("about-on-close", showAbout.toString());
                 config.store(new FileOutputStream(propF), "The Chekkit config.");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -475,7 +478,9 @@ public class Chekkit extends JFrame implements WindowListener {
             }
             this.dispose();
             ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-small.png")));
-            JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: " + Chekkit.VERSION + "\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+            if (showAbout) {
+                JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: " + Chekkit.VERSION + "\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+            }
             System.exit(0);
         }
     }
