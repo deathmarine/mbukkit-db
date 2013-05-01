@@ -45,6 +45,7 @@ public class HashFile implements SyntaxConstants {
 		textArea.setMarkOccurrences(true);
 		textArea.setClearWhitespaceLinesEnabled(false);
 		textArea.setEditable(false);
+		textArea.setAntiAliasingEnabled(true);
 		textArea.setCodeFoldingEnabled(true);
 		if(file.getName().toLowerCase().endsWith(".java"))
 			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVA);
