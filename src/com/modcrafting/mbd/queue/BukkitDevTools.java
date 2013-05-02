@@ -132,7 +132,7 @@ public class BukkitDevTools {
      * @param key - The API key to use
      * @return A list of QueueFiles
      */
-    public static ApprovalQueue parseFiles(String key) {
+    public static ApprovalQueue parseFiles(String key, Boolean includeClaimed) {
         List<String> sn = new ArrayList<String>();
         List<QueueFile> qfl = new ArrayList<QueueFile>();
         int numClaimed = 0;
@@ -171,6 +171,7 @@ public class BukkitDevTools {
                 String uploader = infoBlocks.get(5).text().trim();
                 long date = Long.parseLong(infoBlocks.get(6).child(0).attr("data-epoch"));
                 String claimed = infoBlocks.get(3).text();
+                
                 Boolean staff = infoBlocks.get(5).child(0).hasClass("user-moderator");
                 if (staff && !sn.contains(uploader)) {
                     sn.add(uploader);
@@ -183,6 +184,9 @@ public class BukkitDevTools {
                     numClaimed++;
                 }
                 total++;
+                if (!includeClaimed && claimed != null) {
+                    continue;
+                }
                 QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed, date, size, staff);
                 qfl.add(qf);
             }

@@ -11,12 +11,15 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.ldap.SortKey;
 import javax.swing.Box;
+import javax.swing.DefaultRowSorter;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -29,8 +32,12 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -55,6 +62,9 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private boolean isThreadRunning = false;
     private JScrollPane scrollPane;
     private SpringLayout sl_contentPane = new SpringLayout();
+    private Boolean sizeSort = false;
+    private Boolean dateSort = false;
+    private int prop = 0;
 
     /**
      * Initialize the object
@@ -162,17 +172,18 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             @Override
             public void run() {
                 showProgressBar();
-                ApprovalQueue aq = BukkitDevTools.parseFiles(APIKey);
+                ApprovalQueue aq = BukkitDevTools.parseFiles(APIKey, showClaimed.isSelected());
                 List<QueueFile> qfl = aq.getFileList();
                 int total = aq.getFileTotal();
                 Object[][] files;
+                /*int applicable;
                 if (!showClaimed.isSelected()) {
-                    files = new Object[aq.getFilesUnclaimed()][6];
+                    applicable = aq.getFilesUnclaimed();
                 } else {
                     files = new Object[qfl.size()][6];
-                }
+                }*/
 
-                String[] columnNames = { "Title", "Project", "Size", "Author", "Posted", "Status" };
+                /*String[] columnNames = { "Title", "Project", "Size", "Author", "Posted", "Status" };
                 int index = 0;
 
                 int claimed = aq.getFilesClaimed();
@@ -211,43 +222,69 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                     } else {
                         return;
                     }
-                }
+                }*/
 
-                QueueWindow.this.setTitle("File Queue: " + (index + claimed) + " Total Files, " + claimed + " Claimed");
+                QueueWindow.this.setTitle("File Queue: " + (aq.getFileTotal()) + " Total Files, " + aq.getFilesClaimed() + " Claimed");
                 
-                final DefaultTableModel model = new DefaultTableModel(files, columnNames) {
+                /*final DefaultTableModel model = new DefaultTableModel(files, columnNames) {
                     private static final long serialVersionUID = 5344763309058756161L;
 
-                    public boolean isCellEditable(int row, int column) {
-                        return false;
-                    }
-
-                    Class[] types = { String.class, String.class, Integer.class, String.class, String.class, String.class };
-
-                    @Override
-                    public Class getColumnClass(int columnIndex) {
-                        return this.types[columnIndex];
-                    }
-                };
-
-                table = new JTable(model) {
-
-                    private static final long serialVersionUID = 1L;
-                    DefaultTableCellRenderer defaultRender=new DefaultTableCellRenderer();
-                    DefaultTableCellRenderer staffText=new DefaultTableCellRenderer(); {staffText.setForeground(Color.GREEN);}
-                    DefaultTableCellRenderer colorText=new DefaultTableCellRenderer(); {colorText.setForeground(Color.RED); Chekkit.log.warning(colorText.getText());}
-                    @Override
-                    public TableCellRenderer getCellRenderer(int column, int row) {
-                        if (column == 0 && ((String) model.getValueAt(row, column)).startsWith("{"))  {
-                            return colorText;
-                        }
-                     
-                        
-                        return defaultRender;
-                    }
-                };
+                    
+                };*/
+                final FileTableModel model = new FileTableModel(aq);
+                
+                table = new JTable(model);
+                table.setDefaultRenderer(String.class, new FileCellRenderer(aq.getFileList()));
                 table.setAutoCreateRowSorter(true);
-
+                table.removeColumn(table.getColumnModel().getColumn(6));
+                table.removeColumn(table.getColumnModel().getColumn(6));
+                table.getRowSorter().addRowSorterListener(
+                        new RowSorterListener() {
+                            
+                            @Override
+                            public void sorterChanged(RowSorterEvent e) {
+                                if (e.getType() != RowSorterEvent.Type.SORTED) {
+                                    return;
+                                }
+                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 2) {
+                                    Chekkit.log.info("Size sort! Compensating...");
+                                    List l = new ArrayList<SortKey>();
+                                    RowSorter.SortKey sk;
+                                    if (sizeSort) {
+                                        sk = new RowSorter.SortKey(6, SortOrder.ASCENDING);
+                                        sizeSort = false;
+                                        
+                                    } else {
+                                        sk = new RowSorter.SortKey(6, SortOrder.DESCENDING);
+                                        sizeSort = true;
+                                    }
+                                    
+                                    l.add(sk);
+                                    table.getRowSorter().setSortKeys(l);
+                                    return;
+                                }
+                                
+                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 4) {
+                                    Chekkit.log.info("Date sort! Compensating...");
+                                    List l = new ArrayList<SortKey>();
+                                    RowSorter.SortKey sk;
+                                    if (dateSort) {
+                                        sk = new RowSorter.SortKey(7, SortOrder.ASCENDING);
+                                        dateSort = false;
+                                        
+                                    } else {
+                                        sk = new RowSorter.SortKey(7, SortOrder.DESCENDING);
+                                        dateSort = true;
+                                        
+                                    }
+                                    l.add(sk);
+                                    table.getRowSorter().setSortKeys(l);
+                                    return;
+                                }
+                                dateSort = false;
+                                sizeSort = false;
+                            }
+                        });
                 scrollPane = new JScrollPane(table);
                 sl_contentPane.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.NORTH, contentPane);
                 sl_contentPane.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, contentPane);
@@ -331,6 +368,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         } else if (e.getSource() == this.showClaimed) {
             this.contentPane.remove(this.scrollPane);
             this.showLabel("Getting Claimed...");
+            this.table.setVisible(false);
             this.getQueue();
         } else if (e.getSource() == this.autoRefresh) {
             if (this.autoRefresh.isSelected()) {
