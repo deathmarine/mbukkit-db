@@ -59,7 +59,7 @@ public class BukkitDevTools {
                 return KeyState.INVALID;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
 
             e.printStackTrace();
             return null;
