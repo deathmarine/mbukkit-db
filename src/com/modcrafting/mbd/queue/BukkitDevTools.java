@@ -35,7 +35,7 @@ public class BukkitDevTools {
 
     public static KeyState checkAPIKey(String key) {
         try {
-            Document doc1 = Jsoup.connect("http://dev.bukkit.org/home/?api-key=" + key).get();
+            Document doc1 = Jsoup.connect("http://dev.bukkit.org/home/?api-key=" + key).timeout(120000).get();
             Element loginReq = doc1.getElementById("login-next");
             if (loginReq != null) {
                 return KeyState.INVALID;
