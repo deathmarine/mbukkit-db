@@ -460,16 +460,16 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         } else if (e.getSource() == this.mntmClaimSelectedFiles) {
             final FileTableModel ftm = (FileTableModel) table.getModel(); 
             Chekkit.log.info("Fired!");
-            SwingUtilities.invokeLater(new Runnable() {
+            /*SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
-                public void run() {
+                public void run() {*/
                     Chekkit.log.info("Starting claim");
-                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey);
+                    BukkitDevTools.claimFiles(ftm.files, this, APIKey);
                     
-                }
+                    /**//*}
                 
-            });
+            });/**/
         }
     }
 

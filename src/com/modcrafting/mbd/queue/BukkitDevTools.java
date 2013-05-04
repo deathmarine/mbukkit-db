@@ -41,10 +41,11 @@ public class BukkitDevTools {
         Chekkit.log.info("Checking files for issues");
         qw.showLabel("Checking files for issues...");
         qw.progressBar.setVisible(true);
+        qw.progressBar.setIndeterminate(true);
         List<BukkitDevPM> PMs = new ArrayList<BukkitDevPM>();
         List<Integer> filesToClaim = new ArrayList<Integer>();
         for (QueueFile qf: qfl) {
-            
+            Chekkit.log.info("Checking file " + qf.getFileID());
             if (qf.selected) {
                 qw.showLabel("Checking file " + qf.getFileID() + "...");
                 if (qf.getClaimed() != null) {
@@ -66,7 +67,7 @@ public class BukkitDevTools {
                         PMs.add(qf.getVersionPM());
                     }
                 }
-                
+                Chekkit.log.info("Adding file");
                 filesToClaim.add(qf.getFileID());
                 
                 
@@ -75,21 +76,26 @@ public class BukkitDevTools {
             
             
         }
-        new MessageQueue(PMs, key);
+        if (PMs.size() > 0)
+            new MessageQueue(PMs, key);
+        Chekkit.log.info("Sending request...");
         qw.showLabel("Sending request...");
-        Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/");
+        Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + key);
         c.data("form_type", "file");
         c.data("file-status", "u");
+        c.timeout(0);
         
         for (Integer id: filesToClaim) {
             c.data("file_checklist", id.toString());
+            Chekkit.log.info("Added id: " + id);
         }
         try {
-            c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").ignoreHttpErrors(true).post();
+            c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").post();
         } catch (Exception e) {
             
             e.printStackTrace();
         }
+        Chekkit.log.info("Refreshing");
         qw.refreshThread();
         
         qw.hideLabel();
