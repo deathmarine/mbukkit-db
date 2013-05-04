@@ -12,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -42,7 +43,7 @@ public class NoteDialog extends JDialog{
 			label.addMouseListener(new AddListener());
 			toolBar.add(label);
 			field = new JTextField(150);
-			field.setText("  Add Note...");
+			field.setText("Add Note...");
 			//label.setFont(new Font("Serif", Font.BOLD, 12));
 			//label.setForeground(Color.WHITE);
 			toolBar.add(field);
@@ -78,16 +79,19 @@ public class NoteDialog extends JDialog{
 		}
 		public void actionPerformed() {
 			final String text = field.getText();
-			if(text!=null && text.length()>0){
+			if (text.equals("Add Note...") || text.isEmpty()) {
+			    JOptionPane.showMessageDialog(NoteDialog.this, "You must enter a note!", "Note error", JOptionPane.WARNING_MESSAGE);
+			} else {
 				SwingUtilities.invokeLater(new Runnable(){
 					@Override
 					public void run() {
 						parent.database.setNote(parent.mainclass, Chekkit.username, text);
 					}
 				});
-				addText(Chekkit.username, System.currentTimeMillis(), text);
-				field.setText("  Add Note...");
-			}			
+				addText(Chekkit.realUsername, System.currentTimeMillis(), text);
+				field.setText("Add Note...");
+    		
+			}
 		}
 	}
 }

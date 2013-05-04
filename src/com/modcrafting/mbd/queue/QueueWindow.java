@@ -43,7 +43,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private static final long serialVersionUID = 1856749858855789365L;
 
     private JPanel contentPane = new JPanel();
-    private JProgressBar progressBar = new JProgressBar();
+    public JProgressBar progressBar = new JProgressBar();
     private JLabel label = new JLabel("");
     private String APIKey = "";
     private JTable table = new JTable();
@@ -173,7 +173,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         this.setVisible(true);
     }
 
-    private void refreshThread() {
+    public void refreshThread() {
         this.refreshThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -459,11 +459,13 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             
         } else if (e.getSource() == this.mntmClaimSelectedFiles) {
             final FileTableModel ftm = (FileTableModel) table.getModel(); 
+            Chekkit.log.info("Fired!");
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this);
+                    Chekkit.log.info("Starting claim");
+                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey);
                     
                 }
                 

@@ -18,6 +18,8 @@ import org.jsoup.select.Elements;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import com.modcrafting.mbd.Chekkit;
+import com.modcrafting.mbd.objects.BukkitDevPM;
+import com.modcrafting.mbd.objects.MessageQueue;
 
 public class BukkitDevTools {
 
@@ -35,29 +37,64 @@ public class BukkitDevTools {
         }
     }
     
-    public static void claimFiles(List<QueueFile> qfl, QueueWindow qw) {
+    public static void claimFiles(List<QueueFile> qfl, QueueWindow qw, String key) {
+        Chekkit.log.info("Checking files for issues");
+        qw.showLabel("Checking files for issues...");
+        qw.progressBar.setVisible(true);
+        List<BukkitDevPM> PMs = new ArrayList<BukkitDevPM>();
+        List<Integer> filesToClaim = new ArrayList<Integer>();
         for (QueueFile qf: qfl) {
+            
             if (qf.selected) {
+                qw.showLabel("Checking file " + qf.getFileID() + "...");
                 if (qf.getClaimed() != null) {
+                    qw.showLabel("File " + qf.getFileID() + " is already claimed. Informing user...");
                     String msg = "The file '" + qf.getTitle() + "' is under review by " + qf.getClaimed() + ".\nDo you wish to claim this file anyway?";
-                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File already claimed.", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
+                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File already claimed.", JOptionPane.YES_NO_OPTION);
                     if (cont != JOptionPane.YES_OPTION) {
+                        qw.showLabel("File " + qf.getFileID() + " is already claimed. User decided to abort file.");
                         continue; //Next file please
                     }
                 }
                 
                 if (!qf.hasNumberInTitle()) {
+                    qw.showLabel("File " + qf.getFileID() + " has no title in version. Informing user.");
                     String msg = "The file '" + qf.getTitle() + "' appears to be missing a version from its title.\nWould you like to send the user a PM?";
-                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File has no version number in title.", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
+                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File has no version number in title.", JOptionPane.YES_NO_OPTION);
                     if (cont == JOptionPane.YES_OPTION) {
-                        //TODO: Send file PM here
+                        qw.showLabel("File " + qf.getFileID() + " requires a PM to be sent. Adding message to queue...");
+                        PMs.add(qf.getVersionPM());
                     }
                 }
+                
+                filesToClaim.add(qf.getFileID());
+                
+                
             
             }
             
             
         }
+        new MessageQueue(PMs, key);
+        qw.showLabel("Sending request...");
+        Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/");
+        c.data("form_type", "file");
+        c.data("file-status", "u");
+        
+        for (Integer id: filesToClaim) {
+            c.data("file_checklist", id.toString());
+        }
+        try {
+            c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").ignoreHttpErrors(true).post();
+        } catch (Exception e) {
+            
+            e.printStackTrace();
+        }
+        qw.refreshThread();
+        
+        qw.hideLabel();
+        qw.progressBar.setVisible(false);
+        
     }
 
     public static KeyState checkAPIKey(String key) {
@@ -211,7 +248,7 @@ public class BukkitDevTools {
                     numClaimed++;
                 }
                 total++;
-                if (!includeClaimed && claimed != null) {
+                if ((!includeClaimed && claimed != null) || claimed == Chekkit.realUsername) {
                     continue;
                 }
                 QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed, date, size, staff);
