@@ -153,7 +153,8 @@ public class Chekkit extends JFrame implements WindowListener {
                 new Thread(new Runnable(){
                 	@Override
                 	public void run(){
-                		new QueueWindow(useNimbus, Chekkit.this);
+                	    int processID = Chekkit.processPanel.addUnknownProcess("Checking API key information...");
+                		new QueueWindow(useNimbus, Chekkit.this, processID);
                 	}
                 }).start();
             }

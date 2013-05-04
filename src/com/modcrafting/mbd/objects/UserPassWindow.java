@@ -83,18 +83,18 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
     public void setContents() {
         SpringLayout layout = new SpringLayout();
-        submit = new JButton("Submit");
+        submit = new JButton("Login");
         submit.addActionListener(this);
         layout.putConstraint(SpringLayout.SOUTH, submit, 0, SpringLayout.SOUTH, panel);
-        layout.putConstraint(SpringLayout.WEST, submit, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, submit, 0, SpringLayout.EAST, panel);
 
         cancel = new JButton("Cancel");
         cancel.addActionListener(this);
         layout.putConstraint(SpringLayout.SOUTH, cancel, 0, SpringLayout.SOUTH, panel);
-        layout.putConstraint(SpringLayout.EAST, cancel, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.WEST, cancel, 0, SpringLayout.WEST, panel);
 
         remember = new JCheckBox("Remember me");
-        layout.putConstraint(SpringLayout.SOUTH, remember, 0, SpringLayout.SOUTH, panel);
+        layout.putConstraint(SpringLayout.SOUTH, remember, -5, SpringLayout.SOUTH, panel);
         layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, remember, 0, SpringLayout.HORIZONTAL_CENTER, panel);
 
         panel.setLayout(layout);

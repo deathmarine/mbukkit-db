@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.ldap.SortKey;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -55,11 +57,13 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     /**
      * Initialize the object
      */
-    public QueueWindow(Boolean useNimbus, JFrame parent) {
+    public QueueWindow(Boolean useNimbus, JFrame parent, int pId) {
         super("File Queue");
+        
         if (!this.getAPI()) {
             return;
         }
+        Chekkit.processPanel.removeProcess(pId);
         this.createFrame(parent);
         this.showLabel("Loading Queue...");
         this.getQueue();
@@ -222,57 +226,68 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 table = new JTable(model);
                 table.setDefaultRenderer(String.class, new FileCellRenderer(aq.getFileList()));
                 table.setAutoCreateRowSorter(true);
-                table.removeColumn(table.getColumnModel().getColumn(6));
-                table.removeColumn(table.getColumnModel().getColumn(6));
+                table.removeColumn(table.getColumnModel().getColumn(7));
+                table.removeColumn(table.getColumnModel().getColumn(7));
+                table.getColumnModel().getColumn(0).setMaxWidth(25);
                 table.getRowSorter().addRowSorterListener(
                         new RowSorterListener() {
                             
                             @Override
                             public void sorterChanged(RowSorterEvent e) {
-                                
+                                //Don't touch this, it works.
                                 Boolean serviced = false;
-                                Chekkit.log.info("From the top. " + e.getType().toString());
+                                FileTableModel ftm = (FileTableModel) table.getModel();
+                                
+                                //Chekkit.log.info("From the top. " + e.getType().toString());
                                 if (e.getType() != RowSorterEvent.Type.SORTED) {
                                     return;
                                 }
                                 
-                                FileTableModel ftm = (FileTableModel) table.getModel();
-                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 2) {
-                                    Chekkit.log.info("Size sort! Compensating...");
+                                if (ftm.progSort) {
+                                    ftm.progSort = false;
+                                    //Chekkit.log.info("Destroyed a non-user sort event.");
+                                    return;
+                                  }
+                                
+                               
+                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 3) {
+                                    //Chekkit.log.info("Size sort! Compensating...");
                                     List l = new ArrayList<SortKey>();
                                     RowSorter.SortKey sk;
                                     Chekkit.log.info(ftm.sizeSort.toString());
                                     if (ftm.sizeSort) {
-                                        sk = new RowSorter.SortKey(6, SortOrder.ASCENDING);
+                                        sk = new RowSorter.SortKey(7, SortOrder.ASCENDING);
                                         ftm.sizeSort = false;
                                         
                                     } else {
-                                        sk = new RowSorter.SortKey(6, SortOrder.DESCENDING);
+                                        sk = new RowSorter.SortKey(7, SortOrder.DESCENDING);
                                         ftm.sizeSort = true;
                                     }
                                     
                                     l.add(sk);
+                                    ftm.progSort = true;
                                     table.getRowSorter().setSortKeys(l);
                                     serviced = true;
                                     return;
                                 }
                                 
-                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 4) {
-                                    Chekkit.log.info("Date sort! Compensating...");
+                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 5) {
+                                    //Chekkit.log.info("Date sort! Compensating...");
                                     List l = new ArrayList<SortKey>();
                                     RowSorter.SortKey sk;
                                     
                                     Chekkit.log.info(ftm.dateSort.toString());
                                     if (ftm.dateSort) {
-                                        sk = new RowSorter.SortKey(7, SortOrder.ASCENDING);
+                                        sk = new RowSorter.SortKey(8, SortOrder.ASCENDING);
                                         ftm.dateSort = false;
                                         
                                     } else {
-                                        sk = new RowSorter.SortKey(7, SortOrder.DESCENDING);
+                                        sk = new RowSorter.SortKey(8, SortOrder.DESCENDING);
                                         ftm.dateSort = true;
                                         
                                     }
                                     l.add(sk);
+                                    ftm.progSort = true;
                                     table.getRowSorter().setSortKeys(l);
                                     serviced = true;
                                     return;
@@ -280,7 +295,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                                 if (!serviced) {
                                     ftm.dateSort = false;
                                     ftm.sizeSort = false;
-                                    Chekkit.log.info("Resetting date & size.");
+                                    //Chekkit.log.info("Resetting date & size.");
                                 }
                             }
                         });
@@ -291,6 +306,17 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 sl_contentPane.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, contentPane);
 
                 contentPane.add(scrollPane);
+                Action claimFile = new AbstractAction()
+                {
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        JTable table = (JTable)e.getSource();
+                        int modelRow = Integer.valueOf( e.getActionCommand() );
+                        JOptionPane.showMessageDialog(table.getParent(), "Claimed.");
+                    }
+                };
+
+                
                 table.setVisible(true);
                 contentPane.repaint();
 

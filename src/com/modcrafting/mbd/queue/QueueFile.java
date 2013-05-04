@@ -65,6 +65,8 @@ public class QueueFile {
      * Whether the user that created the file is staff
      */
     private Boolean isStaff;
+    
+    public Boolean selected = false;
 
     public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate, String readableSize, Boolean isStaff) {
         this.id = id;

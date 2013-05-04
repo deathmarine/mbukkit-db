@@ -54,6 +54,25 @@ public class ProcessPanel extends JPanel{
 		return list.indexOf(panel);
 	}
 	
+	public int addUnknownProcess(String p){
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel(p);
+        JProgressBar bar = new JProgressBar();
+        bar.setIndeterminate(true);
+        label.setVisible(true);
+        bar.setVisible(true);
+        
+        panel.add(label);
+        panel.add(bar);
+        
+        list.add(panel);
+        this.add(panel);
+        this.revalidate();
+        this.repaint();
+        
+        return list.indexOf(panel);
+    }
+	
 	public void removeProcess(Integer id){
 		this.remove(list.get(id));
 		list.remove(id);
