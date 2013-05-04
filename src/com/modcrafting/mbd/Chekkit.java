@@ -80,8 +80,8 @@ public class Chekkit extends JFrame implements WindowListener {
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         this.properties = properties;
+        
         datab = new SQL(properties);
-        config = new Configuration();
         
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -259,6 +259,9 @@ public class Chekkit extends JFrame implements WindowListener {
     }
 
     public static void main(String[] args) {
+        config = new Configuration();
+        useNimbus = config.getUseNimbus();
+        showAbout = config.getShowAbout();
         List<String> argList = new ArrayList<String>();
         for (String s : args) {
             argList.add(s);

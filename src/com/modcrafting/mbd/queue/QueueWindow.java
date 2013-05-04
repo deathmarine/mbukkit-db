@@ -50,8 +50,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private boolean isThreadRunning = false;
     private JScrollPane scrollPane;
     private SpringLayout sl_contentPane = new SpringLayout();
-    private Boolean sizeSort = false;
-    private Boolean dateSort = false;
     private int prop = 0;
 
     /**
@@ -233,10 +231,11 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                             public void sorterChanged(RowSorterEvent e) {
                                 
                                 Boolean serviced = false;
+                                Chekkit.log.info("From the top. " + e.getType().toString());
                                 if (e.getType() != RowSorterEvent.Type.SORTED) {
                                     return;
                                 }
-                                Chekkit.log.info("From the top. " + e.getType().toString());
+                                
                                 FileTableModel ftm = (FileTableModel) table.getModel();
                                 if (table.getRowSorter().getSortKeys().get(0).getColumn() == 2) {
                                     Chekkit.log.info("Size sort! Compensating...");

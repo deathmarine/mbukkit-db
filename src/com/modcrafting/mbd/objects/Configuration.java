@@ -56,11 +56,11 @@ public class Configuration {
                     showAbout = Boolean.parseBoolean((String) defaults.get("about-on-close"));
                 }
                 
-                if(defaults.get("hide-progress") == null){
+                /*if(defaults.get("hide-progress") == null){
                     defaults.put("hide-progress", false);
                 }else{
                     hideProgress = Boolean.parseBoolean((String) defaults.get("hide-progress"));
-                }
+                }*/// This Config setting is no longer relevant
                 
                 if(defaults.get("key") == null){
                     defaults.put("key", "");
@@ -73,7 +73,6 @@ public class Configuration {
         } else {
             try {
                 defaults.put("enable-nimbus", useNimbus.toString());
-                defaults.put("hide-progress", hideProgress.toString());
                 defaults.put("about-on-close", showAbout.toString());
                 defaults.put("auto-queue-refresh-rate", qRefRate.toString());
                 defaults.put("key", key);
@@ -114,6 +113,14 @@ public class Configuration {
             return false;
         }
         return false;
+    }
+    
+    public Boolean getUseNimbus() {
+        return this.useNimbus;
+    }
+    
+    public Boolean getShowAbout() {
+        return this.showAbout;
     }
     
     public Integer getInteger(String setting){
