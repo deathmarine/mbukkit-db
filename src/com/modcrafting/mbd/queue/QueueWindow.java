@@ -28,11 +28,15 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 
 import com.modcrafting.mbd.Chekkit;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
 
 public class QueueWindow extends JFrame implements ActionListener, WindowListener {
 
@@ -53,10 +57,17 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private JScrollPane scrollPane;
     private SpringLayout sl_contentPane = new SpringLayout();
     private int prop = 0;
+    private JMenuItem mntmClaimOldest = new JMenuItem("Mark 10 oldest files");
+    private JMenuItem mntmMarkSelectedFiles = new JMenuItem("Mark selected files");
+    private final JMenuItem mntmUnmarkSelectedFiles = new JMenuItem("Unmark selected files");
+    private final JMenuItem mntmMarkTop = new JMenuItem("Mark 10 top files");
+    private final JMenuItem mntmClaimSelectedFiles = new JMenuItem("Claim marked files");
 
     /**
      * Initialize the object
      */
+    
+ 
     public QueueWindow(Boolean useNimbus, JFrame parent, int pId) {
         super("File Queue");
         
@@ -69,12 +80,13 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         this.getQueue();
     }
 
-    private void showLabel(String text) {
+    public void showLabel(String text) {
         this.label.setText(text);
         this.label.setVisible(true);
     }
 
-    private void hideLabel() {
+
+    public void hideLabel() {
         this.label.setVisible(false);
     }
 
@@ -105,6 +117,29 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         mnView.add(this.showClaimed);
         this.showClaimed.addActionListener(this);
         mnView.add(this.refreshQueue);
+        
+        JMenu mnFiles = new JMenu("Files");
+        menuBar.add(mnFiles);
+        mntmMarkSelectedFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+        mntmMarkSelectedFiles.addActionListener(this);
+        mnFiles.add(mntmMarkSelectedFiles);
+        mntmUnmarkSelectedFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+        mntmUnmarkSelectedFiles.addActionListener(this);
+        
+        mnFiles.add(mntmUnmarkSelectedFiles);
+        
+        
+        mntmClaimSelectedFiles.addActionListener(this);
+        mntmClaimSelectedFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        mnFiles.add(mntmClaimSelectedFiles);
+        mntmClaimOldest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+        mntmClaimOldest.addActionListener(this);
+        
+        mnFiles.add(mntmClaimOldest);
+        mntmMarkTop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+        mntmMarkTop.addActionListener(this);
+        
+        mnFiles.add(mntmMarkTop);
         this.refreshQueue.addActionListener(this);
 
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -221,7 +256,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
                     
                 };*/
-                final FileTableModel model = new FileTableModel(aq);
+                final FileTableModel model = new FileTableModel(aq, QueueWindow.this);
                 
                 table = new JTable(model);
                 table.setDefaultRenderer(String.class, new FileCellRenderer(aq.getFileList()));
@@ -388,6 +423,51 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             } else {
                 this.refreshThread.stop();
             }
+        } else if (e.getSource() == this.mntmMarkSelectedFiles) {
+            for (int i : this.table.getSelectedRows()) {
+                table.getModel().setValueAt(true, table.convertRowIndexToModel(i), 0);
+            }
+        } else if (e.getSource() == this.mntmUnmarkSelectedFiles) {
+            for (int i : this.table.getSelectedRows()) {
+                table.getModel().setValueAt(false, table.convertRowIndexToModel(i), 0);
+            }
+        } else if (e.getSource() == this.mntmClaimOldest) {
+            FileTableModel ftm = (FileTableModel) table.getModel(); 
+            int i = 0;
+            int done = 0;
+            for (QueueFile qf: ftm.files) {
+                
+                if (qf.getClaimed() == null && !qf.selected) {
+                    table.getModel().setValueAt(true, i, 0);
+                    done++;
+                }
+                if (done == 10) {
+                    break;
+                }
+                i++;  
+            }
+        } else if (e.getSource() == this.mntmMarkTop) {
+            int done = 0;
+            int i = 0;
+            while (done != 10) {
+                if (!(Boolean) table.getModel().getValueAt(table.convertRowIndexToModel(i), 0)) {
+                    table.getModel().setValueAt(true, table.convertRowIndexToModel(i), 0);
+                    done++;
+                }
+                i++;
+            }
+            
+        } else if (e.getSource() == this.mntmClaimSelectedFiles) {
+            final FileTableModel ftm = (FileTableModel) table.getModel(); 
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this);
+                    
+                }
+                
+            });
         }
     }
 

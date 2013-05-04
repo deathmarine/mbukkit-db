@@ -162,6 +162,8 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             httpcon.setRequestMethod("POST");
             httpcon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             httpcon.setRequestProperty("Content-Length", "" + Integer.toString(prop.getBytes().length));
+            httpcon.setConnectTimeout(3000);
+            httpcon.setReadTimeout(3000);
             DataOutputStream wr = new DataOutputStream(httpcon.getOutputStream());
             wr.writeBytes(prop);
             wr.flush();
@@ -224,6 +226,8 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            this.errorArea.setText("A connection error ocurred while authenticating.");
+            this.errorArea.setVisible(true);
             return false;
         }
     }

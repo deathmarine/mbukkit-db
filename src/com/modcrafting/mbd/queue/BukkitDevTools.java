@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,6 +31,31 @@ public class BukkitDevTools {
             Chekkit.log.info(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
+            
+        }
+    }
+    
+    public static void claimFiles(List<QueueFile> qfl, QueueWindow qw) {
+        for (QueueFile qf: qfl) {
+            if (qf.selected) {
+                if (qf.getClaimed() != null) {
+                    String msg = "The file '" + qf.getTitle() + "' is under review by " + qf.getClaimed() + ".\nDo you wish to claim this file anyway?";
+                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File already claimed.", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
+                    if (cont != JOptionPane.YES_OPTION) {
+                        continue; //Next file please
+                    }
+                }
+                
+                if (!qf.hasNumberInTitle()) {
+                    String msg = "The file '" + qf.getTitle() + "' appears to be missing a version from its title.\nWould you like to send the user a PM?";
+                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File has no version number in title.", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
+                    if (cont == JOptionPane.YES_OPTION) {
+                        //TODO: Send file PM here
+                    }
+                }
+            
+            }
+            
             
         }
     }

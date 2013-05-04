@@ -16,6 +16,8 @@ public class FileTableModel extends AbstractTableModel {
     public Boolean sizeSort = false;
     public Boolean dateSort = false;
     public Boolean progSort = false;
+    private int selected = 0;
+    private QueueWindow qw;
     
 
     public boolean isCellEditable(int row, int column) {
@@ -35,7 +37,8 @@ public class FileTableModel extends AbstractTableModel {
         return this.types[columnIndex];
     }
     
-    public FileTableModel(ApprovalQueue aq) {
+    public FileTableModel(ApprovalQueue aq, QueueWindow qw) {
+        this.qw = qw;
         columns.add(" ");
         columns.add("Title");
         columns.add("Project");
@@ -75,9 +78,15 @@ public class FileTableModel extends AbstractTableModel {
     
     public void setValueAt(Object value, int row, int col) {
         if (col == 0) {
-            files.get(row).selected ^= true;
+            
+            files.get(row).selected = (Boolean) value;
             fireTableDataChanged();
             fireTableCellUpdated(row, col);
+            if (files.get(row).selected)
+                selected++;
+            else
+                selected--;
+            qw.showLabel(selected + " files selected.");
         }
         
     }
