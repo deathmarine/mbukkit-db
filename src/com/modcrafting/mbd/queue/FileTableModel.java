@@ -11,6 +11,8 @@ public class FileTableModel extends AbstractTableModel {
     private Class[] types = { String.class, String.class, String.class, String.class, String.class, String.class, Integer.class, Long.class};
     public final List<QueueFile> files;
     private int totalRows;
+    public Boolean sizeSort = false;
+    public Boolean dateSort = false;
 
     public boolean isCellEditable(int row, int column) {
         return false;

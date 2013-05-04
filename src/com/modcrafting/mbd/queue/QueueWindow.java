@@ -243,24 +243,30 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                             
                             @Override
                             public void sorterChanged(RowSorterEvent e) {
+                                
+                                Boolean serviced = false;
                                 if (e.getType() != RowSorterEvent.Type.SORTED) {
                                     return;
                                 }
+                                Chekkit.log.info("From the top. " + e.getType().toString());
+                                FileTableModel ftm = (FileTableModel) table.getModel();
                                 if (table.getRowSorter().getSortKeys().get(0).getColumn() == 2) {
                                     Chekkit.log.info("Size sort! Compensating...");
                                     List l = new ArrayList<SortKey>();
                                     RowSorter.SortKey sk;
-                                    if (sizeSort) {
+                                    Chekkit.log.info(ftm.sizeSort.toString());
+                                    if (ftm.sizeSort) {
                                         sk = new RowSorter.SortKey(6, SortOrder.ASCENDING);
-                                        sizeSort = false;
+                                        ftm.sizeSort = false;
                                         
                                     } else {
                                         sk = new RowSorter.SortKey(6, SortOrder.DESCENDING);
-                                        sizeSort = true;
+                                        ftm.sizeSort = true;
                                     }
                                     
                                     l.add(sk);
                                     table.getRowSorter().setSortKeys(l);
+                                    serviced = true;
                                     return;
                                 }
                                 
@@ -268,21 +274,27 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                                     Chekkit.log.info("Date sort! Compensating...");
                                     List l = new ArrayList<SortKey>();
                                     RowSorter.SortKey sk;
-                                    if (dateSort) {
+                                    
+                                    Chekkit.log.info(ftm.dateSort.toString());
+                                    if (ftm.dateSort) {
                                         sk = new RowSorter.SortKey(7, SortOrder.ASCENDING);
-                                        dateSort = false;
+                                        ftm.dateSort = false;
                                         
                                     } else {
                                         sk = new RowSorter.SortKey(7, SortOrder.DESCENDING);
-                                        dateSort = true;
+                                        ftm.dateSort = true;
                                         
                                     }
                                     l.add(sk);
                                     table.getRowSorter().setSortKeys(l);
+                                    serviced = true;
                                     return;
                                 }
-                                dateSort = false;
-                                sizeSort = false;
+                                if (!serviced) {
+                                    ftm.dateSort = false;
+                                    ftm.sizeSort = false;
+                                    Chekkit.log.info("Resetting date & size.");
+                                }
                             }
                         });
                 scrollPane = new JScrollPane(table);
