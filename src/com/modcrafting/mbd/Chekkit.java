@@ -50,6 +50,7 @@ import javax.swing.border.BevelBorder;
 import org.fife.ui.rsyntaxtextarea.Theme;
 
 import com.modcrafting.mbd.decom.DecompJar;
+import com.modcrafting.mbd.objects.Configuration;
 import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProcessPanel;
@@ -57,11 +58,12 @@ import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
 
-@SuppressWarnings({"rawtypes", "resource"})
+@SuppressWarnings({"rawtypes"})
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
     public final static Logger log = Logger.getLogger("Chekkit");
     public Properties properties;
+    public static Configuration config;
     public static Boolean useNimbus = false;
     public static Boolean hideProgress = false;
     public Console console;
@@ -79,7 +81,8 @@ public class Chekkit extends JFrame implements WindowListener {
     public Chekkit(Properties properties) {
         this.properties = properties;
         datab = new SQL(properties);
-
+        config = new Configuration();
+        
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -260,28 +263,7 @@ public class Chekkit extends JFrame implements WindowListener {
         for (String s : args) {
             argList.add(s);
         }
-        File propF = new File(Chekkit.PATH + File.separator + "config.properties");
-        if (propF.exists()) {
-            try {
-                Properties config = new Properties();
-                config.load(new FileInputStream(propF));
-                useNimbus = Boolean.parseBoolean((String) config.get("enable-nimbus"));
-                showAbout = Boolean.parseBoolean((String) config.get("about-on-close"));
-                hideProgress = Boolean.parseBoolean((String) ("hide-progress"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                Properties config = new Properties();
-                config.put("enable-nimbus", useNimbus.toString());
-                config.put("hide-progress", hideProgress.toString());
-                config.put("about-on-close", showAbout.toString());
-                config.store(new FileOutputStream(propF), "The Chekkit config.");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        
         //String username = new String();
         String password = new String();
         if (argList.contains("--nogui")) {

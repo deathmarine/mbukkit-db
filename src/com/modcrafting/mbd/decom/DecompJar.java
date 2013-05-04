@@ -487,8 +487,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
                 return;
             }
             if(hash.getFile().getName().endsWith(".java")){
-                int value = JOptionPane.showConfirmDialog(co,"Save to database", "Would you like to save this file.", JOptionPane.YES_NO_CANCEL_OPTION);
-                if(value==JOptionPane.CANCEL_OPTION){
+                int value = JOptionPane.showConfirmDialog(co,"Save to database?");
+                if(value==JOptionPane.CLOSED_OPTION || value == JOptionPane.CANCEL_OPTION){
                     return;
                 }else if(value==JOptionPane.YES_OPTION){
                     safe.put(title, hash);
@@ -505,8 +505,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
                         return;
                     }
                 }
+                open.remove(title);
             }
-            open.remove(title);
         }
         tabbed.remove(co);
 	}
