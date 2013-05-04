@@ -1,6 +1,5 @@
 package com.modcrafting.mbd.queue;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -8,20 +7,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 import javax.naming.ldap.SortKey;
 import javax.swing.Box;
-import javax.swing.DefaultRowSorter;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -38,9 +29,6 @@ import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 import com.modcrafting.mbd.Chekkit;
 
@@ -306,13 +294,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
     private boolean getAPI() {
         String key = null;
-        try {
-            Properties prop = new Properties();
-            prop.load(new FileInputStream(Chekkit.PATH + File.separator + "config.properties"));
-            key = prop.getProperty("key");
-        } catch (Exception e) {
-            // Ignore it
-        }
+        key = Chekkit.config.getString("key");
         if (key == "" || key == null || (BukkitDevTools.checkAPIKey(key) != KeyState.STAFF)) {
             Boolean in = true;
             while (in) {
@@ -340,14 +322,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             if (key == null) {
                 return false;
             } else {
-                try {
-                    Properties prop = new Properties();
-                    prop.load(new FileInputStream(Chekkit.PATH + File.separator + "config.properties"));
-                    prop.setProperty("key", key);
-                    prop.store(new FileOutputStream(Chekkit.PATH + File.separator + "config.properties"), "The main config");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Chekkit.config.set("key", key);
             }
         }
         this.APIKey = key;
