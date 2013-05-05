@@ -78,7 +78,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         if (!this.getAPI()) {
             return;
         }
-        Chekkit.log.info("!!!? " + this.DBOName);
         Chekkit.processPanel.removeProcess(pId);
         this.createFrame(parent);
         this.showLabel("Loading Queue...");
@@ -207,8 +206,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
     private void getQueue() {
         final String username = this.DBOName;
-        Chekkit.log.info("getQueue!!! " + this.DBOName);
-        Chekkit.log.info("getQueueOwn!!! " + username);
         this.thisThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -395,7 +392,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                         }
                     } else {
                         DBOName = is.getUsername();
-                        Chekkit.log.info("!!! " + this.DBOName);
                         in = false;
                     }
                 } else {
