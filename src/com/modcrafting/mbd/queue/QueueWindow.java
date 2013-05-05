@@ -493,7 +493,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 public void run() {/**/
                     Chekkit.log.info("Starting claim");
                     BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck);
-                    
+                    progressBar.setVisible(false);
                     
                     /**/}
                 
