@@ -1,6 +1,7 @@
 package com.modcrafting.mbd.queue;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import com.modcrafting.mbd.objects.BukkitDevPM;
@@ -68,9 +69,14 @@ public class QueueFile {
      */
     private Boolean isStaff;
     
+    /**
+     * Whether or not the file is a server-mod
+     */
+    private Boolean serverMod = true;
+   
     public Boolean selected = false;
 
-    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate, String readableSize, Boolean isStaff) {
+    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate, String readableSize, Boolean isStaff, Boolean isServerMod) {
         this.id = id;
         this.size = size;
         this.author = author;
@@ -83,6 +89,7 @@ public class QueueFile {
         this.postDate = postDate;
         this.readableSize = readableSize;
         this.isStaff = isStaff;
+        this.serverMod = isServerMod;
         
     }
     //TODO: Lombok?
@@ -93,6 +100,10 @@ public class QueueFile {
     
     public String getClaimed() {
         return this.claimed;
+    }
+    
+    public Boolean isServerMod() {
+        return this.serverMod;
     }
     
     public int getSize() {
@@ -143,8 +154,12 @@ public class QueueFile {
         String editURL = this.fileLink + "edit/";
         long theFuture = System.currentTimeMillis() + (86400 * 7 * 1000);
         Date nextWeek = new Date(theFuture);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String date = sdf.format(nextWeek);
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy");
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(nextWeek);
+        int d = cal.get(Calendar.DAY_OF_MONTH);
+        String dayPart = d + BukkitDevTools.ordinal(d) + " ";
+        String date = dayPart + sdf.format(nextWeek);
         BukkitDevPM message = new BukkitDevPM(this.author, "Hi " + this.author + "!\n\nThanks for uploading your file for " + this.projectName + ". Before it can be approved, you need to edit the file and add a version number to it. Example: 'LiteKits v1.0'.\n\nTo do this now, hit the button below and add the version to the 'Name' field.\n\n[[" + editURL + "|{{http://i.imgur.com/TvLphUs.png|}}]]\n\nPlease note that if you do not add a version before " + date + ", your file will be deleted and you'll need to upload it again.\n\nThanks!", "Your file, " + this.title);
         return message;
     }

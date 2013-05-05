@@ -201,7 +201,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                 return false;
             }
             
-            Chekkit.realUsername = user;
+            Chekkit.chekkitUsername = user;
             
             if (this.remember.isSelected()) {
                try {

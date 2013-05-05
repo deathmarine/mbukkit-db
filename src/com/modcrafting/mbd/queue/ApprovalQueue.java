@@ -23,12 +23,18 @@ public class ApprovalQueue {
      * The list of staff authors in the queue.
      */
     private List<String> staffNames;
+    
+    /**
+     * Number of files claimed by current user
+     */
+    private int own;
 
-    public ApprovalQueue(List<QueueFile> qfl, int claimed, int total, List<String> staffNames) {
+    public ApprovalQueue(List<QueueFile> qfl, int claimed, int total, List<String> staffNames, int ownFiles) {
         this.qfl = qfl;
         this.claimed = claimed;
         this.total = total;
         this.staffNames = staffNames;
+        this.own = own;
     }
     
     public List<QueueFile> getFileList() {
@@ -47,8 +53,13 @@ public class ApprovalQueue {
         return this.total - this.claimed;
     }
     
+    
     public List<String> getStaffUploaders() {
         return this.staffNames;
+    }
+    
+    public int getOwnClaimedFiles() {
+        return this.own;
     }
 
 }

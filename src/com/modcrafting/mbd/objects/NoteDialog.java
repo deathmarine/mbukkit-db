@@ -85,10 +85,10 @@ public class NoteDialog extends JDialog{
 				SwingUtilities.invokeLater(new Runnable(){
 					@Override
 					public void run() {
-						parent.database.setNote(parent.mainclass, Chekkit.username, text);
+						parent.database.setNote(parent.mainclass, Chekkit.chekkitUsername, text);
 					}
 				});
-				addText(Chekkit.realUsername, System.currentTimeMillis(), text);
+				addText(Chekkit.chekkitUsername, System.currentTimeMillis(), text);
 				field.setText("Add Note...");
     		
 			}

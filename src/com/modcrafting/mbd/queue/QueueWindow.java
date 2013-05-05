@@ -62,6 +62,8 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private final JMenuItem mntmUnmarkSelectedFiles = new JMenuItem("Unmark selected files");
     private final JMenuItem mntmMarkTop = new JMenuItem("Mark 10 top files");
     private final JMenuItem mntmClaimSelectedFiles = new JMenuItem("Claim marked files");
+    private String DBOName;
+    private Chekkit ck;
 
     /**
      * Initialize the object
@@ -71,9 +73,11 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     public QueueWindow(Boolean useNimbus, JFrame parent, int pId) {
         super("File Queue");
         
+        this.ck = (Chekkit) parent;
         if (!this.getAPI()) {
             return;
         }
+        Chekkit.log.info("!!!? " + this.DBOName);
         Chekkit.processPanel.removeProcess(pId);
         this.createFrame(parent);
         this.showLabel("Loading Queue...");
@@ -83,6 +87,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     public void showLabel(String text) {
         this.label.setText(text);
         this.label.setVisible(true);
+        this.repaint();
     }
 
 
@@ -193,11 +198,14 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     }
 
     private void getQueue() {
+        final String username = this.DBOName;
+        Chekkit.log.info("getQueue!!! " + this.DBOName);
+        Chekkit.log.info("getQueueOwn!!! " + username);
         this.thisThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 showProgressBar();
-                ApprovalQueue aq = BukkitDevTools.parseFiles(APIKey, showClaimed.isSelected());
+                ApprovalQueue aq = BukkitDevTools.parseFiles(APIKey, showClaimed.isSelected(), username);
                 List<QueueFile> qfl = aq.getFileList();
                 int total = aq.getFileTotal();
                 Object[][] files;
@@ -341,15 +349,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 sl_contentPane.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, contentPane);
 
                 contentPane.add(scrollPane);
-                Action claimFile = new AbstractAction()
-                {
-                    public void actionPerformed(ActionEvent e)
-                    {
-                        JTable table = (JTable)e.getSource();
-                        int modelRow = Integer.valueOf( e.getActionCommand() );
-                        JOptionPane.showMessageDialog(table.getParent(), "Claimed.");
-                    }
-                };
+               
 
                 
                 table.setVisible(true);
@@ -367,12 +367,14 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private boolean getAPI() {
         String key = null;
         key = Chekkit.config.getString("key");
-        if (key == "" || key == null || (BukkitDevTools.checkAPIKey(key) != KeyState.STAFF)) {
+        UserInfo is = BukkitDevTools.checkAPIKey(key);
+        if (key == "" || key == null || (is.getKeyState() != KeyState.STAFF)) {
             Boolean in = true;
             while (in) {
                 key = JOptionPane.showInputDialog(this, "Enter your BukkitDev API key:", "More info required!", JOptionPane.INFORMATION_MESSAGE);
                 if (key != null) {
-                    KeyState ks = BukkitDevTools.checkAPIKey(key);
+                    is = BukkitDevTools.checkAPIKey(key);
+                    KeyState ks = is.getKeyState();
                     if (ks != KeyState.STAFF) {
                         if (ks == KeyState.NORMAL) {
                             JOptionPane.showMessageDialog(this, "The API key you supplied was for a non-staff account.", "Invalid API key", JOptionPane.WARNING_MESSAGE);
@@ -384,6 +386,8 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                             JOptionPane.showMessageDialog(this, "There was an error validating the key.", "API key verification failure", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
+                        DBOName = is.getUsername();
+                        Chekkit.log.info("!!! " + this.DBOName);
                         in = false;
                     }
                 } else {
@@ -395,6 +399,11 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 return false;
             } else {
                 Chekkit.config.set("key", key);
+            }
+        } else {
+            if (is.getUsername() != null) {
+                this.DBOName = is.getUsername();
+                Chekkit.log.info("--- " + this.DBOName);
             }
         }
         this.APIKey = key;
@@ -460,16 +469,18 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         } else if (e.getSource() == this.mntmClaimSelectedFiles) {
             final FileTableModel ftm = (FileTableModel) table.getModel(); 
             Chekkit.log.info("Fired!");
-            /*SwingUtilities.invokeLater(new Runnable() {
+            /**/SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
-                public void run() {*/
+                public void run() {/**/
                     Chekkit.log.info("Starting claim");
-                    BukkitDevTools.claimFiles(ftm.files, this, APIKey);
+                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey, ck);
                     
-                    /**//*}
+                    
+                    /**/}
                 
             });/**/
+            refreshThread();
         }
     }
 

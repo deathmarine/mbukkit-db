@@ -34,12 +34,18 @@ public class FileCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
+        Boolean moddedBG = false;
 
         Color selected = new Color(255, 255, 173);
+        Color claimed = new Color(158, 255, 255);
         c.setBackground(table.getBackground());
         if (((Boolean) table.getModel().getValueAt(table.convertRowIndexToModel(row), 0))) {
             c.setBackground(selected);
+            moddedBG = true;
+        }
+        
+        if (((String)table.getModel().getValueAt(table.convertRowIndexToModel(row), 6)).contains(Chekkit.bukkitDevUsername) && !moddedBG) {
+            c.setBackground(claimed);
         }
 
         if (column == 1 && nameRowVals.contains(table.convertRowIndexToModel(row))) {
@@ -49,7 +55,7 @@ public class FileCellRenderer extends DefaultTableCellRenderer {
                 c.setForeground(darkGreen);
             } else {
 
-                if (isSelected && !((Boolean) table.getModel().getValueAt(table.convertRowIndexToModel(row), 0))) { //Readable text when selected
+                if (isSelected && !moddedBG) { //Readable text when selected
                     c.setForeground(Color.WHITE);
                     c.setBackground(table.getSelectionBackground());
                 } else {
@@ -60,6 +66,8 @@ public class FileCellRenderer extends DefaultTableCellRenderer {
             }
 
         }
+        
+       
 
 
         return c;

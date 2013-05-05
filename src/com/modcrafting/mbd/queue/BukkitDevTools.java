@@ -1,15 +1,22 @@
 package com.modcrafting.mbd.queue;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,13 +44,16 @@ public class BukkitDevTools {
         }
     }
     
-    public static void claimFiles(List<QueueFile> qfl, QueueWindow qw, String key) {
+    public static void claimFiles(List<QueueFile> qfl, QueueWindow qw, String key, Chekkit ck) {
         Chekkit.log.info("Checking files for issues");
         qw.showLabel("Checking files for issues...");
+        
         qw.progressBar.setVisible(true);
         qw.progressBar.setIndeterminate(true);
+        qw.repaint();
         List<BukkitDevPM> PMs = new ArrayList<BukkitDevPM>();
         List<Integer> filesToClaim = new ArrayList<Integer>();
+        List<File> filesToDecompile = new ArrayList<File>();
         for (QueueFile qf: qfl) {
             Chekkit.log.info("Checking file " + qf.getFileID());
             if (qf.selected) {
@@ -67,6 +77,34 @@ public class BukkitDevTools {
                         PMs.add(qf.getVersionPM());
                     }
                 }
+                File dls = new File(Chekkit.PATH + File.separator + "downloads");
+                if (!dls.exists() && !dls.mkdir()) {
+                    
+                } else {
+                    if (!qf.getFileDownloadURL().endsWith(".jar")) {
+                        int cont = JOptionPane.showConfirmDialog(qw, "File isn't a JAR.\nWould you like to download it manually?", "Warning!", JOptionPane.YES_NO_OPTION);
+                        if (cont == JOptionPane.YES_OPTION) {
+                            try {
+                                Desktop.getDesktop().browse(new URL(qf.getFileDownloadURL()).toURI());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        
+                    } else {
+                        try {
+                            String name = qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/')+1, qf.getFileDownloadURL().length());
+                            qw.showLabel("Downloading " + name + "...");
+                            
+                            File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
+                            FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
+                            filesToDecompile.add(destination);
+                        
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
                 Chekkit.log.info("Adding file");
                 filesToClaim.add(qf.getFileID());
                 
@@ -76,8 +114,9 @@ public class BukkitDevTools {
             
             
         }
-        if (PMs.size() > 0)
-            new MessageQueue(PMs, key);
+        if (PMs.size() > 0) {
+            new MessageQueue(PMs, key).setVisible(true);
+        }
         Chekkit.log.info("Sending request...");
         qw.showLabel("Sending request...");
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + key);
@@ -96,21 +135,31 @@ public class BukkitDevTools {
             e.printStackTrace();
         }
         Chekkit.log.info("Refreshing");
-        qw.refreshThread();
-        
-        qw.hideLabel();
-        qw.progressBar.setVisible(false);
+        ck.handleFiles(filesToDecompile);
         
     }
+    
+    public static String ordinal(int num) {
+      String[] suffix = {"th", "st", "nd', 'rd", "th", "th", "th", "th", "th", "th"};
+      int m = num % 100;
+      return num + suffix[(m > 10 && m < 20) ? 0 : (m % 10)];
+    }
 
-    public static KeyState checkAPIKey(String key) {
+
+
+    public static UserInfo checkAPIKey(String key) {
         try {
             Document doc1 = Jsoup.connect("http://dev.bukkit.org/home/?api-key=" + key).timeout(120000).get();
             Element loginReq = doc1.getElementById("login-next");
+            
             if (loginReq != null) {
-                return KeyState.INVALID;
+                return new UserInfo(null, KeyState.INVALID);
             }
-
+            Element header = doc1.getElementById("hd");
+            String username = header.child(1).text();
+            if (username != null) {
+                Chekkit.bukkitDevUsername = username;
+            }
             Elements actions = doc1.getElementsByTag("dt");
             Boolean normal = false;
             for (Element action : actions) {
@@ -119,14 +168,18 @@ public class BukkitDevTools {
                 }
 
                 if (action.text().equals("Moderation")) {
-                    return KeyState.STAFF;
+                    
+                    
+                    Chekkit.log.info(username);
+                    return new UserInfo(username, KeyState.STAFF);
+                    
                 }
             }
 
             if (normal) {
-                return KeyState.NORMAL;
+                return new UserInfo(username, KeyState.NORMAL);
             } else {
-                return KeyState.INVALID;
+                return new UserInfo(null, KeyState.INVALID);
             }
 
         } catch (Exception e) {
@@ -200,13 +253,13 @@ public class BukkitDevTools {
      * This is a ridiculously messy method that parses the approval queue
      * 
      * @param key - The API key to use
-     * @return A list of QueueFiles
      */
-    public static ApprovalQueue parseFiles(String key, Boolean includeClaimed) {
+    public static ApprovalQueue parseFiles(String key, Boolean includeClaimed, String username) {
         List<String> sn = new ArrayList<String>();
         List<QueueFile> qfl = new ArrayList<QueueFile>();
         int numClaimed = 0;
         int total = 0;
+        int own = 0;
         try {
             Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + key);
             c.timeout(180000);
@@ -254,9 +307,14 @@ public class BukkitDevTools {
                     numClaimed++;
                 }
                 total++;
-                if ((!includeClaimed && claimed != null) || claimed == Chekkit.realUsername) {
+                //If the file isn't not claimed, and we're excluding claimed files and it's not claimed by us, ignore
+                if (claimed != null && !includeClaimed && !claimed.contains(username)) {
+                    Chekkit.log.info("Skipping file claimed by " + claimed + " because not " + username);
+                    if (claimed.contains(username))
+                        own++;
                     continue;
                 }
+               
                 QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed, date, size, staff);
                 qfl.add(qf);
             }
@@ -265,7 +323,7 @@ public class BukkitDevTools {
             e.printStackTrace();
             return null;
         }
-        ApprovalQueue aq = new ApprovalQueue(qfl, numClaimed, total, sn);
+        ApprovalQueue aq = new ApprovalQueue(qfl, numClaimed, total, sn, own);
         return aq;
     }
 
