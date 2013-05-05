@@ -306,7 +306,8 @@ public class BukkitDevTools {
                     numClaimed++;
                 }
                 total++;
-                //If the file isn't not claimed, and we're excluding claimed files and it's not claimed by us, ignore
+                //If the file is claimed, and the user wants to exclude claimed files (only show unclaimed files)
+                //and the file isn't claimed by the user in question, we'll skip the file
                 if (claimed != null && !includeClaimed && !claimed.contains(username)) {
                     Chekkit.log.info("Skipping file claimed by " + claimed + " because not " + username);
                     if (claimed.contains(username))
