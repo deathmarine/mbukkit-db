@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.BukkitDevPM;
 
 public class QueueFile {
@@ -148,6 +149,10 @@ public class QueueFile {
     
     public int getFileID() {
         return this.id;
+    }
+    
+    public void setClaimed() {
+        this.claimed = Chekkit.bukkitDevUsername;
     }
     
     public BukkitDevPM getVersionPM() {

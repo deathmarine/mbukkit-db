@@ -107,6 +107,7 @@ public class BukkitDevTools {
                 }
                 Chekkit.log.info("Adding file");
                 filesToClaim.add(qf.getFileID());
+                qf.setClaimed();
 
 
             }

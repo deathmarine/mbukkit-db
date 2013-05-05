@@ -407,7 +407,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         } else {
             if (is.getUsername() != null) {
                 this.DBOName = is.getUsername();
-                Chekkit.log.info("--- " + this.DBOName);
             }
         }
         this.APIKey = key;
@@ -478,8 +477,9 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 @Override
                 public void run() {/**/
                     Chekkit.log.info("Starting claim");
-                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey, ck);
-                    
+                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
+                    progressBar.setVisible(false);
+                    hideLabel();
                     
                     /**/}
                 
@@ -492,8 +492,9 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 @Override
                 public void run() {/**/
                     Chekkit.log.info("Starting claim");
-                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck);
+                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
                     progressBar.setVisible(false);
+                    hideLabel();
                     
                     /**/}
                 
