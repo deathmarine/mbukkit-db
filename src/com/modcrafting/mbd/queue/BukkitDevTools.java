@@ -328,9 +328,13 @@ public class BukkitDevTools {
     public static void approveFiles(List<QueueFile> files, QueueWindow queueWindow, String APIKey, Chekkit ck) {
         int[] fileIDs = new int[files.size()];
         int i = 0;
-        Boolean co = false;
+        Boolean co = true;
         for (QueueFile qf : files) {
             if (qf.selected) {
+                if (!qf.hasNumberInTitle()) {
+                    JOptionPane.showMessageDialog(queueWindow, qf.getTitle() + " doesn't have a version in it's title.\nIf you've PM'd the user, please wait for them to add one.");
+                    co = false;
+                }
                 if (qf.getClaimed() == null) {
                     JOptionPane.showMessageDialog(queueWindow, "You need to claim " + qf.getTitle() + " first.");
                     co = false;
@@ -341,7 +345,7 @@ public class BukkitDevTools {
             }
         }
         
-        if (co)
+        if (!co)
             return;
 
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
