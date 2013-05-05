@@ -329,8 +329,10 @@ public class BukkitDevTools {
     public static void approveFiles(List<QueueFile> files, QueueWindow queueWindow, String APIKey, Chekkit ck) {
         int[] fileIDs = new int[files.size()];
         int i = 0;
+        int toRemove = 0;
         Boolean co = true;
         for (QueueFile qf : files) {
+            
             if (qf.selected) {
                 if (!qf.hasNumberInTitle()) {
                     JOptionPane.showMessageDialog(queueWindow, qf.getTitle() + " doesn't have a version in it's title.\nIf you've PM'd the user, please wait for them to add one.");
@@ -342,8 +344,10 @@ public class BukkitDevTools {
                 } else {
                     fileIDs[i] = qf.getFileID();
                     i++;
+                    ((FileTableModel)queueWindow.table.getModel()).removeRow(queueWindow.table.convertRowIndexToModel(toRemove));
                 }
             }
+            toRemove++;
         }
         
         if (!co)
@@ -351,10 +355,12 @@ public class BukkitDevTools {
 
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
         c.data("form_type", "file");
-        c.data("file-status", "n");
+        c.data("file-status", "s");
         c.timeout(0);
 
         for (int id : fileIDs) {
+            if (id == 0)
+                break;
             c.data("file_checklist", Integer.toString(id));
             Chekkit.log.info("Added id: " + id);
             queueWindow.showLabel("Adding file + " + id + " to queue...");
@@ -366,6 +372,7 @@ public class BukkitDevTools {
 
             e.printStackTrace();
         }
+        
 
 
     }

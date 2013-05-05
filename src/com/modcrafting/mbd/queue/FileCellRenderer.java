@@ -2,6 +2,7 @@ package com.modcrafting.mbd.queue;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class FileCellRenderer extends DefaultTableCellRenderer {
         
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         Boolean moddedBG = false;
-
+        FileTableModel ftm = (FileTableModel) table.getModel();
         Color selected = new Color(255, 255, 173);
         Color claimed = new Color(158, 255, 255);
         c.setBackground(table.getBackground());
@@ -46,6 +47,10 @@ public class FileCellRenderer extends DefaultTableCellRenderer {
         
         if (((String)table.getModel().getValueAt(table.convertRowIndexToModel(row), 6)).contains(Chekkit.bukkitDevUsername) && !moddedBG) {
             c.setBackground(claimed);
+        }
+        
+        if (column == 1 && ftm.files.get(row).isServerMod()) {
+            c.setFont(c.getFont().deriveFont(c.getFont().getStyle() ^ Font.BOLD));
         }
 
         if (column == 1 && nameRowVals.contains(table.convertRowIndexToModel(row))) {

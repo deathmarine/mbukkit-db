@@ -46,7 +46,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     public JProgressBar progressBar = new JProgressBar();
     private JLabel label = new JLabel("");
     private String APIKey = "";
-    private JTable table = new JTable();
+    public JTable table = new JTable();
     private JMenuItem refreshQueue = new JMenuItem("Refresh Queue");
     private JMenuItem exit = new JMenuItem("Exit");
     private JCheckBoxMenuItem showClaimed = new JCheckBoxMenuItem("Show Claimed Files");
@@ -491,7 +491,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
                 @Override
                 public void run() {/**/
-                    Chekkit.log.info("Starting claim");
                     BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
                     progressBar.setVisible(false);
                     hideLabel();

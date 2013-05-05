@@ -146,6 +146,14 @@ public class FileTableModel extends AbstractTableModel {
        
     }
 
+
+    public void removeRow(int toRemove) {
+        files.remove(toRemove);
+        fireTableDataChanged();
+        
+        
+    }
+
   
 
 }
