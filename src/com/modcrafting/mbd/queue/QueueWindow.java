@@ -62,6 +62,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private final JMenuItem mntmUnmarkSelectedFiles = new JMenuItem("Unmark selected files");
     private final JMenuItem mntmMarkTop = new JMenuItem("Mark 10 top files");
     private final JMenuItem mntmClaimSelectedFiles = new JMenuItem("Claim marked files");
+    private final JMenuItem mntmApproveMarkedFiles = new JMenuItem("Approve marked files");
     private String DBOName;
     private Chekkit ck;
 
@@ -145,6 +146,13 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         mntmMarkTop.addActionListener(this);
         
         mnFiles.add(mntmMarkTop);
+        
+        JMenuItem mntmMarkClaimedFiles = new JMenuItem("Mark claimed files");
+        mnFiles.add(mntmMarkClaimedFiles);
+        
+        
+        mntmApproveMarkedFiles.addActionListener(this);
+        mnFiles.add(mntmApproveMarkedFiles);
         this.refreshQueue.addActionListener(this);
 
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -481,6 +489,20 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 
             });/**/
             refreshThread();
+        } else if (e.getSource() == this.mntmApproveMarkedFiles) {
+            final FileTableModel ftm = (FileTableModel) table.getModel(); 
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {/**/
+                    Chekkit.log.info("Starting claim");
+                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck);
+                    
+                    
+                    /**/}
+                
+            });/**/
+            
         }
     }
 

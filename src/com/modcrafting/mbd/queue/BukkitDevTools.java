@@ -40,21 +40,21 @@ public class BukkitDevTools {
             Chekkit.log.info(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
-            
+
         }
     }
-    
+
     public static void claimFiles(List<QueueFile> qfl, QueueWindow qw, String key, Chekkit ck) {
         Chekkit.log.info("Checking files for issues");
         qw.showLabel("Checking files for issues...");
-        
+
         qw.progressBar.setVisible(true);
         qw.progressBar.setIndeterminate(true);
         qw.repaint();
         List<BukkitDevPM> PMs = new ArrayList<BukkitDevPM>();
         List<Integer> filesToClaim = new ArrayList<Integer>();
         List<File> filesToDecompile = new ArrayList<File>();
-        for (QueueFile qf: qfl) {
+        for (QueueFile qf : qfl) {
             Chekkit.log.info("Checking file " + qf.getFileID());
             if (qf.selected) {
                 qw.showLabel("Checking file " + qf.getFileID() + "...");
@@ -67,7 +67,7 @@ public class BukkitDevTools {
                         continue; //Next file please
                     }
                 }
-                
+
                 if (!qf.hasNumberInTitle()) {
                     qw.showLabel("File " + qf.getFileID() + " has no title in version. Informing user.");
                     String msg = "The file '" + qf.getTitle() + "' appears to be missing a version from its title.\nWould you like to send the user a PM?";
@@ -79,7 +79,7 @@ public class BukkitDevTools {
                 }
                 File dls = new File(Chekkit.PATH + File.separator + "downloads");
                 if (!dls.exists() && !dls.mkdir()) {
-                    
+
                 } else {
                     if (!qf.getFileDownloadURL().endsWith(".jar")) {
                         int cont = JOptionPane.showConfirmDialog(qw, "File isn't a JAR.\nWould you like to download it manually?", "Warning!", JOptionPane.YES_NO_OPTION);
@@ -90,16 +90,16 @@ public class BukkitDevTools {
                                 e.printStackTrace();
                             }
                         }
-                        
+
                     } else {
                         try {
-                            String name = qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/')+1, qf.getFileDownloadURL().length());
+                            String name = qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/') + 1, qf.getFileDownloadURL().length());
                             qw.showLabel("Downloading " + name + "...");
-                            
+
                             File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
                             FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
                             filesToDecompile.add(destination);
-                        
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -107,12 +107,11 @@ public class BukkitDevTools {
                 }
                 Chekkit.log.info("Adding file");
                 filesToClaim.add(qf.getFileID());
-                
-                
-            
+
+
             }
-            
-            
+
+
         }
         if (PMs.size() > 0) {
             new MessageQueue(PMs, key).setVisible(true);
@@ -123,35 +122,34 @@ public class BukkitDevTools {
         c.data("form_type", "file");
         c.data("file-status", "u");
         c.timeout(0);
-        
-        for (Integer id: filesToClaim) {
+
+        for (Integer id : filesToClaim) {
             c.data("file_checklist", id.toString());
             Chekkit.log.info("Added id: " + id);
         }
         try {
             c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").post();
         } catch (Exception e) {
-            
+
             e.printStackTrace();
         }
         Chekkit.log.info("Refreshing");
         ck.handleFiles(filesToDecompile);
-        
-    }
-    
-    public static String ordinal(int num) {
-      String[] suffix = {"th", "st", "nd', 'rd", "th", "th", "th", "th", "th", "th"};
-      int m = num % 100;
-      return num + suffix[(m > 10 && m < 20) ? 0 : (m % 10)];
+
     }
 
+    public static String ordinal(int num) {
+        String[] suffix = {"th", "st", "nd', 'rd", "th", "th", "th", "th", "th", "th" };
+        int m = num % 100;
+        return num + suffix[(m > 10 && m < 20) ? 0 : (m % 10)];
+    }
 
 
     public static UserInfo checkAPIKey(String key) {
         try {
             Document doc1 = Jsoup.connect("http://dev.bukkit.org/home/?api-key=" + key).timeout(120000).get();
             Element loginReq = doc1.getElementById("login-next");
-            
+
             if (loginReq != null) {
                 return new UserInfo(null, KeyState.INVALID);
             }
@@ -168,11 +166,11 @@ public class BukkitDevTools {
                 }
 
                 if (action.text().equals("Moderation")) {
-                    
-                    
+
+
                     Chekkit.log.info(username);
                     return new UserInfo(username, KeyState.STAFF);
-                    
+
                 }
             }
 
@@ -294,7 +292,7 @@ public class BukkitDevTools {
                 String uploader = infoBlocks.get(5).text().trim();
                 long date = Long.parseLong(infoBlocks.get(6).child(0).attr("data-epoch"));
                 String claimed = infoBlocks.get(3).text();
-                
+
                 Boolean staff = infoBlocks.get(5).child(0).hasClass("user-moderator");
                 if (staff && !sn.contains(uploader)) {
                     sn.add(uploader);
@@ -314,8 +312,8 @@ public class BukkitDevTools {
                         own++;
                     continue;
                 }
-               
-                QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed, date, size, staff);
+
+                QueueFile qf = new QueueFile(fileId, bytes, uploader, fileTitle, filePageURL, fileDirectLink, projectName, projectURL, claimed, date, size, staff, projectURL.contains("server-mod"));
                 qfl.add(qf);
             }
 
@@ -325,6 +323,46 @@ public class BukkitDevTools {
         }
         ApprovalQueue aq = new ApprovalQueue(qfl, numClaimed, total, sn, own);
         return aq;
+    }
+
+    public static void approveFiles(List<QueueFile> files, QueueWindow queueWindow, String APIKey, Chekkit ck) {
+        int[] fileIDs = new int[files.size()];
+        int i = 0;
+        Boolean co = false;
+        for (QueueFile qf : files) {
+            if (qf.selected) {
+                if (qf.getClaimed() == null) {
+                    JOptionPane.showMessageDialog(queueWindow, "You need to claim " + qf.getTitle() + " first.");
+                    co = false;
+                } else {
+                    fileIDs[i] = qf.getFileID();
+                    i++;
+                }
+            }
+        }
+        
+        if (co)
+            return;
+
+        Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
+        c.data("form_type", "file");
+        c.data("file-status", "n");
+        c.timeout(0);
+
+        for (int id : fileIDs) {
+            c.data("file_checklist", Integer.toString(id));
+            Chekkit.log.info("Added id: " + id);
+            queueWindow.showLabel("Adding file + " + id + " to queue...");
+        }
+        queueWindow.showLabel("Sending request...");
+        try {
+            c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").post();
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+
     }
 
 }

@@ -163,21 +163,7 @@ public class QueueFile {
         BukkitDevPM message = new BukkitDevPM(this.author, "Hi " + this.author + "!\n\nThanks for uploading your file for " + this.projectName + ". Before it can be approved, you need to edit the file and add a version number to it. Example: 'LiteKits v1.0'.\n\nTo do this now, hit the button below and add the version to the 'Name' field.\n\n[[" + editURL + "|{{http://i.imgur.com/TvLphUs.png|}}]]\n\nPlease note that if you do not add a version before " + date + ", your file will be deleted and you'll need to upload it again.\n\nThanks!", "Your file, " + this.title);
         return message;
     }
-    
-    public void setFileStatus(FileStatus fs, String reason) {
-        switch(fs) {
-            case NORMAL:
-                //TODO: Use API key to set file status to normal
-                break;
-            case UNDER_REVIEW:
-                //TODO: Use API key to set file status to under review
-                break;
-            case DELETED:
-                //TODO: Use API key and reason to set file to deleted
-                break;
-            
-        }
-    }
+
     
     
 
