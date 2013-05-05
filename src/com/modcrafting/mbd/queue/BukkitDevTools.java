@@ -331,6 +331,7 @@ public class BukkitDevTools {
         int i = 0;
         int toRemove = 0;
         Boolean co = true;
+        List<Integer> filesRemoving = new ArrayList<Integer>();
         for (QueueFile qf : files) {
             
             if (qf.selected) {
@@ -344,7 +345,8 @@ public class BukkitDevTools {
                 } else {
                     fileIDs[i] = qf.getFileID();
                     i++;
-                    ((FileTableModel)queueWindow.table.getModel()).removeRow(queueWindow.table.convertRowIndexToModel(toRemove));
+                    filesRemoving.add(toRemove);
+                    
                 }
             }
             toRemove++;
@@ -353,9 +355,12 @@ public class BukkitDevTools {
         if (!co)
             return;
 
+        for (Integer file: filesRemoving) {
+            ((FileTableModel)queueWindow.table.getModel()).removeRow(queueWindow.table.convertRowIndexToModel(file));
+        }
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
         c.data("form_type", "file");
-        c.data("file-status", "s");
+        c.data("file-status", "s"); //s = safe
         c.timeout(0);
 
         for (int id : fileIDs) {
