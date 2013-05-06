@@ -220,7 +220,7 @@ public class BukkitDevTools {
         }
 
         if (size.contains("GiB")) { // Gibibyte !?!?
-            size = size.substring(0, size.indexOf("MiB") - 1);
+            size = size.substring(0, size.indexOf("GiB") - 1);
             try {
                 float f = Float.parseFloat(size);
                 return (int) f * 1073741824;
