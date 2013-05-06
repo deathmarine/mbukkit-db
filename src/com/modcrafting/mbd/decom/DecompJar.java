@@ -82,8 +82,12 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
 	private int processID;
-	public DecompJar(File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
+        
+        private Chekkit main;
+        
+	public DecompJar(Chekkit main, File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
+                this.main = main;
 		processID = Chekkit.processPanel.addProcess("Opening " + file.getName().replaceAll(".jar", ""));
 		database = sql;
 		this.map = map;

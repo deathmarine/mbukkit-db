@@ -57,6 +57,7 @@ import com.modcrafting.mbd.objects.ProcessPanel;
 import com.modcrafting.mbd.objects.UserPassWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
+import java.util.*;
 
 @SuppressWarnings({"rawtypes"})
 public class Chekkit extends JFrame implements WindowListener {
@@ -78,7 +79,10 @@ public class Chekkit extends JFrame implements WindowListener {
     public static String bukkitDevUsername;
     public static String chekkitUsername;
     public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar", "");
-
+    private List<DecompJar> decompilingJars = Collections.synchronizedList(new ArrayList<DecompJar>());
+    
+    
+    
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         this.properties = properties;
@@ -173,9 +177,7 @@ public class Chekkit extends JFrame implements WindowListener {
                         System.out.println("Approved");
                         File[] fileArray = jfm.getSelectedFiles();
                         List<File> fileList = new ArrayList<File>();
-                        for (File f : fileArray) {
-                            fileList.add(f);
-                        }
+                        fileList.addAll(Arrays.asList(fileArray));
                         handleFiles(fileList);
                     } else {
                         System.out.println("Cancelled file selection");
@@ -266,9 +268,7 @@ public class Chekkit extends JFrame implements WindowListener {
         useNimbus = config.getUseNimbus();
         showAbout = config.getShowAbout();
         List<String> argList = new ArrayList<String>();
-        for (String s : args) {
-            argList.add(s);
-        }
+        argList.addAll(Arrays.asList(args));
         
         //String username = new String();
         String password = new String();
@@ -322,6 +322,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 }
                 Chekkit.chekkitUsername = username;
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         try {
                             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -353,6 +354,7 @@ public class Chekkit extends JFrame implements WindowListener {
             final String user = upw.getUsername();
             final String pass = upw.getPassword();
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     try {
                         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -422,7 +424,7 @@ public class Chekkit extends JFrame implements WindowListener {
     }
 
     public void handleFiles(final List<File> files) {
-        if (files.size() == 0) {
+        if (files.isEmpty()) {
             Log("No File(s) selected.");
             return;
         }
@@ -438,11 +440,12 @@ public class Chekkit extends JFrame implements WindowListener {
 
                     return;
                 }
+                final Chekkit c = this;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
 
-                        new DecompJar(f, datab, keyword, bannedpackage, hideProgress, useNimbus);
+                        decompilingJars.add(new DecompJar(c, f, datab, keyword, bannedpackage, hideProgress, useNimbus));
 
                     }
                 }).start();
