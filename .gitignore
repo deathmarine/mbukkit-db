@@ -11,3 +11,5 @@ out.jardesc
 
 keywords.bin
 /dist
+/manifest.mf
+/nbbuild.xml
