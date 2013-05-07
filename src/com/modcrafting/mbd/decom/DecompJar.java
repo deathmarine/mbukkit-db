@@ -68,6 +68,7 @@ import com.modcrafting.mbd.sql.SQL;
 
 public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
+
 	HashMap<String, HashSet<HashFile>> files = new HashMap<String, HashSet<HashFile>>();
 	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
 	public String mainclass;
@@ -254,11 +255,17 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		mitem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
 		mitem.getAccessibleContext().setAccessibleDescription("Searches the currently selected tab.");
         JMenu menu2 = new JMenu("File");
-        JMenuItem mitem2 = new JMenuItem("Close current file");
-        menu2.add(mitem2);
-		mitem2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
-        mitem2.getAccessibleContext().setAccessibleDescription("Closes the current tab");
-		mitem2.addActionListener(new CloseCurrentTab(this));
+        JMenuItem closeCurrentFile = new JMenuItem("Close current file");
+        menu2.add(closeCurrentFile);
+		closeCurrentFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+        closeCurrentFile.getAccessibleContext().setAccessibleDescription("Closes the current tab");
+		closeCurrentFile.addActionListener(new CloseCurrentTab(this));
+                
+                JMenuItem openNotes = new JMenuItem("Open Notes");
+                menu2.add(openNotes);
+                openNotes.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0));
+                openNotes.getAccessibleContext().setAccessibleDescription("Opens the Notes for this project");
+                openNotes.addActionListener(new OpenNotes(this));
 		menu.add(mitem);
 		mbar.add(menu2);
 		mbar.add(menu);
@@ -273,7 +280,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		this.setJMenuBar(mbar);
 	    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setVisible(true);
-		new NoteDialog(this);
+                if(Chekkit.config.getOpenNotesOnFileOpen()){
+                    new NoteDialog(this);
+                }
 		
 		Chekkit.processPanel.removeProcess(processID);
 		
@@ -763,4 +772,18 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	public void windowIconified(WindowEvent arg0) {}
 	@Override
 	public void windowOpened(WindowEvent arg0) {}
+
+    private static class OpenNotes implements ActionListener {
+
+        private DecompJar file;
+        public OpenNotes(DecompJar aThis) {
+            file = aThis;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new NoteDialog(file);
+        }
+    }
+        
 }

@@ -24,6 +24,8 @@ public class Configuration {
     private Boolean showAbout = false;
     private String key = "";
     
+    private Boolean openNotesOnFileOpen = false;
+    
     public Configuration(){
         file = this.createConfig();
         try {
@@ -56,17 +58,17 @@ public class Configuration {
                     showAbout = Boolean.parseBoolean((String) defaults.get("about-on-close"));
                 }
                 
-                /*if(defaults.get("hide-progress") == null){
-                    defaults.put("hide-progress", false);
-                }else{
-                    hideProgress = Boolean.parseBoolean((String) defaults.get("hide-progress"));
-                }*/// This Config setting is no longer relevant
-                
                 if(defaults.get("key") == null){
                     defaults.put("key", "");
                 }else{
                     key = defaults.getProperty("key");
                 }   
+                
+                if(defaults.get("open-notes-on-file-open") == null){
+                    defaults.put("open-notes-on-file-open", false);
+                }else{
+                    this.openNotesOnFileOpen = Boolean.parseBoolean((String)defaults.getProperty("open-notes-on-file-open"));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -76,6 +78,7 @@ public class Configuration {
                 defaults.put("about-on-close", showAbout.toString());
                 defaults.put("auto-queue-refresh-rate", qRefRate.toString());
                 defaults.put("key", key);
+                defaults.put("open-notes-on-file-open", openNotesOnFileOpen.toString());
                 defaults.store(new FileOutputStream(propF), "The Chekkit config.");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -121,6 +124,10 @@ public class Configuration {
     
     public Boolean getShowAbout() {
         return this.showAbout;
+    }
+
+    public Boolean getOpenNotesOnFileOpen() {
+        return openNotesOnFileOpen;
     }
     
     public Integer getInteger(String setting){

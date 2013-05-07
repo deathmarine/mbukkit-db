@@ -16,7 +16,6 @@ import com.modcrafting.mbd.objects.UpdateHolder;
 public class SQL {
 	private Connection conn;
 	private Properties props;
-	private PreparedStatement ps = null;
 	private List<UpdateHolder> updates = new ArrayList<UpdateHolder>();
 	
 	private String url = "jdbc:mysql://server.modcrafting.com:3306/dbo_master";
@@ -57,14 +56,13 @@ public class SQL {
 	
 	public void shutdown(List<String> list){
 		for(String s : list){
-			this.ps = null;
 			try {
 				if(conn == null || conn.isClosed()){
 					this.connect();
 				}
-				this.ps = conn.prepareStatement(s);
-				this.ps.executeUpdate();
-				this.ps = null;
+				PreparedStatement ps = conn.prepareStatement(s);
+				ps.executeUpdate();
+                                ps.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
