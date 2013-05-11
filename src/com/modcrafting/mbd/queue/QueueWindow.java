@@ -155,7 +155,6 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
         mntmApproveMarkedFiles.addActionListener(this);
         
-        JMenuItem mntmMarkClaimedFiles_1 = new JMenuItem("Mark claimed version files");
         mntmMarkClaimedFiles_1.addActionListener(this);
         mnFiles.add(mntmMarkClaimedFiles_1);
         mnFiles.add(mntmApproveMarkedFiles);
@@ -500,7 +499,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             int i = 0;
             for (QueueFile qf : ftm.files) {
                 Chekkit.log.info("Hit1");
-                if (qf.getClaimed().equals(Chekkit.bukkitDevUsername)) {
+                if (qf.getClaimed() != null && qf.getClaimed().equals(Chekkit.bukkitDevUsername)) {
                     Chekkit.log.info("Hit2");
                     table.getModel().setValueAt(true, i, 0);
                 } else {
@@ -509,11 +508,12 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 i++;
             }
         } else if (e.getSource() == mntmMarkClaimedFiles_1) {
+            Chekkit.log.info("Hit0");
             FileTableModel ftm = (FileTableModel) table.getModel();
             int i = 0;
             for (QueueFile qf : ftm.files) {
-
-                if (qf.getClaimed().equals(Chekkit.bukkitDevUsername) && qf.hasNumberInTitle()) {
+                Chekkit.log.info("Hit1");
+                if (qf.getClaimed() != null && qf.getClaimed().equals(Chekkit.bukkitDevUsername) && qf.hasNumberInTitle()) {
                     table.getModel().setValueAt(true, i, 0);
                 } else {
                     table.getModel().setValueAt(false, i, 0);
