@@ -260,19 +260,21 @@ public class BukkitDevTools {
 
     }
 
-    public static void removeFileFromTable(final int[] i, final QueueWindow qf) {
-        SwingUtilities.invokeLater(new Runnable() {
+    public static void removeFileFromTable(final List<Integer> fileIndexes, final QueueWindow qw) {
+        /*SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                for (int id : i) {
-                    if (id == 0)
-                        break;
-                    ((FileTableModel) qf.table.getModel()).removeRow(qf.table.convertRowIndexToModel(id));
+                int i = 0;
+                for (Integer qf : fileIndexes) {
+
+                    ((FileTableModel) qw.table.getModel()).removeRow(qf);
+                    //Drop the index by 1 since the size is one less
+                    i++;
                 }
 
             }
-        });
+        });*/// Not used as we force a refresh when approving files anyway.
     }
 
     public static void requestQueueUpdate(final QueueWindow qw) {
@@ -369,11 +371,12 @@ public class BukkitDevTools {
     }
 
     public static void approveFiles(List<QueueFile> files, QueueWindow queueWindow, String APIKey, Chekkit ck) {
-        int[] fileIDs = new int[files.size()];
+        List<Integer> fileIds = new ArrayList<Integer>();
+        List<Integer> fileIndexes = new ArrayList<Integer>();
         int i = 0;
         int toRemove = 0;
         Boolean co = true;
-        List<Integer> filesRemoving = new ArrayList<Integer>();
+        //List<Integer> filesRemoving = new ArrayList<Integer>();
         for (QueueFile qf : files) {
 
             if (qf.selected) {
@@ -385,9 +388,9 @@ public class BukkitDevTools {
                     JOptionPane.showMessageDialog(queueWindow, "You need to claim " + qf.getTitle() + " first.");
                     co = false;
                 } else {
-                    fileIDs[i] = qf.getFileID();
+                    fileIds.add(qf.getFileID());
+                    fileIndexes.add(i);
                     i++;
-                    filesRemoving.add(toRemove);
 
                 }
             }
@@ -398,14 +401,14 @@ public class BukkitDevTools {
             return;
 
 
-        removeFileFromTable(fileIDs, queueWindow);
+        //removeFileFromTable(fileIndexes, queueWindow);
 
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
         c.data("form_type", "file");
         c.data("file-status", "s"); //s = safe
         c.timeout(0);
 
-        for (int id : fileIDs) {
+        for (int id : fileIds) {
             if (id == 0)
                 break;
             c.data("file_checklist", Integer.toString(id));

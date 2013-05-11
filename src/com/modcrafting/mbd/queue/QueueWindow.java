@@ -63,6 +63,8 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private final JMenuItem mntmMarkTop = new JMenuItem("Mark 10 top files");
     private final JMenuItem mntmClaimSelectedFiles = new JMenuItem("Claim marked files");
     private final JMenuItem mntmApproveMarkedFiles = new JMenuItem("Approve marked files");
+    private final JMenuItem mntmMarkClaimedFiles = new JMenuItem("Mark claimed files");
+    private final JMenuItem mntmMarkClaimedFiles_1 = new JMenuItem("Mark claimed version files");
     private String DBOName;
     private Chekkit ck;
 
@@ -145,12 +147,17 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         mntmMarkTop.addActionListener(this);
 
         mnFiles.add(mntmMarkTop);
+        mntmMarkClaimedFiles.addActionListener(this);
 
-        JMenuItem mntmMarkClaimedFiles = new JMenuItem("Mark claimed files");
+        
         mnFiles.add(mntmMarkClaimedFiles);
 
 
         mntmApproveMarkedFiles.addActionListener(this);
+        
+        JMenuItem mntmMarkClaimedFiles_1 = new JMenuItem("Mark claimed version files");
+        mntmMarkClaimedFiles_1.addActionListener(this);
+        mnFiles.add(mntmMarkClaimedFiles_1);
         mnFiles.add(mntmApproveMarkedFiles);
         this.refreshQueue.addActionListener(this);
 
@@ -487,6 +494,32 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             hideLabel();
             
 
+        } else if (e.getSource() == mntmMarkClaimedFiles) {
+            
+            FileTableModel ftm = (FileTableModel) table.getModel();
+            int i = 0;
+            for (QueueFile qf : ftm.files) {
+                Chekkit.log.info("Hit1");
+                if (qf.getClaimed().equals(Chekkit.bukkitDevUsername)) {
+                    Chekkit.log.info("Hit2");
+                    table.getModel().setValueAt(true, i, 0);
+                } else {
+                    table.getModel().setValueAt(false, i, 0);
+                }
+                i++;
+            }
+        } else if (e.getSource() == mntmMarkClaimedFiles_1) {
+            FileTableModel ftm = (FileTableModel) table.getModel();
+            int i = 0;
+            for (QueueFile qf : ftm.files) {
+
+                if (qf.getClaimed().equals(Chekkit.bukkitDevUsername) && qf.hasNumberInTitle()) {
+                    table.getModel().setValueAt(true, i, 0);
+                } else {
+                    table.getModel().setValueAt(false, i, 0);
+                }
+                i++;
+            }
         }
     }
 
