@@ -260,12 +260,16 @@ public class BukkitDevTools {
 
     }
 
-    public static void removeFileFromTable(final int i, final QueueWindow qf) {
+    public static void removeFileFromTable(final int[] i, final QueueWindow qf) {
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                ((FileTableModel) qf.table.getModel()).removeRow(qf.table.convertRowIndexToModel(i));
+                for (int id : i) {
+                    if (id == 0)
+                        break;
+                    ((FileTableModel) qf.table.getModel()).removeRow(qf.table.convertRowIndexToModel(i));
+                }
 
             }
         });
@@ -393,9 +397,9 @@ public class BukkitDevTools {
         if (!co)
             return;
 
-        for (Integer file : filesRemoving) {
-            removeFileFromTable(file, queueWindow);
-        }
+
+        removeFileFromTable(fileIDs, queueWindow);
+
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
         c.data("form_type", "file");
         c.data("file-status", "s"); //s = safe
