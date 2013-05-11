@@ -59,7 +59,7 @@ import com.modcrafting.mbd.queue.QueueWindow;
 import com.modcrafting.mbd.sql.SQL;
 import java.util.*;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({"rawtypes" })
 public class Chekkit extends JFrame implements WindowListener {
     private static final long serialVersionUID = 2878574498207291074L;
     public final static Logger log = Logger.getLogger("Chekkit");
@@ -80,15 +80,14 @@ public class Chekkit extends JFrame implements WindowListener {
     public static String chekkitUsername;
     public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar", "");
     private List<DecompJar> decompilingJars = Collections.synchronizedList(new ArrayList<DecompJar>());
-    
-    
-    
+
+
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         this.properties = properties;
-        
+
         datab = new SQL(properties);
-        
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -156,12 +155,12 @@ public class Chekkit extends JFrame implements WindowListener {
         queueMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Thread(new Runnable(){
-                	@Override
-                	public void run(){
-                	    int processID = Chekkit.processPanel.addUnknownProcess("Checking API key information...");
-                		new QueueWindow(useNimbus, Chekkit.this, processID);
-                	}
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int processID = Chekkit.processPanel.addUnknownProcess("Checking API key information...");
+                        new QueueWindow(useNimbus, Chekkit.this, processID);
+                    }
                 }).start();
             }
         });
@@ -267,9 +266,32 @@ public class Chekkit extends JFrame implements WindowListener {
         config = new Configuration();
         useNimbus = config.getUseNimbus();
         showAbout = config.getShowAbout();
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName()) && useNimbus) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        if (Chekkit.PATH.contains(".jar")) {
+            JOptionPane.showMessageDialog(null, "Please ensure the Chekkit JAR file is named 'Chekkit.jar' or 'mbd.jar'.\n" + Chekkit.PATH);
+            System.exit(0);
+        }
+
+        File libDecompiler = new File(Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar");
+        if (!libDecompiler.exists()) {
+            new LibVerification().displayError();
+            System.exit(0);
+        }
+
         List<String> argList = new ArrayList<String>();
         argList.addAll(Arrays.asList(args));
-        
+
         //String username = new String();
         String password = new String();
         if (argList.contains("--nogui")) {
