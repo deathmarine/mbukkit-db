@@ -268,7 +268,7 @@ public class BukkitDevTools {
                 for (int id : i) {
                     if (id == 0)
                         break;
-                    ((FileTableModel) qf.table.getModel()).removeRow(qf.table.convertRowIndexToModel(i));
+                    ((FileTableModel) qf.table.getModel()).removeRow(qf.table.convertRowIndexToModel(id));
                 }
 
             }
