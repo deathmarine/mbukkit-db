@@ -42,7 +42,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
     private static final long serialVersionUID = 1856749858855789365L;
 
-    private JPanel contentPane = new JPanel();
+    public JPanel contentPane = new JPanel();
     public JProgressBar progressBar = new JProgressBar();
     private JLabel label = new JLabel("");
     private String APIKey = "";
@@ -54,7 +54,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private Thread thisThread;
     private Thread refreshThread;
     private boolean isThreadRunning = false;
-    private JScrollPane scrollPane;
+    public JScrollPane scrollPane;
     private SpringLayout sl_contentPane = new SpringLayout();
     private int prop = 0;
     private JMenuItem mntmClaimOldest = new JMenuItem("Mark 10 oldest files");
@@ -69,11 +69,11 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     /**
      * Initialize the object
      */
-    
- 
+
+
     public QueueWindow(Boolean useNimbus, JFrame parent, int pId) {
         super("File Queue");
-        
+
         this.ck = (Chekkit) parent;
         if (!this.getAPI()) {
             return;
@@ -122,7 +122,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         mnView.add(this.showClaimed);
         this.showClaimed.addActionListener(this);
         mnView.add(this.refreshQueue);
-        
+
         JMenu mnFiles = new JMenu("Files");
         menuBar.add(mnFiles);
         mntmMarkSelectedFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
@@ -130,26 +130,26 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         mnFiles.add(mntmMarkSelectedFiles);
         mntmUnmarkSelectedFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
         mntmUnmarkSelectedFiles.addActionListener(this);
-        
+
         mnFiles.add(mntmUnmarkSelectedFiles);
-        
-        
+
+
         mntmClaimSelectedFiles.addActionListener(this);
         mntmClaimSelectedFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
         mnFiles.add(mntmClaimSelectedFiles);
         mntmClaimOldest.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
         mntmClaimOldest.addActionListener(this);
-        
+
         mnFiles.add(mntmClaimOldest);
         mntmMarkTop.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
         mntmMarkTop.addActionListener(this);
-        
+
         mnFiles.add(mntmMarkTop);
-        
+
         JMenuItem mntmMarkClaimedFiles = new JMenuItem("Mark claimed files");
         mnFiles.add(mntmMarkClaimedFiles);
-        
-        
+
+
         mntmApproveMarkedFiles.addActionListener(this);
         mnFiles.add(mntmApproveMarkedFiles);
         this.refreshQueue.addActionListener(this);
@@ -204,7 +204,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         this.refreshThread.start();
     }
 
-    private void getQueue() {
+    public void getQueue() {
         final String username = this.DBOName;
         this.thisThread = new Thread(new Runnable() {
             @Override
@@ -214,139 +214,129 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 List<QueueFile> qfl = aq.getFileList();
                 int total = aq.getFileTotal();
                 Object[][] files;
-                /*int applicable;
-                if (!showClaimed.isSelected()) {
-                    applicable = aq.getFilesUnclaimed();
-                } else {
-                    files = new Object[qfl.size()][6];
-                }*/
+                /*
+                 * int applicable; if (!showClaimed.isSelected()) { applicable
+                 * = aq.getFilesUnclaimed(); } else { files = new
+                 * Object[qfl.size()][6]; }
+                 */
 
-                /*String[] columnNames = { "Title", "Project", "Size", "Author", "Posted", "Status" };
-                int index = 0;
-
-                int claimed = aq.getFilesClaimed();
-                for (QueueFile q : qfl) {
-                    if (isThreadRunning) {
-                        String c = q.getClaimed();
-                        Chekkit.log.info(q.getAuthor() + ": " + q.getCreatedByStaff());
-                        
-                        if (c == null) {
-                            c = "";
-                            files[index][0] = q.getTitle();
-                            files[index][1] = q.getProjectName();
-                            files[index][2] = q.getSize();
-                            files[index][3] = q.getAuthor();
-                            files[index][4] = BukkitDevTools.prettyTime(q.getUploadTime());
-                            files[index][5] = "Awaiting approval";
-                            index++;
-                        } else if (showClaimed.isSelected()) {
-                            if (!q.hasNumberInTitle()) {
-                                files[index][0] = "{" + q.getTitle();
-                            } else {
-                                files[index][0] = q.getTitle();
-                            }
-                            files[index][1] = q.getProjectName();
-                            files[index][2] = q.getSize();
-                            files[index][3] = q.getAuthor();
-                            files[index][4] = BukkitDevTools.prettyTime(q.getUploadTime());
-                            files[index][5] = "Claimed by " + c;
-
-                            index++;
-                        }
-                        // System.out.println(q.getAuthor() + " has uploaded " +
-                        // q.getTitle() + " at " + q.getFileDownloadURL() +
-                        // " on " + q.getUploadTime() + " for project " +
-                        // q.getProjectName() + ". It's under review: " + c);
-                    } else {
-                        return;
-                    }
-                }*/
+                /*
+                 * String[] columnNames = { "Title", "Project", "Size",
+                 * "Author", "Posted", "Status" }; int index = 0;
+                 * 
+                 * int claimed = aq.getFilesClaimed(); for (QueueFile q : qfl)
+                 * { if (isThreadRunning) { String c = q.getClaimed();
+                 * Chekkit.log.info(q.getAuthor() + ": " +
+                 * q.getCreatedByStaff());
+                 * 
+                 * if (c == null) { c = ""; files[index][0] = q.getTitle();
+                 * files[index][1] = q.getProjectName(); files[index][2] =
+                 * q.getSize(); files[index][3] = q.getAuthor();
+                 * files[index][4] =
+                 * BukkitDevTools.prettyTime(q.getUploadTime());
+                 * files[index][5] = "Awaiting approval"; index++; } else if
+                 * (showClaimed.isSelected()) { if (!q.hasNumberInTitle()) {
+                 * files[index][0] = "{" + q.getTitle(); } else {
+                 * files[index][0] = q.getTitle(); } files[index][1] =
+                 * q.getProjectName(); files[index][2] = q.getSize();
+                 * files[index][3] = q.getAuthor(); files[index][4] =
+                 * BukkitDevTools.prettyTime(q.getUploadTime());
+                 * files[index][5] = "Claimed by " + c;
+                 * 
+                 * index++; } // System.out.println(q.getAuthor() +
+                 * " has uploaded " + // q.getTitle() + " at " +
+                 * q.getFileDownloadURL() + // " on " + q.getUploadTime() +
+                 * " for project " + // q.getProjectName() +
+                 * ". It's under review: " + c); } else { return; } }
+                 */
 
                 QueueWindow.this.setTitle("File Queue: " + (aq.getFileTotal()) + " Total Files, " + aq.getFilesClaimed() + " Claimed");
-                
-                /*final DefaultTableModel model = new DefaultTableModel(files, columnNames) {
-                    private static final long serialVersionUID = 5344763309058756161L;
 
-                    
-                };*/
+                /*
+                 * final DefaultTableModel model = new
+                 * DefaultTableModel(files, columnNames) { private static
+                 * final long serialVersionUID = 5344763309058756161L;
+                 * 
+                 * 
+                 * };
+                 */
                 final FileTableModel model = new FileTableModel(aq, QueueWindow.this);
-                
+
                 table = new JTable(model);
                 table.setDefaultRenderer(String.class, new FileCellRenderer(aq.getFileList()));
                 table.setAutoCreateRowSorter(true);
                 table.removeColumn(table.getColumnModel().getColumn(7));
                 table.removeColumn(table.getColumnModel().getColumn(7));
                 table.getColumnModel().getColumn(0).setMaxWidth(25);
-                table.getRowSorter().addRowSorterListener(
-                        new RowSorterListener() {
-                            
-                            @Override
-                            public void sorterChanged(RowSorterEvent e) {
-                                //Don't touch this, it works.
-                                Boolean serviced = false;
-                                FileTableModel ftm = (FileTableModel) table.getModel();
-                                
-                                //Chekkit.log.info("From the top. " + e.getType().toString());
-                                if (e.getType() != RowSorterEvent.Type.SORTED) {
-                                    return;
-                                }
-                                
-                                if (ftm.progSort) {
-                                    ftm.progSort = false;
-                                    //Chekkit.log.info("Destroyed a non-user sort event.");
-                                    return;
-                                  }
-                                
-                               
-                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 3) {
-                                    //Chekkit.log.info("Size sort! Compensating...");
-                                    List l = new ArrayList<SortKey>();
-                                    RowSorter.SortKey sk;
-                                    Chekkit.log.info(ftm.sizeSort.toString());
-                                    if (ftm.sizeSort) {
-                                        sk = new RowSorter.SortKey(7, SortOrder.ASCENDING);
-                                        ftm.sizeSort = false;
-                                        
-                                    } else {
-                                        sk = new RowSorter.SortKey(7, SortOrder.DESCENDING);
-                                        ftm.sizeSort = true;
-                                    }
-                                    
-                                    l.add(sk);
-                                    ftm.progSort = true;
-                                    table.getRowSorter().setSortKeys(l);
-                                    serviced = true;
-                                    return;
-                                }
-                                
-                                if (table.getRowSorter().getSortKeys().get(0).getColumn() == 5) {
-                                    //Chekkit.log.info("Date sort! Compensating...");
-                                    List l = new ArrayList<SortKey>();
-                                    RowSorter.SortKey sk;
-                                    
-                                    Chekkit.log.info(ftm.dateSort.toString());
-                                    if (ftm.dateSort) {
-                                        sk = new RowSorter.SortKey(8, SortOrder.ASCENDING);
-                                        ftm.dateSort = false;
-                                        
-                                    } else {
-                                        sk = new RowSorter.SortKey(8, SortOrder.DESCENDING);
-                                        ftm.dateSort = true;
-                                        
-                                    }
-                                    l.add(sk);
-                                    ftm.progSort = true;
-                                    table.getRowSorter().setSortKeys(l);
-                                    serviced = true;
-                                    return;
-                                }
-                                if (!serviced) {
-                                    ftm.dateSort = false;
-                                    ftm.sizeSort = false;
-                                    //Chekkit.log.info("Resetting date & size.");
-                                }
+                table.getRowSorter().addRowSorterListener(new RowSorterListener() {
+
+                    @Override
+                    public void sorterChanged(RowSorterEvent e) {
+                        //Don't touch this, it works.
+                        Boolean serviced = false;
+                        FileTableModel ftm = (FileTableModel) table.getModel();
+
+                        //Chekkit.log.info("From the top. " + e.getType().toString());
+                        if (e.getType() != RowSorterEvent.Type.SORTED) {
+                            return;
+                        }
+
+                        if (ftm.progSort) {
+                            ftm.progSort = false;
+                            //Chekkit.log.info("Destroyed a non-user sort event.");
+                            return;
+                        }
+
+
+                        if (table.getRowSorter().getSortKeys().get(0).getColumn() == 3) {
+                            //Chekkit.log.info("Size sort! Compensating...");
+                            List l = new ArrayList<SortKey>();
+                            RowSorter.SortKey sk;
+                            Chekkit.log.info(ftm.sizeSort.toString());
+                            if (ftm.sizeSort) {
+                                sk = new RowSorter.SortKey(7, SortOrder.ASCENDING);
+                                ftm.sizeSort = false;
+
+                            } else {
+                                sk = new RowSorter.SortKey(7, SortOrder.DESCENDING);
+                                ftm.sizeSort = true;
                             }
-                        });
+
+                            l.add(sk);
+                            ftm.progSort = true;
+                            table.getRowSorter().setSortKeys(l);
+                            serviced = true;
+                            return;
+                        }
+
+                        if (table.getRowSorter().getSortKeys().get(0).getColumn() == 5) {
+                            //Chekkit.log.info("Date sort! Compensating...");
+                            List l = new ArrayList<SortKey>();
+                            RowSorter.SortKey sk;
+
+                            Chekkit.log.info(ftm.dateSort.toString());
+                            if (ftm.dateSort) {
+                                sk = new RowSorter.SortKey(8, SortOrder.ASCENDING);
+                                ftm.dateSort = false;
+
+                            } else {
+                                sk = new RowSorter.SortKey(8, SortOrder.DESCENDING);
+                                ftm.dateSort = true;
+
+                            }
+                            l.add(sk);
+                            ftm.progSort = true;
+                            table.getRowSorter().setSortKeys(l);
+                            serviced = true;
+                            return;
+                        }
+                        if (!serviced) {
+                            ftm.dateSort = false;
+                            ftm.sizeSort = false;
+                            //Chekkit.log.info("Resetting date & size.");
+                        }
+                    }
+                });
                 scrollPane = new JScrollPane(table);
                 sl_contentPane.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.NORTH, contentPane);
                 sl_contentPane.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, contentPane);
@@ -354,9 +344,8 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 sl_contentPane.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, contentPane);
 
                 contentPane.add(scrollPane);
-               
 
-                
+
                 table.setVisible(true);
                 contentPane.repaint();
 
@@ -444,11 +433,11 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 table.getModel().setValueAt(false, table.convertRowIndexToModel(i), 0);
             }
         } else if (e.getSource() == this.mntmClaimOldest) {
-            FileTableModel ftm = (FileTableModel) table.getModel(); 
+            FileTableModel ftm = (FileTableModel) table.getModel();
             int i = 0;
             int done = 0;
-            for (QueueFile qf: ftm.files) {
-                
+            for (QueueFile qf : ftm.files) {
+
                 if (qf.getClaimed() == null && !qf.selected) {
                     table.getModel().setValueAt(true, i, 0);
                     done++;
@@ -456,7 +445,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 if (done == 10) {
                     break;
                 }
-                i++;  
+                i++;
             }
         } else if (e.getSource() == this.mntmMarkTop) {
             int done = 0;
@@ -468,37 +457,36 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 }
                 i++;
             }
-            
-        } else if (e.getSource() == this.mntmClaimSelectedFiles) {
-            final FileTableModel ftm = (FileTableModel) table.getModel(); 
-            Chekkit.log.info("Fired!");
-            /**/SwingUtilities.invokeLater(new Runnable() {
 
-                @Override
-                public void run() {/**/
+        } else if (e.getSource() == this.mntmClaimSelectedFiles) {
+            final FileTableModel ftm = (FileTableModel) table.getModel();
+            Chekkit.log.info("Fired!");
+            Thread t = new Thread(new Runnable() {
+                public void run() {
                     Chekkit.log.info("Starting claim");
                     BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
                     progressBar.setVisible(false);
                     hideLabel();
-                    
-                    /**/}
-                
-            });/**/
-            refreshThread();
-        } else if (e.getSource() == this.mntmApproveMarkedFiles) {
-            final FileTableModel ftm = (FileTableModel) table.getModel(); 
-            SwingUtilities.invokeLater(new Runnable() {
 
-                @Override
-                public void run() {/**/
-                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
-                    progressBar.setVisible(false);
-                    hideLabel();
-                    
                     /**/}
-                
+
             });/**/
+            t.start();
             
+        } else if (e.getSource() == this.mntmApproveMarkedFiles) {
+            progressBar.setVisible(true);
+            progressBar.setIndeterminate(true);
+            final FileTableModel ftm = (FileTableModel) table.getModel();
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
+                }
+            });
+            t.start();
+            progressBar.setVisible(false);
+            hideLabel();
+            
+
         }
     }
 

@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Connection;
@@ -44,36 +45,45 @@ public class BukkitDevTools {
         }
     }
 
+    private static void showLabel(final String text, final QueueWindow qw) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                qw.showLabel(text);
+            }
+
+        });
+    }
+
     public static void claimFiles(List<QueueFile> qfl, QueueWindow qw, String key, Chekkit ck) {
         Chekkit.log.info("Checking files for issues");
-        qw.showLabel("Checking files for issues...");
+        BukkitDevTools.showLabel("Checking files for issues...", qw);
 
-        qw.progressBar.setVisible(true);
-        qw.progressBar.setIndeterminate(true);
-        qw.repaint();
+
         List<BukkitDevPM> PMs = new ArrayList<BukkitDevPM>();
         List<Integer> filesToClaim = new ArrayList<Integer>();
         List<File> filesToDecompile = new ArrayList<File>();
         for (QueueFile qf : qfl) {
             Chekkit.log.info("Checking file " + qf.getFileID());
             if (qf.selected) {
-                qw.showLabel("Checking file " + qf.getFileID() + "...");
+                BukkitDevTools.showLabel("Checking file " + qf.getFileID() + "...", qw);
                 if (qf.getClaimed() != null) {
-                    qw.showLabel("File " + qf.getFileID() + " is already claimed. Informing user...");
+                    BukkitDevTools.showLabel("File " + qf.getFileID() + " is already claimed. Informing user...", qw);
                     String msg = "The file '" + qf.getTitle() + "' is under review by " + qf.getClaimed() + ".\nDo you wish to claim this file anyway?";
                     int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File already claimed.", JOptionPane.YES_NO_OPTION);
                     if (cont != JOptionPane.YES_OPTION) {
-                        qw.showLabel("File " + qf.getFileID() + " is already claimed. User decided to abort file.");
+                        BukkitDevTools.showLabel("File " + qf.getFileID() + " is already claimed. User decided to abort file.", qw);
                         continue; //Next file please
                     }
                 }
 
                 if (!qf.hasNumberInTitle()) {
-                    qw.showLabel("File " + qf.getFileID() + " has no title in version. Informing user.");
+                    BukkitDevTools.showLabel("File " + qf.getFileID() + " has no title in version. Informing user.", qw);
                     String msg = "The file '" + qf.getTitle() + "' appears to be missing a version from its title.\nWould you like to send the user a PM?";
                     int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File has no version number in title.", JOptionPane.YES_NO_OPTION);
                     if (cont == JOptionPane.YES_OPTION) {
-                        qw.showLabel("File " + qf.getFileID() + " requires a PM to be sent. Adding message to queue...");
+                        BukkitDevTools.showLabel("File " + qf.getFileID() + " requires a PM to be sent. Adding message to queue...", qw);
                         PMs.add(qf.getVersionPM());
                     }
                 }
@@ -81,29 +91,30 @@ public class BukkitDevTools {
                 if (!dls.exists() && !dls.mkdir()) {
 
                 } else {
-                    if (!qf.getFileDownloadURL().endsWith(".jar")) {
-                        int cont = JOptionPane.showConfirmDialog(qw, "File isn't a JAR.\nWould you like to download it manually?", "Warning!", JOptionPane.YES_NO_OPTION);
-                        if (cont == JOptionPane.YES_OPTION) {
-                            try {
-                                Desktop.getDesktop().browse(new URL(qf.getFileDownloadURL()).toURI());
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                    try {
+                        String name = qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/') + 1, qf.getFileDownloadURL().length());
+                        BukkitDevTools.showLabel("Downloading " + name + "...", qw);
+                        File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
+
+                        if (!destination.getPath().endsWith(".jar") && !qf.isServerMod()) {
+                            JOptionPane.showMessageDialog(qw, "This file isn't a server mod. We'll try and download it and rename it to a JAR if it isn't one already.", "Warning!", JOptionPane.WARNING_MESSAGE);
+                            destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name + ".jar");
+                        } else {
+                            if (!destination.getPath().endsWith(".jar") && qf.isServerMod()) {
+                                JOptionPane.showMessageDialog(qw, "This file is a not a JAR. It'll be downloaded, but you'll need to extract/process it manually.", "Warning!", JOptionPane.WARNING_MESSAGE);
                             }
                         }
+                        FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
 
-                    } else {
-                        try {
-                            String name = qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/') + 1, qf.getFileDownloadURL().length());
-                            qw.showLabel("Downloading " + name + "...");
 
-                            File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
-                            FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
+                        if (destination.getPath().endsWith(".jar")) {
                             filesToDecompile.add(destination);
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+
                 }
                 Chekkit.log.info("Adding file");
                 filesToClaim.add(qf.getFileID());
@@ -118,7 +129,7 @@ public class BukkitDevTools {
             new MessageQueue(PMs, key).setVisible(true);
         }
         Chekkit.log.info("Sending request...");
-        qw.showLabel("Sending request...");
+        BukkitDevTools.showLabel("Sending request...", qw);
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + key);
         c.data("form_type", "file");
         c.data("file-status", "u");
@@ -136,6 +147,7 @@ public class BukkitDevTools {
         }
         Chekkit.log.info("Refreshing");
         ck.handleFiles(filesToDecompile);
+        requestQueueUpdate(qw);
 
     }
 
@@ -248,6 +260,31 @@ public class BukkitDevTools {
 
     }
 
+    public static void removeFileFromTable(final int i, final QueueWindow qf) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                ((FileTableModel) qf.table.getModel()).removeRow(qf.table.convertRowIndexToModel(i));
+
+            }
+        });
+    }
+
+    public static void requestQueueUpdate(final QueueWindow qw) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                qw.contentPane.remove(qw.scrollPane);
+                qw.contentPane.repaint();
+                qw.showLabel("Refreshing Queue...");
+                qw.getQueue();
+
+            }
+        });
+    }
+
     /**
      * This is a ridiculously messy method that parses the approval queue
      * 
@@ -334,7 +371,7 @@ public class BukkitDevTools {
         Boolean co = true;
         List<Integer> filesRemoving = new ArrayList<Integer>();
         for (QueueFile qf : files) {
-            
+
             if (qf.selected) {
                 if (!qf.hasNumberInTitle()) {
                     JOptionPane.showMessageDialog(queueWindow, qf.getTitle() + " doesn't have a version in it's title.\nIf you've PM'd the user, please wait for them to add one.");
@@ -347,17 +384,17 @@ public class BukkitDevTools {
                     fileIDs[i] = qf.getFileID();
                     i++;
                     filesRemoving.add(toRemove);
-                    
+
                 }
             }
             toRemove++;
         }
-        
+
         if (!co)
             return;
 
-        for (Integer file: filesRemoving) {
-            ((FileTableModel)queueWindow.table.getModel()).removeRow(queueWindow.table.convertRowIndexToModel(file));
+        for (Integer file : filesRemoving) {
+            removeFileFromTable(file, queueWindow);
         }
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
         c.data("form_type", "file");
@@ -369,17 +406,17 @@ public class BukkitDevTools {
                 break;
             c.data("file_checklist", Integer.toString(id));
             Chekkit.log.info("Added id: " + id);
-            queueWindow.showLabel("Adding file + " + id + " to queue...");
+            showLabel("Adding file + " + id + " to queue...", queueWindow);
         }
-        queueWindow.showLabel("Sending request...");
+        showLabel("Sending request...", queueWindow);
         try {
             c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").post();
         } catch (Exception e) {
 
             e.printStackTrace();
         }
-        
-
+        showLabel("Files approved!", queueWindow);
+        requestQueueUpdate(queueWindow);
 
     }
 
