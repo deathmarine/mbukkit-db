@@ -32,7 +32,7 @@
 	<echo message="${ant.project.name}: ${ant.file}" />
 
 	<target name="compile" depends="clean, init" description="Compile all the code">
-	  <replace file="${src}/com/modcrafting/mbd/Chekkit.java" token="JENKINSBUILDNUMBER" value="${env.BUILD_NUMBER}"/>
+	  <replace file="src/com/modcrafting/mbd/Chekkit.java" token="JENKINSBUILDNUMBER" value="${env.BUILD_NUMBER}"/>
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin"
 			includeantruntime="false" source="${source}" target="${target}">
 			<src path="src" />
