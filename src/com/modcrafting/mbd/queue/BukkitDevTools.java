@@ -38,7 +38,6 @@ public class BukkitDevTools {
         try {
             String url = "http://dev.bukkit.org/home/send-private-message/?api-key=" + key;
             Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").ignoreHttpErrors(true).post();
-            Chekkit.log.info(doc.toString());
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -146,9 +145,19 @@ public class BukkitDevTools {
             e.printStackTrace();
         }
         Chekkit.log.info("Refreshing");
-        ck.handleFiles(filesToDecompile);
+        decompileSomeFiles(filesToDecompile, ck);
         requestQueueUpdate(qw);
 
+    }
+
+    public static void decompileSomeFiles(final List<File> files, final Chekkit ck) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                ck.handleFiles(files);
+            }
+        });
     }
 
     public static String ordinal(int num) {
@@ -261,20 +270,17 @@ public class BukkitDevTools {
     }
 
     public static void removeFileFromTable(final List<Integer> fileIndexes, final QueueWindow qw) {
-        /*SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                int i = 0;
-                for (Integer qf : fileIndexes) {
-
-                    ((FileTableModel) qw.table.getModel()).removeRow(qf);
-                    //Drop the index by 1 since the size is one less
-                    i++;
-                }
-
-            }
-        });*/// Not used as we force a refresh when approving files anyway.
+        /*
+         * SwingUtilities.invokeLater(new Runnable() {
+         * 
+         * @Override public void run() { int i = 0; for (Integer qf :
+         * fileIndexes) {
+         * 
+         * ((FileTableModel) qw.table.getModel()).removeRow(qf); //Drop the
+         * index by 1 since the size is one less i++; }
+         * 
+         * } });
+         */// Not used as we force a refresh when approving files anyway.
     }
 
     public static void requestQueueUpdate(final QueueWindow qw) {

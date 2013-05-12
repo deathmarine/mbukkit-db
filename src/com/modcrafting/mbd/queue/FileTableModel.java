@@ -78,14 +78,19 @@ public class FileTableModel extends AbstractTableModel {
     
     public void setValueAt(Object value, int row, int col) {
         if (col == 0) {
-            
+            if (files.get(row).selected && !((Boolean) value)) {
+                //If it was originally selected and it's being deselected
+                selected--;
+                //We drop the count by one
+            }
+            if (!files.get(row).selected && ((Boolean) value)) {
+                //If it was originally unselected and it's being selected
+                selected++;
+                //We increase the count by one
+            }
             files.get(row).selected = (Boolean) value;
             fireTableDataChanged();
             fireTableCellUpdated(row, col);
-            if (files.get(row).selected)
-                selected++;
-            else
-                selected--;
             qw.showLabel(selected + " files selected.");
         }
         

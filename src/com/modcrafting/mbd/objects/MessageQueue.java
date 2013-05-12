@@ -36,7 +36,8 @@ public class MessageQueue extends JDialog {
         springLayout.putConstraint(SpringLayout.NORTH, progressBar, 9, SpringLayout.SOUTH, lblNewLabel);
         springLayout.putConstraint(SpringLayout.WEST, progressBar, 10, SpringLayout.WEST, getContentPane());
         getContentPane().add(progressBar);
-        
+        progressBar.setMaximum(100);
+        progressBar.setMinimum(0);
         new Thread(new MessageSendOperation(messages, APIKey, this)).start();
 
     }
