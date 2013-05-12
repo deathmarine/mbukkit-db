@@ -32,6 +32,7 @@
 	<echo message="${ant.project.name}: ${ant.file}" />
 
 	<target name="compile" depends="clean, init" description="Compile all the code">
+	  <replace file="${src}/com/modcrafting/mbd/Chekkit.java" token="JENKINSBUILDNUMBER" value="${env.BUILD_NUMBER}"/>
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin"
 			includeantruntime="false" source="${source}" target="${target}">
 			<src path="src" />
@@ -39,11 +40,6 @@
 			<compilerarg value="-Xlint:none" />
 		</javac>
 	</target>
-	
-	<target name="printinfo">
-  	<property environment="env" />
-  	<echo message="${env.BUILD_NUMBER}"/>
-	</target> 
 
 	<target name="package" depends="compile" description="Make the distributable jar file">
 		<delete dir="bin/php" />
