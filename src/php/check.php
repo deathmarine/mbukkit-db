@@ -1,5 +1,5 @@
 <?PHP
-header('X-Chekkit-Version: 1.4');
+header('X-Chekkit-Version: 1.6');
 require_once("./include/membersite_config.php");
 
 $info = "get,fucked";

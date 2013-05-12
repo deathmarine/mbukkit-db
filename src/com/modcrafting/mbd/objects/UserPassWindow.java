@@ -23,10 +23,12 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -170,17 +172,35 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             wr.close();
             httpcon.disconnect();
             String ver = httpcon.getHeaderField("X-Chekkit-Version");
-            if (ver != null) {
-                if (!ver.equals(Chekkit.VERSION)) {
-                    this.errorArea.setText("A later version, " + ver + " is available.");
-                    this.errorArea.setVisible(true);
+            try {
+                float f = Float.parseFloat(ver);
+                if (f < Float.parseFloat(Chekkit.VERSION)) {
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(null, "It appears you're using a later version than is defined as stable.\nYou can still use this build, but be aware it is under development.");
+                        }
+
+                    });
                     
-                    return false;
+                } else {
+                    if (ver != null) {
+                        if (!ver.equals(Chekkit.VERSION)) {
+                            this.errorArea.setText("A different version, " + ver + " is available.");
+                            this.errorArea.setVisible(true);
+                            
+                            return false;
+                        }
+                        
+                    } else {
+                        System.out.println("WARN: Skipped update check due to missing header.");
+                    }
                 }
-                
-            } else {
-                System.out.println("WARN: Skipped update check due to missing header.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            
             
             StringBuilder builder = new StringBuilder();
             BufferedReader br = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
