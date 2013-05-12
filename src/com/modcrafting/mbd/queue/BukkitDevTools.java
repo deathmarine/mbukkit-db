@@ -37,7 +37,7 @@ public class BukkitDevTools {
     public static void sendBukkitDevPM(String user, String subject, String message, String key) {
         try {
             String url = "http://dev.bukkit.org/home/send-private-message/?api-key=" + key;
-            Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").ignoreHttpErrors(true).post();
+            Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent(Chekkit.USER_AGENT).ignoreHttpErrors(true).post();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -139,7 +139,7 @@ public class BukkitDevTools {
             Chekkit.log.info("Added id: " + id);
         }
         try {
-            c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").post();
+            c.userAgent(Chekkit.USER_AGENT).post();
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -169,7 +169,7 @@ public class BukkitDevTools {
 
     public static UserInfo checkAPIKey(String key) {
         try {
-            Document doc1 = Jsoup.connect("http://dev.bukkit.org/home/?api-key=" + key).timeout(120000).get();
+            Document doc1 = Jsoup.connect("http://dev.bukkit.org/home/?api-key=" + key).userAgent(Chekkit.USER_AGENT).timeout(120000).get();
             Element loginReq = doc1.getElementById("login-next");
 
             if (loginReq != null) {
@@ -375,6 +375,142 @@ public class BukkitDevTools {
         ApprovalQueue aq = new ApprovalQueue(qfl, numClaimed, total, sn, own);
         return aq;
     }
+    
+    public static void harvestDeletionReasons(List<QueueFile> files, QueueWindow qw, String APIKey, Chekkit ck) {
+        List<String> reasons = new ArrayList<String>();
+        List<QueueFile> filesToDelete = new ArrayList<QueueFile>();
+        
+        for (QueueFile qf: files) {
+            if (qf.selected && (qf.getClaimed() == null || !qf.getClaimed().equals(Chekkit.bukkitDevUsername))) {
+                Chekkit.log.info(Chekkit.bukkitDevUsername + " " + qf.getClaimed());
+                JOptionPane.showMessageDialog(null, "You must claim " + qf.getTitle() + " before deletion.\nAborting deletion...");
+                break;
+            }
+            if (qf.selected && qf.hasNumberInTitle()) {
+                showLabel("Harvesting reason for " + qf.getTitle(), qw);
+                
+                FileRejectionResult fr = new FileRejectionWindow(qf, null, APIKey).getResult();
+                if (fr == null || fr.getRejectionReason().isEmpty()) {
+                    Chekkit.log.info("ABORT");
+                    reasons = null;
+                    break;
+                }
+                Chekkit.log.info("ADDED");
+                reasons.add(fr.getRejectionReason());
+                filesToDelete.add(qf);
+            }
+            
+            if (qf.selected && !qf.hasNumberInTitle()) {
+                showLabel("Harvesting reason for " + qf.getTitle(), qw);
+                FileRejectionResult fr = new FileRejectionWindow(qf, "File contains no version in title.", APIKey).getResult();
+                if (fr == null || fr.getRejectionReason().isEmpty()) {
+                    
+                    Chekkit.log.info("ABORT");
+                    reasons = null;
+                    break;
+                }
+                Chekkit.log.info("ADDED");
+                reasons.add(fr.getRejectionReason());
+                filesToDelete.add(qf);
+            }
+        }
+        if (reasons == null) {
+            showLabel("User aborted deletion process", qw);
+            return;
+        }
+        Chekkit.log.info("OUTPUT");
+        for (String s : reasons) {
+            Chekkit.log.info(s);
+        }
+        BukkitDevTools.deleteFiles(filesToDelete, qw, APIKey, ck, reasons);
+    }
+    
+    public static void deleteFiles(List<QueueFile> files, QueueWindow queueWindow, String APIKey, Chekkit ck, List<String> reasons) {
+        List<Integer> fileIds = new ArrayList<Integer>();
+        List<Integer> fileIndexes = new ArrayList<Integer>();
+        int i = 0;
+        int toRemove = 0;
+        Boolean co = true;
+        //List<Integer> filesRemoving = new ArrayList<Integer>();
+        for (QueueFile qf : files) {
+
+            if (qf.selected) {
+                if (qf.getClaimed() == null) {
+                    JOptionPane.showMessageDialog(queueWindow, "You need to claim " + qf.getTitle() + " first.");
+                    co = false;
+                } else {
+                    fileIds.add(qf.getFileID());
+                    fileIndexes.add(i);
+                    i++;
+
+                }
+            }
+            toRemove++;
+        }
+
+        if (!co)
+            return;
+
+        if (fileIndexes.size() != reasons.size()) {
+            throw new IllegalArgumentException("Reasons length should match number of files selected.");
+        }
+        //removeFileFromTable(fileIndexes, queueWindow);
+
+        Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
+        c.data("form_type", "file");
+        c.data("file-status", "d"); //d = deleted
+        c.timeout(0);
+        i = 0;
+        for (int id : fileIds) {
+            if (id == 0)
+                break;
+            c.data("file_checklist", Integer.toString(id));
+            c.data("file-note", reasons.get(i));
+            Chekkit.log.info("Added id: " + id + " with reason " + reasons.get(i));
+            showLabel("Adding file + " + id + " to queue...", queueWindow);
+            i++;
+        }
+        Chekkit.log.info("Sending request...");
+        showLabel("Sending request...", queueWindow);
+        try {
+            Document d = c.userAgent(Chekkit.USER_AGENT).post();
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+        Chekkit.log.info("All done.");
+        showLabel("Files deleted!", queueWindow);
+        requestQueueUpdate(queueWindow);
+
+    }
+    
+    public static void banUser(String username, String APIKey, String reason, Boolean stopLogin, Boolean removeComments, Boolean removeProjects) {
+        String url = "http://dev.bukkit.org/admin/ban-user/?api-key=" + APIKey;
+        Connection c = Jsoup.connect(url);
+        if (stopLogin) {
+            c.data("is_banned", "y");
+        }
+        
+        if (removeComments) {
+            c.data("delete_all_comments", "y");
+        }
+        
+        if (removeProjects) {
+            c.data("delete_all_projects", "y");
+        }
+        c.data("reason", reason);
+        c.data("user", username);
+        c.data("confirm", "y");
+        
+        c.timeout(0);
+        try {
+            c.userAgent(Chekkit.USER_AGENT).post();
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+        
+    }
 
     public static void approveFiles(List<QueueFile> files, QueueWindow queueWindow, String APIKey, Chekkit ck) {
         List<Integer> fileIds = new ArrayList<Integer>();
@@ -411,7 +547,7 @@ public class BukkitDevTools {
 
         Connection c = Jsoup.connect("http://dev.bukkit.org/admin/approval-queue/?api-key=" + APIKey);
         c.data("form_type", "file");
-        c.data("file-status", "s"); //s = safe
+        c.data("file-status", "s"); //s = safe?
         c.timeout(0);
 
         for (int id : fileIds) {
@@ -423,7 +559,7 @@ public class BukkitDevTools {
         }
         showLabel("Sending request...", queueWindow);
         try {
-            c.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0").post();
+            c.userAgent(Chekkit.USER_AGENT).post();
         } catch (Exception e) {
 
             e.printStackTrace();

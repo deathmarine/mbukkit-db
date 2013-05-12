@@ -21,10 +21,12 @@ public class MessageQueue extends JDialog {
      * Create the dialog.
      */
     public MessageQueue(List<BukkitDevPM> messages, String APIKey) {
+        setResizable(false);
         setTitle("Message queue");
         setBounds(100, 100, 202, 86);
         
         SpringLayout springLayout = new SpringLayout();
+        springLayout.putConstraint(SpringLayout.EAST, progressBar, -10, SpringLayout.EAST, getContentPane());
         getContentPane().setLayout(springLayout);
         
         

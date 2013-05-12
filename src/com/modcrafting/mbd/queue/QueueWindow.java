@@ -65,6 +65,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private final JMenuItem mntmApproveMarkedFiles = new JMenuItem("Approve marked files");
     private final JMenuItem mntmMarkClaimedFiles = new JMenuItem("Mark claimed files");
     private final JMenuItem mntmMarkClaimedFiles_1 = new JMenuItem("Mark claimed version files");
+    private final JMenuItem mntmDeleteMarkedFiles = new JMenuItem("Delete marked files");
     private String DBOName;
     private Chekkit ck;
 
@@ -158,6 +159,10 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         mntmMarkClaimedFiles_1.addActionListener(this);
         mnFiles.add(mntmMarkClaimedFiles_1);
         mnFiles.add(mntmApproveMarkedFiles);
+        
+        
+        mntmDeleteMarkedFiles.addActionListener(this);
+        mnFiles.add(mntmDeleteMarkedFiles);
         this.refreshQueue.addActionListener(this);
 
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -485,7 +490,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             final FileTableModel ftm = (FileTableModel) table.getModel();
             Thread t = new Thread(new Runnable() {
                 public void run() {
-                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
+                    BukkitDevTools.approveFiles(ftm.files, QueueWindow.this, APIKey, ck);
                 }
             });
             t.start();
@@ -520,6 +525,15 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                 }
                 i++;
             }
+        } else if (e.getSource() == mntmDeleteMarkedFiles) {
+            Chekkit.log.info("DELETE");
+            final FileTableModel ftm = (FileTableModel) table.getModel();
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    BukkitDevTools.harvestDeletionReasons(ftm.files, QueueWindow.this, APIKey, ck);
+                }
+            });
+            t.start();
         }
     }
 

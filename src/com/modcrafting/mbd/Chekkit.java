@@ -55,7 +55,9 @@ import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProcessPanel;
 import com.modcrafting.mbd.objects.UserPassWindow;
+import com.modcrafting.mbd.queue.FileRejectionWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
+import com.modcrafting.mbd.queue.UserBanWindow;
 import com.modcrafting.mbd.sql.SQL;
 import java.util.*;
 
@@ -79,6 +81,7 @@ public class Chekkit extends JFrame implements WindowListener {
     public static Boolean showAbout = true;
     public static String bukkitDevUsername;
     public static String chekkitUsername;
+    public static final String USER_AGENT = "Chekkit " + VERSION;
     public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar", "");
     private List<DecompJar> decompilingJars = Collections.synchronizedList(new ArrayList<DecompJar>());
 
@@ -86,7 +89,7 @@ public class Chekkit extends JFrame implements WindowListener {
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
         this.properties = properties;
-
+        
         datab = new SQL(properties);
 
         try {
@@ -101,7 +104,7 @@ public class Chekkit extends JFrame implements WindowListener {
             e.printStackTrace();
 
         }
-
+        
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         final Dimension center = new Dimension((int) (screenSize.width * 0.75), (int) (screenSize.height * 0.75));
         final int x = (int) (center.width * 0.2);
@@ -142,6 +145,15 @@ public class Chekkit extends JFrame implements WindowListener {
         JMenuItem queueMenuItem = new JMenuItem("Open Queue");
         fileMenu.add(openMenuItem);
         fileMenu.add(queueMenuItem);
+        
+        JMenuItem aboutMenuItem = new JMenuItem("About");
+        aboutMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showAbout();
+            }
+        });
+        fileMenu.add(aboutMenuItem);
         fileMenu.add(exitMenuItem);
         consoleMenu.add(clearMenuItem);
         consoleMenu.add(keysMenuItem);
@@ -253,7 +265,7 @@ public class Chekkit extends JFrame implements WindowListener {
         sp.setDividerLocation(750);
 
         console = new Console(mdt);
-        this.add(sp);
+        getContentPane().add(sp);
         this.addWindowListener(this);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.setVisible(true);
@@ -492,9 +504,9 @@ public class Chekkit extends JFrame implements WindowListener {
                 log.info("Failed to save keywords list.");
             }
             this.dispose();
-            ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-small.png")));
+            
             if (showAbout) {
-                JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: " + Chekkit.VERSION + "\nDeathmarine, lol768, zeeveener", "Good Bye.", JOptionPane.PLAIN_MESSAGE, img);
+               
             }
             System.exit(0);
         }
@@ -530,5 +542,14 @@ public class Chekkit extends JFrame implements WindowListener {
 
     public static void setTheme(Theme theme) {
         Chekkit.theme = theme;
+    }
+    
+    public void showAbout() {
+        ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon-small.png")));
+        if (Chekkit.JENKINS_BUILD.contains("JENKINS") || !Chekkit.JENKINS_BUILD.matches(".*\\d.*")) {
+            JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: " + Chekkit.VERSION + " - Custom build.\nDeathmarine, lol768, zeeveener", "About Chekkit", JOptionPane.PLAIN_MESSAGE, img);
+        } else {
+            JOptionPane.showMessageDialog(null, "Chekkit or Die.\nVersion: " + Chekkit.VERSION + " - Jenkins build: " + Chekkit.JENKINS_BUILD + "\nDeathmarine, lol768, zeeveener", "About Chekkit", JOptionPane.PLAIN_MESSAGE, img);            
+        }
     }
 }
