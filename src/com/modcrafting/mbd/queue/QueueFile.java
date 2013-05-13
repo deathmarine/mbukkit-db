@@ -17,7 +17,7 @@ public class QueueFile {
     /**
      * The size of the file that is in the queue. This is set in bytes.
      */
-    private int size;
+    private float size;
     
     /**
      * Human-readable String version of filesize
@@ -77,7 +77,7 @@ public class QueueFile {
    
     public Boolean selected = false;
 
-    public QueueFile(int id, int size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate, String readableSize, Boolean isStaff, Boolean isServerMod) {
+    public QueueFile(int id, float size, String author, String title, String fileLink, String directLink, String projectName, String projectLink, String claimed, long postDate, String readableSize, Boolean isStaff, Boolean isServerMod) {
         this.id = id;
         this.size = size;
         this.author = author;
@@ -107,7 +107,7 @@ public class QueueFile {
         return this.serverMod;
     }
     
-    public int getSize() {
+    public float getSize() {
         return this.size;
     }
     

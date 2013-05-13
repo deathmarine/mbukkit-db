@@ -215,14 +215,14 @@ public class BukkitDevTools {
         return p.format(new Date(timestamp * 1000));
     }
 
-    public static int sizeToBytes(String size) {
+    public static float sizeToBytes(String size) {
         // IEC denotes the i to show binary (2^x) sizes:
         // 1 KiB = 1024 bytes
         if (size.contains("KiB")) { // KibiBytes
             size = size.substring(0, size.indexOf("KiB") - 1);
             try {
                 float f = Float.parseFloat(size);
-                return (int) f * 1024;
+                return f * 1024;
             } catch (Exception e) {
                 e.printStackTrace();
                 return -1;
@@ -233,7 +233,7 @@ public class BukkitDevTools {
             size = size.substring(0, size.indexOf("MiB") - 1);
             try {
                 float f = Float.parseFloat(size);
-                return (int) f * 1048576;
+                return f * 1048576;
             } catch (Exception e) {
                 e.printStackTrace();
                 return -1;
@@ -244,7 +244,7 @@ public class BukkitDevTools {
             size = size.substring(0, size.indexOf("GiB") - 1);
             try {
                 float f = Float.parseFloat(size);
-                return (int) f * 1073741824;
+                return f * 1073741824;
             } catch (Exception e) {
                 e.printStackTrace();
                 return -1;
@@ -261,7 +261,7 @@ public class BukkitDevTools {
         size = size.substring(0, size.indexOf("B") - 1);
         try {
             float f = Float.parseFloat(size);
-            return (int) f;
+            return f;
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
@@ -338,7 +338,7 @@ public class BukkitDevTools {
                 String fileDirectLink = infoBlocks.get(3).child(0).attr("href");
                 // Chekkit.log.info(infoBlocks.get(3).child(0).toString());
                 String size = infoBlocks.get(4).text().trim();
-                int bytes = BukkitDevTools.sizeToBytes(size);
+                float bytes = BukkitDevTools.sizeToBytes(size);
                 String uploader = infoBlocks.get(5).text().trim();
                 long date = Long.parseLong(infoBlocks.get(6).child(0).attr("data-epoch"));
                 String claimed = infoBlocks.get(3).text();
