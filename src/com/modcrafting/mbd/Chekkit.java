@@ -277,8 +277,8 @@ public class Chekkit extends JFrame implements WindowListener {
     
     public static void putToday(Configuration config) {
         int day = Calendar.DAY_OF_MONTH;
-        config.set("today", day);
-        config.set("files-reviewed", 0);
+        config.set("today", Integer.toString(day));
+        config.set("files-reviewed", Integer.toString(0));
     }
 
     public static void main(String[] args) {

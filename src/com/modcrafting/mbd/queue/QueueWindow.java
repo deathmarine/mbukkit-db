@@ -485,13 +485,13 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                     
                 }
                 Integer done = Chekkit.config.getInteger("files-reviewed");
-                if (done != null && (done + amount) > 10) {
+                if ((done != null && (done + amount) > 10) || amount > 10) {
                     int resp = JOptionPane.showConfirmDialog(null, "Claiming these files would mean claiming more than 10 files in a day. Are you sure?", "Mentee warning",  JOptionPane.YES_NO_OPTION);
                     if (resp != JOptionPane.YES_OPTION) {
                         continuing = false;
                     } else {
                         done = done + amount;
-                        Chekkit.config.set("files-reviewed", done);
+                        Chekkit.config.set("files-reviewed", Integer.toString(done));
                     }
                 }
                 

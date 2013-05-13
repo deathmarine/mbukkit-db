@@ -85,6 +85,7 @@ public class Configuration {
                 defaults.put("about-on-close", showAbout.toString());
                 defaults.put("auto-queue-refresh-rate", qRefRate.toString());
                 defaults.put("key", key);
+                defaults.put("mentee-mode", "false");
                 defaults.put("open-notes-on-file-open", openNotesOnFileOpen.toString());
                 defaults.store(new FileOutputStream(propF), "The Chekkit config.");
             } catch (Exception e) {
