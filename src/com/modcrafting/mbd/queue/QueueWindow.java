@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.naming.ldap.SortKey;
@@ -471,18 +472,46 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
 
         } else if (e.getSource() == this.mntmClaimSelectedFiles) {
             final FileTableModel ftm = (FileTableModel) table.getModel();
-            Chekkit.log.info("Fired!");
-            Thread t = new Thread(new Runnable() {
-                public void run() {
-                    Chekkit.log.info("Starting claim");
-                    BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
-                    progressBar.setVisible(false);
-                    hideLabel();
+            Boolean continuing = true;
+            if (Chekkit.config.getMenteeModeEnabled()) {
+                if (Chekkit.config.getInteger("today") == null || Chekkit.config.getInteger("today") != Calendar.DAY_OF_MONTH) {
+                    Chekkit.putToday(Chekkit.config);
+                }
+                int amount = 0;
+                for (QueueFile qf: ftm.files) {
+                    if (qf.selected) {
+                        amount++;
+                    }
+                    
+                }
+                Integer done = Chekkit.config.getInteger("files-reviewed");
+                if (done != null && (done + amount) > 10) {
+                    int resp = JOptionPane.showConfirmDialog(null, "Claiming these files would mean claiming more than 10 files in a day. Are you sure?", "Mentee warning",  JOptionPane.YES_NO_OPTION);
+                    if (resp != JOptionPane.YES_OPTION) {
+                        continuing = false;
+                    } else {
+                        done = done + amount;
+                        Chekkit.config.set("files-reviewed", done);
+                    }
+                }
+                
+            }
+            if (continuing) {
+                Chekkit.log.info("Fired!");
+                Thread t = new Thread(new Runnable() {
+                    public void run() {
+                        Chekkit.log.info("Starting claim");
+                        
+                        BukkitDevTools.claimFiles(ftm.files, QueueWindow.this, APIKey, ck); //TODO: Put this in a new thread
+                        progressBar.setVisible(false);
+                        hideLabel();
 
-                    /**/}
+                        /**/}
 
-            });/**/
-            t.start();
+                });/**/
+                t.start();
+            }
+            
             
         } else if (e.getSource() == this.mntmApproveMarkedFiles) {
             progressBar.setVisible(true);

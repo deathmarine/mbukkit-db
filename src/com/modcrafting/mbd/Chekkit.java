@@ -274,9 +274,21 @@ public class Chekkit extends JFrame implements WindowListener {
     public void errorMessage(String string) {
         JOptionPane.showMessageDialog(null, string, "Error!", 1);
     }
+    
+    public static void putToday(Configuration config) {
+        int day = Calendar.DAY_OF_MONTH;
+        config.set("today", day);
+        config.set("files-reviewed", 0);
+    }
 
     public static void main(String[] args) {
         config = new Configuration();
+        if (config.getMenteeModeEnabled()) {
+            if (config.getInteger("today") == null || config.getInteger("today") != Calendar.DAY_OF_MONTH) {
+                putToday(config);
+            }
+            
+        }
         useNimbus = config.getUseNimbus();
         showAbout = config.getShowAbout();
         try {
