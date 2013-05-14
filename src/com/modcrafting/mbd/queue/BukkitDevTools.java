@@ -76,6 +76,17 @@ public class BukkitDevTools {
                         continue; //Next file please
                     }
                 }
+                
+                if (qf.getAuthor().equals(Chekkit.bukkitDevUsername)) {
+                    
+                    BukkitDevTools.showLabel("File " + qf.getFileID() + " is user's own file. Informing user...", qw);
+                    String msg = qf.getTitle() + " was uploaded by you. Generally, you need to let other staff review your files. Do you wish to continue?";
+                    int cont = JOptionPane.showConfirmDialog(qw, msg, "Warning! File is your own.", JOptionPane.YES_NO_OPTION);
+                    if (cont != JOptionPane.YES_OPTION) {
+                        BukkitDevTools.showLabel("File " + qf.getFileID() + " is user's own file. User decided to abort file.", qw);
+                        continue; //Next file please
+                    }
+                }
 
                 if (!qf.hasNumberInTitle()) {
                     BukkitDevTools.showLabel("File " + qf.getFileID() + " has no title in version. Informing user.", qw);

@@ -394,7 +394,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	@Override
 	public void windowClosing(WindowEvent ev) {
 		if(open.size()>0){
-    		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have files open.\nAre you sure you want to close?", "OpenWindows", JOptionPane.YES_NO_OPTION);
+    		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have " + open.size() + " files open.\nAre you sure you want to close?", "OpenWindows", JOptionPane.YES_NO_OPTION);
     		if(value==JOptionPane.NO_OPTION || value==JOptionPane.NO_OPTION){
     			this.setVisible(true);
     			return;
