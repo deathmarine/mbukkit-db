@@ -33,6 +33,16 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.modcrafting.mbd.Chekkit;
+import javax.swing.JProgressBar;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import javax.swing.Box;
+import java.awt.FlowLayout;
+import javax.swing.SwingConstants;
+import java.awt.GridLayout;
 
 public class UserPassWindow extends JFrame implements ActionListener, KeyListener {
 
@@ -41,17 +51,24 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
     private JPanel panel;
     private JButton submit;
-    private JButton cancel;
     private JTextField userField;
     private JPasswordField passField;
     private JLabel errorArea;
     private JCheckBox remember;
 
     public boolean isOpen = true;
+    private JPanel pane_1;
+    private SpringLayout sl_panel;
+    private JProgressBar progressBar;
+    private JPanel pane;
+    private Component horizontalStrut_2;
+    private Component horizontalStrut_3;
+    private String type = "wait";
 
     public UserPassWindow(Boolean useNimbus) {
 
         super("Login");
+        setResizable(false);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -65,14 +82,54 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
         }
         panel = new JPanel();
-        this.setSize(300, 150);
+        panel.setBounds(0, 0, 323, 145);
+        this.setSize(329, 184);
         this.setAlwaysOnTop(true);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(screenSize.width / 2 - (this.getSize().width / 2), screenSize.height / 2 - (this.getSize().height / 2));
         this.setContents();
+        
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.add(panel);
+        getContentPane().setLayout(null);
+        getContentPane().add(panel);
+
+        horizontalStrut_2 = Box.createHorizontalStrut(20);
+        pane.add(horizontalStrut_2);
+        sl_panel.putConstraint(SpringLayout.WEST, horizontalStrut_2, 6, SpringLayout.EAST, pane);
+        sl_panel.putConstraint(SpringLayout.SOUTH, horizontalStrut_2, 0, SpringLayout.SOUTH, pane);
+
+        JPanel panel_1 = new JPanel();
+        sl_panel.putConstraint(SpringLayout.NORTH, panel_1, 18, SpringLayout.NORTH, progressBar);
+        sl_panel.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.WEST, pane_1);
+        sl_panel.putConstraint(SpringLayout.SOUTH, panel_1, 0, SpringLayout.SOUTH, panel);
+        sl_panel.putConstraint(SpringLayout.EAST, panel_1, 0, SpringLayout.EAST, panel);
+        panel.add(panel_1);
+
+        Component horizontalGlue = Box.createHorizontalGlue();
+        panel_1.add(horizontalGlue);
+        errorArea = new JLabel(" ");
+        panel_1.add(errorArea);
+        sl_panel.putConstraint(SpringLayout.NORTH, errorArea, 4, SpringLayout.SOUTH, progressBar);
+        sl_panel.putConstraint(SpringLayout.WEST, errorArea, 0, SpringLayout.WEST, progressBar);
+        sl_panel.putConstraint(SpringLayout.EAST, errorArea, 0, SpringLayout.EAST, progressBar);
+        errorArea.setVisible(false);
+        errorArea.setForeground(Color.RED);
+
+        Component horizontalGlue_2 = Box.createHorizontalGlue();
+        panel_1.add(horizontalGlue_2);
+        
         this.setVisible(true);
+        String build = (Chekkit.JENKINS_BUILD.contains("JENKINS")) ? "Custom build" : Chekkit.JENKINS_BUILD;
+        this.errorArea.setText("Version " + Chekkit.VERSION + " - " + build);
+        this.errorArea.setForeground(Color.BLUE);
+        this.errorArea.setVisible(true);
+        
+        if (type != null && type.equals("immediate")) {
+            submit.doClick();
+        }
+        
+        
+        
         while (this.isOpen) {
             try {
                 Thread.sleep(10);
@@ -84,66 +141,87 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
     }
 
     public void setContents() {
-        SpringLayout layout = new SpringLayout();
-        submit = new JButton("Login");
-        submit.addActionListener(this);
-        layout.putConstraint(SpringLayout.SOUTH, submit, 0, SpringLayout.SOUTH, panel);
-        layout.putConstraint(SpringLayout.EAST, submit, 0, SpringLayout.EAST, panel);
-
-        cancel = new JButton("Cancel");
-        cancel.addActionListener(this);
-        layout.putConstraint(SpringLayout.SOUTH, cancel, 0, SpringLayout.SOUTH, panel);
-        layout.putConstraint(SpringLayout.WEST, cancel, 0, SpringLayout.WEST, panel);
-
-        remember = new JCheckBox("Remember me");
-        layout.putConstraint(SpringLayout.SOUTH, remember, -5, SpringLayout.SOUTH, panel);
-        layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, remember, 0, SpringLayout.HORIZONTAL_CENTER, panel);
-
-        panel.setLayout(layout);
         String user = "";
         String pass = "";
+        
         try {
             Properties prop = new Properties();
             prop.load(new FileInputStream(Chekkit.PATH + File.separator + "authentication.property"));
             user = prop.getProperty("username");
             pass = prop.getProperty("password");
+            type = prop.getProperty("type");
+            
         } catch (Exception e) {
             //Ignore it
         }
-        
-        JPanel pane = new JPanel();
-        userField = new JTextField("", 16);
-        userField.addKeyListener(this);
-        userField.setText(user);
-        pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
-        pane.add(new JLabel("Username:    "));
-        pane.add(userField);
-        layout.putConstraint(SpringLayout.VERTICAL_CENTER, pane, -30, SpringLayout.VERTICAL_CENTER, panel);
-        layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, pane, 0, SpringLayout.HORIZONTAL_CENTER, panel);
-        panel.add(pane);
 
         pane = new JPanel();
         passField = new JPasswordField("", 16);
         passField.addKeyListener(this);
+        pane_1 = new JPanel();
+        userField = new JTextField("", 16);
+        userField.addKeyListener(this);
+        sl_panel = new SpringLayout();
+        sl_panel.putConstraint(SpringLayout.NORTH, pane, 6, SpringLayout.SOUTH, pane_1);
+        sl_panel.putConstraint(SpringLayout.WEST, pane, 0, SpringLayout.WEST, pane_1);
+        sl_panel.putConstraint(SpringLayout.SOUTH, pane, 66, SpringLayout.NORTH, panel);
+        sl_panel.putConstraint(SpringLayout.WEST, pane_1, 0, SpringLayout.WEST, panel);
+        sl_panel.putConstraint(SpringLayout.NORTH, pane_1, 10, SpringLayout.NORTH, panel);
+        sl_panel.putConstraint(SpringLayout.SOUTH, pane_1, 35, SpringLayout.NORTH, panel);
+        panel.setLayout(sl_panel);
+        userField.setText(user);
+        pane_1.setLayout(new BoxLayout(pane_1, BoxLayout.X_AXIS));
+
+        Component horizontalStrut = Box.createHorizontalStrut(20);
+        pane_1.add(horizontalStrut);
+        pane_1.add(new JLabel("Username:    "));
+        pane_1.add(userField);
+        panel.add(pane_1);
         passField.setText(pass);
         pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
+
+        Component horizontalStrut_1 = Box.createHorizontalStrut(20);
+        pane.add(horizontalStrut_1);
         pane.add(new JLabel("Password:     "));
         pane.add(passField);
-        layout.putConstraint(SpringLayout.VERTICAL_CENTER, pane, 0, SpringLayout.VERTICAL_CENTER, panel);
-        layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, pane, 0, SpringLayout.HORIZONTAL_CENTER, panel);
         panel.add(pane);
+
+        JPanel panel_2 = new JPanel();
+        sl_panel.putConstraint(SpringLayout.NORTH, panel_2, 6, SpringLayout.SOUTH, pane);
+        sl_panel.putConstraint(SpringLayout.WEST, panel_2, 15, SpringLayout.WEST, pane);
+        sl_panel.putConstraint(SpringLayout.SOUTH, panel_2, -40, SpringLayout.SOUTH, panel);
+        sl_panel.putConstraint(SpringLayout.EAST, panel_2, 0, SpringLayout.EAST, pane_1);
+        panel.add(panel_2);
+        panel_2.setLayout(null);
+
+        remember = new JCheckBox("Remember");
+        remember.setBounds(0, 5, 110, 23);
+        sl_panel.putConstraint(SpringLayout.NORTH, remember, 6, SpringLayout.NORTH, panel_2);
+        sl_panel.putConstraint(SpringLayout.WEST, remember, 75, SpringLayout.WEST, panel_2);
+        panel_2.add(remember);
+        sl_panel.putConstraint(SpringLayout.EAST, remember, 0, SpringLayout.EAST, pane);
+        submit = new JButton("Login");
+        submit.setBounds(210, 0, 73, 28);
+        sl_panel.putConstraint(SpringLayout.EAST, submit, -10, SpringLayout.EAST, panel_2);
+        panel_2.add(submit);
+        submit.addActionListener(this);
+        progressBar = new JProgressBar();
+        progressBar.setVisible(false);
+        progressBar.setIndeterminate(true);
+        sl_panel.putConstraint(SpringLayout.WEST, progressBar, 8, SpringLayout.WEST, panel);
+        sl_panel.putConstraint(SpringLayout.SOUTH, progressBar, -20, SpringLayout.SOUTH, panel);
+        sl_panel.putConstraint(SpringLayout.EAST, progressBar, 0, SpringLayout.EAST, pane_1);
         if (pass != "") {
             remember.setSelected(true);
         }
-        errorArea = new JLabel("");
-        errorArea.setVisible(false);
-        errorArea.setForeground(Color.RED);
-        submit.setSize(50, 15);
-        cancel.setSize(50, 15);
-        panel.add(submit);
-        panel.add(cancel);
-        panel.add(errorArea);
-        panel.add(remember);
+        
+        
+
+
+        horizontalStrut_3 = Box.createHorizontalStrut(20);
+        pane_1.add(horizontalStrut_3);
+        panel.add(progressBar);
+        
     }
 
     public String getUsername() {
@@ -153,6 +231,36 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
     public String getPassword() {
         return this.password;
     }
+    
+    public void setLabel(final String text) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                errorArea.setVisible(true);
+                errorArea.setForeground(Color.RED);
+                errorArea.setText(text);
+            }
+        });
+    }
+    
+    public void hideLabel(final String text) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                errorArea.setVisible(false);
+            }
+        });
+    }
+    
+    public void hideProgress() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisible(false);
+            }
+        });
+    }
+
 
     public boolean checkUserAndPass(String user, String pass) {
         try {
@@ -183,16 +291,15 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                         }
 
                     });
-                    
+
                 } else {
                     if (ver != null) {
                         if (!ver.equals(Chekkit.VERSION)) {
-                            this.errorArea.setText("A different version, " + ver + " is available.");
-                            this.errorArea.setVisible(true);
-                            
+                            setLabel("A different version, " + ver + " is available.");
+
                             return false;
                         }
-                        
+
                     } else {
                         System.out.println("WARN: Skipped update check due to missing header.");
                     }
@@ -200,8 +307,8 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            
-            
+
+
             StringBuilder builder = new StringBuilder();
             BufferedReader br = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
             String line;
@@ -211,23 +318,22 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             br.close();
             final String[] arg = builder.toString().split(",");
             if (arg.length < 1) {
-                this.errorArea.setText("Unable to connect to the site.");
-                this.errorArea.setVisible(true);
+                setLabel("Unable to connect to the site.");
                 return false;
             }
             if (arg[0].equalsIgnoreCase("get")) {
-                this.errorArea.setText("Incorrect Username or Password.");
-                this.errorArea.setVisible(true);
+                setLabel("Incorrect Username or Password.");
                 return false;
             }
-            
+
             Chekkit.chekkitUsername = user;
-            
+
             if (this.remember.isSelected()) {
-               try {
+                try {
                     Properties rememberMe = new Properties();
                     rememberMe.put("username", user);
                     rememberMe.put("password", pass);
+                    rememberMe.put("type", type);
                     FileOutputStream fos = new FileOutputStream(Chekkit.PATH + File.separator + "authentication.property");
                     rememberMe.store(fos, "Properties file if you've chosen to remember login details");
                 } catch (Exception e) {
@@ -238,9 +344,9 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                     File f = new File(Chekkit.PATH + File.separator + "authentication.property");
                     f.delete();
                 } catch (Exception e) {
-                    
+
                 }
-                
+
             }
 
             Chekkit.username = arg[0];
@@ -248,8 +354,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            this.errorArea.setText("A connection error ocurred while authenticating.");
-            this.errorArea.setVisible(true);
+            setLabel("A connection error ocurred while authenticating.");
             return false;
         }
     }
@@ -268,18 +373,35 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                     this.errorArea.setText("Please enter a password.");
                     this.errorArea.setVisible(true);
                 } else {
-                	Chekkit.username = this.userField.getText();
+                    this.errorArea.setText("Authenticating...");
+                    this.errorArea.setForeground(Color.BLUE);
+                    this.errorArea.setVisible(true);
+                    Chekkit.username = this.userField.getText();
                     this.password = new String(this.passField.getPassword());
-                    if (this.checkUserAndPass(Chekkit.username, password)) {
-                        this.isOpen = false;
-                    }
+                    progressBar.setVisible(true);
+                    progressBar.setIndeterminate(true);
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (checkUserAndPass(Chekkit.username, password)) {
+                                SwingUtilities.invokeLater(new Runnable() {
+
+                                    public void run() {
+                                        isOpen = false;
+                                    }
+
+                                });
+                            }
+                            hideProgress();
+                        }
+                    });
+                    t.start();
+
                 }
             } catch (NullPointerException ex) {
                 this.errorArea.setText("Please ensure that your username and password have both been entered.");
                 this.errorArea.setVisible(true);
             }
-        } else if (e.getSource() == this.cancel) {
-            System.exit(0);
         }
     }
 
@@ -289,7 +411,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 this.submit.doClick();
             } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                this.cancel.doClick();
+                System.exit(0);
             }
         }
     }
@@ -301,5 +423,4 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
 }
