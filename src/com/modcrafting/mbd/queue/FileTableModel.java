@@ -10,7 +10,7 @@ import com.modcrafting.mbd.Chekkit;
 public class FileTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -540092269499985493L;
     private List<String> columns = new ArrayList<String>();
-    private Class[] types = { Boolean.class, String.class, String.class, String.class, String.class, String.class, String.class, Integer.class, Long.class};
+    private Class[] types = { Boolean.class, String.class, String.class, String.class, String.class, String.class, String.class, Float.class, Long.class};
     public final List<QueueFile> files;
     private int totalRows;
     public Boolean sizeSort = false;

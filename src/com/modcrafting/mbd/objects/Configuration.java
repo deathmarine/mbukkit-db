@@ -22,6 +22,7 @@ public class Configuration {
     private Boolean hideProgress = false;
     private Boolean useNimbus = false;
     private Boolean showAbout = false;
+    private Boolean menteeMode = false;
     private String key = "";
     
     private Boolean openNotesOnFileOpen = false;
@@ -58,6 +59,12 @@ public class Configuration {
                     showAbout = Boolean.parseBoolean((String) defaults.get("about-on-close"));
                 }
                 
+                if(defaults.get("mentee-mode") == null){
+                    defaults.put("mentee-mode", false);
+                }else{
+                    menteeMode = Boolean.parseBoolean((String) defaults.get("mentee-mode"));
+                }
+                
                 if(defaults.get("key") == null){
                     defaults.put("key", "");
                 }else{
@@ -78,6 +85,7 @@ public class Configuration {
                 defaults.put("about-on-close", showAbout.toString());
                 defaults.put("auto-queue-refresh-rate", qRefRate.toString());
                 defaults.put("key", key);
+                defaults.put("mentee-mode", "false");
                 defaults.put("open-notes-on-file-open", openNotesOnFileOpen.toString());
                 defaults.store(new FileOutputStream(propF), "The Chekkit config.");
             } catch (Exception e) {
@@ -128,6 +136,10 @@ public class Configuration {
 
     public Boolean getOpenNotesOnFileOpen() {
         return openNotesOnFileOpen;
+    }
+    
+    public Boolean getMenteeModeEnabled() {
+        return this.menteeMode;
     }
     
     public Integer getInteger(String setting){
