@@ -64,6 +64,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
     private Component horizontalStrut_2;
     private Component horizontalStrut_3;
     private String type = "wait";
+    private JPanel panel_2;
 
     public UserPassWindow(Boolean useNimbus) {
 
@@ -99,15 +100,17 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
         sl_panel.putConstraint(SpringLayout.SOUTH, horizontalStrut_2, 0, SpringLayout.SOUTH, pane);
 
         JPanel panel_1 = new JPanel();
-        sl_panel.putConstraint(SpringLayout.NORTH, panel_1, 18, SpringLayout.NORTH, progressBar);
+        sl_panel.putConstraint(SpringLayout.EAST, panel_2, 0, SpringLayout.EAST, panel_1);
+        sl_panel.putConstraint(SpringLayout.NORTH, panel_1, 14, SpringLayout.NORTH, progressBar);
         sl_panel.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.WEST, pane_1);
-        sl_panel.putConstraint(SpringLayout.SOUTH, panel_1, 0, SpringLayout.SOUTH, panel);
+        sl_panel.putConstraint(SpringLayout.SOUTH, panel_1, 10, SpringLayout.SOUTH, panel);
         sl_panel.putConstraint(SpringLayout.EAST, panel_1, 0, SpringLayout.EAST, panel);
         panel.add(panel_1);
 
         Component horizontalGlue = Box.createHorizontalGlue();
         panel_1.add(horizontalGlue);
         errorArea = new JLabel(" ");
+        errorArea.setVerticalAlignment(SwingConstants.TOP);
         panel_1.add(errorArea);
         sl_panel.putConstraint(SpringLayout.NORTH, errorArea, 4, SpringLayout.SOUTH, progressBar);
         sl_panel.putConstraint(SpringLayout.WEST, errorArea, 0, SpringLayout.WEST, progressBar);
@@ -174,34 +177,45 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
         Component horizontalStrut = Box.createHorizontalStrut(20);
         pane_1.add(horizontalStrut);
-        pane_1.add(new JLabel("Username:    "));
+        JLabel lblUsername = new JLabel("Username:");
+        lblUsername.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblUsername.setPreferredSize(new Dimension(100,lblUsername.getHeight()));
+        pane_1.add(lblUsername);
+        
+        Component horizontalGlue_1 = Box.createHorizontalGlue();
+        pane_1.add(horizontalGlue_1);
         pane_1.add(userField);
         panel.add(pane_1);
         passField.setText(pass);
-        pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
+        pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
 
         Component horizontalStrut_1 = Box.createHorizontalStrut(20);
         pane.add(horizontalStrut_1);
-        pane.add(new JLabel("Password:     "));
+        JLabel lblPassword = new JLabel("Password:");
+        lblPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblPassword.setPreferredSize(new Dimension(100,lblUsername.getHeight()));
+        pane.add(lblPassword);
+        
+        Component horizontalGlue = Box.createHorizontalGlue();
+        pane.add(horizontalGlue);
         pane.add(passField);
         panel.add(pane);
 
-        JPanel panel_2 = new JPanel();
+        panel_2 = new JPanel();
         sl_panel.putConstraint(SpringLayout.NORTH, panel_2, 6, SpringLayout.SOUTH, pane);
-        sl_panel.putConstraint(SpringLayout.WEST, panel_2, 15, SpringLayout.WEST, pane);
+        sl_panel.putConstraint(SpringLayout.WEST, panel_2, 0, SpringLayout.WEST, pane_1);
         sl_panel.putConstraint(SpringLayout.SOUTH, panel_2, -40, SpringLayout.SOUTH, panel);
-        sl_panel.putConstraint(SpringLayout.EAST, panel_2, 0, SpringLayout.EAST, pane_1);
         panel.add(panel_2);
         panel_2.setLayout(null);
 
         remember = new JCheckBox("Remember");
-        remember.setBounds(0, 5, 110, 23);
+        remember.setBounds(18, 5, 110, 23);
         sl_panel.putConstraint(SpringLayout.NORTH, remember, 6, SpringLayout.NORTH, panel_2);
         sl_panel.putConstraint(SpringLayout.WEST, remember, 75, SpringLayout.WEST, panel_2);
         panel_2.add(remember);
         sl_panel.putConstraint(SpringLayout.EAST, remember, 0, SpringLayout.EAST, pane);
         submit = new JButton("Login");
-        submit.setBounds(210, 0, 73, 28);
+        submit.setBounds(225, 2, 73, 28);
         sl_panel.putConstraint(SpringLayout.EAST, submit, -10, SpringLayout.EAST, panel_2);
         panel_2.add(submit);
         submit.addActionListener(this);
@@ -367,11 +381,9 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
                     this.errorArea.setVisible(false);
                 }
                 if (this.userField.getText().equals("")) {
-                    this.errorArea.setText("Please enter a username.");
-                    this.errorArea.setVisible(true);
+                    setLabel("Please enter a username");
                 } else if (this.passField.getPassword().length == 0) {
-                    this.errorArea.setText("Please enter a password.");
-                    this.errorArea.setVisible(true);
+                    setLabel("Please enter a password");
                 } else {
                     this.errorArea.setText("Authenticating...");
                     this.errorArea.setForeground(Color.BLUE);
@@ -399,8 +411,7 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
 
                 }
             } catch (NullPointerException ex) {
-                this.errorArea.setText("Please ensure that your username and password have both been entered.");
-                this.errorArea.setVisible(true);
+                setLabel("Please fill in both fields.");
             }
         }
     }

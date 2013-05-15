@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,12 +83,15 @@ public class Chekkit extends JFrame implements WindowListener {
     public static String bukkitDevUsername;
     public static String chekkitUsername;
     public static final String USER_AGENT = "Chekkit " + VERSION;
-    public static String PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath().replace(File.separator + "Chekkit.jar", "").replace(File.separator + "mbd.jar", "");
+    public static String PATH = "unknown";
     private List<DecompJar> decompilingJars = Collections.synchronizedList(new ArrayList<DecompJar>());
 
 
     @SuppressWarnings("unchecked")
     public Chekkit(Properties properties) {
+        
+        
+        System.out.println(PATH);
         this.properties = properties;
         
         datab = new SQL(properties);
@@ -282,6 +286,15 @@ public class Chekkit extends JFrame implements WindowListener {
     }
 
     public static void main(String[] args) {
+        try {
+            if (Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")) {
+                PATH = new File(Chekkit.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile().getAbsolutePath() + File.separator;
+            } else {
+                PATH = Chekkit.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            }
+            
+        } catch(Exception e) {}
+        System.out.println(PATH);
         config = new Configuration();
         if (config.getMenteeModeEnabled()) {
             if (config.getInteger("today") == null || config.getInteger("today") != Calendar.DAY_OF_MONTH) {
