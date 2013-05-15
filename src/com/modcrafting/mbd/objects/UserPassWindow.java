@@ -43,6 +43,7 @@ import javax.swing.Box;
 import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
 import java.awt.GridLayout;
+import java.awt.Font;
 
 public class UserPassWindow extends JFrame implements ActionListener, KeyListener {
 
@@ -100,9 +101,8 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
         sl_panel.putConstraint(SpringLayout.SOUTH, horizontalStrut_2, 0, SpringLayout.SOUTH, pane);
 
         JPanel panel_1 = new JPanel();
-        sl_panel.putConstraint(SpringLayout.EAST, panel_2, 0, SpringLayout.EAST, panel_1);
         sl_panel.putConstraint(SpringLayout.NORTH, panel_1, 14, SpringLayout.NORTH, progressBar);
-        sl_panel.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.WEST, pane_1);
+        sl_panel.putConstraint(SpringLayout.WEST, panel_1, 0, SpringLayout.WEST, panel);
         sl_panel.putConstraint(SpringLayout.SOUTH, panel_1, 10, SpringLayout.SOUTH, panel);
         sl_panel.putConstraint(SpringLayout.EAST, panel_1, 0, SpringLayout.EAST, panel);
         panel.add(panel_1);
@@ -163,13 +163,13 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
         passField.addKeyListener(this);
         pane_1 = new JPanel();
         userField = new JTextField("", 16);
+        userField.setFont(new Font("Dialog", Font.PLAIN, 11));
         userField.addKeyListener(this);
         sl_panel = new SpringLayout();
         sl_panel.putConstraint(SpringLayout.NORTH, pane, 6, SpringLayout.SOUTH, pane_1);
-        sl_panel.putConstraint(SpringLayout.WEST, pane, 0, SpringLayout.WEST, pane_1);
-        sl_panel.putConstraint(SpringLayout.SOUTH, pane, 66, SpringLayout.NORTH, panel);
-        sl_panel.putConstraint(SpringLayout.WEST, pane_1, 0, SpringLayout.WEST, panel);
+        sl_panel.putConstraint(SpringLayout.WEST, pane, 0, SpringLayout.WEST, panel);
         sl_panel.putConstraint(SpringLayout.NORTH, pane_1, 10, SpringLayout.NORTH, panel);
+        sl_panel.putConstraint(SpringLayout.WEST, pane_1, 0, SpringLayout.WEST, panel);
         sl_panel.putConstraint(SpringLayout.SOUTH, pane_1, 35, SpringLayout.NORTH, panel);
         panel.setLayout(sl_panel);
         userField.setText(user);
@@ -202,8 +202,10 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
         panel.add(pane);
 
         panel_2 = new JPanel();
-        sl_panel.putConstraint(SpringLayout.NORTH, panel_2, 6, SpringLayout.SOUTH, pane);
-        sl_panel.putConstraint(SpringLayout.WEST, panel_2, 0, SpringLayout.WEST, pane_1);
+        sl_panel.putConstraint(SpringLayout.NORTH, panel_2, 72, SpringLayout.NORTH, panel);
+        sl_panel.putConstraint(SpringLayout.WEST, panel_2, 0, SpringLayout.WEST, panel);
+        sl_panel.putConstraint(SpringLayout.EAST, panel_2, 0, SpringLayout.EAST, panel);
+        sl_panel.putConstraint(SpringLayout.SOUTH, pane, -6, SpringLayout.NORTH, panel_2);
         sl_panel.putConstraint(SpringLayout.SOUTH, panel_2, -40, SpringLayout.SOUTH, panel);
         panel.add(panel_2);
         panel_2.setLayout(null);
@@ -220,11 +222,11 @@ public class UserPassWindow extends JFrame implements ActionListener, KeyListene
         panel_2.add(submit);
         submit.addActionListener(this);
         progressBar = new JProgressBar();
+        sl_panel.putConstraint(SpringLayout.WEST, progressBar, 8, SpringLayout.WEST, panel);
+        sl_panel.putConstraint(SpringLayout.EAST, progressBar, -3, SpringLayout.EAST, panel);
         progressBar.setVisible(false);
         progressBar.setIndeterminate(true);
-        sl_panel.putConstraint(SpringLayout.WEST, progressBar, 8, SpringLayout.WEST, panel);
         sl_panel.putConstraint(SpringLayout.SOUTH, progressBar, -20, SpringLayout.SOUTH, panel);
-        sl_panel.putConstraint(SpringLayout.EAST, progressBar, 0, SpringLayout.EAST, pane_1);
         if (pass != "") {
             remember.setSelected(true);
         }
