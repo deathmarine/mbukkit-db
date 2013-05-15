@@ -83,8 +83,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
 	private int processID;
-        
-        private Chekkit main;
+    private Chekkit main;
         
 	public DecompJar(Chekkit main, File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
@@ -329,24 +328,25 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	public void recursiveFolderLoad(File fs){
 		
 		String pattern = Pattern.quote(System.getProperty("file.separator"));
-		String dir = new File(Chekkit.PATH + File.separator + "ext"
-				+ File.separator).getAbsolutePath();
+		String dir = new File(Chekkit.PATH + File.separator + "ext" + File.separator).getAbsolutePath();
 		StringBuilder sb = new StringBuilder();
-		int ss = fs.getAbsolutePath().split(pattern).length;
-		for(String s:fs.getAbsolutePath().split(pattern)){
-			if(!dir.contains(s) && !s.contains(".")){
+		String breakdown = fs.getAbsolutePath().replace(dir, "").trim();
+		int ss = breakdown.split(pattern).length;
+		for(String s:breakdown.split(pattern)){
+			if(!s.contains(".")){ //HERE
 				sb.append(s);
-				if(ss>1){
+				if(ss>1)
 					sb.append(".");
-				}
 			}
 		}
-		if(sb.length()>0)
+		if(sb.length()>0){
 			sb.deleteCharAt(sb.length()-1);
+		}
 		String packag = sb.toString();
 		if(!fs.isDirectory()){
 			HashSet<HashFile> set = new HashSet<HashFile>();
-			
+			if(packag.length()>0)
+				packag = packag.substring(1);
 			if(this.files.containsKey(packag))
 				set = this.files.get(packag);
 			set.add(new HashFile(packag, fs, this));
