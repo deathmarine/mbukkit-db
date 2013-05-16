@@ -1,5 +1,8 @@
 package com.modcrafting.mbd.decom;
 
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Panel;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,6 +32,7 @@ public class HashFile implements SyntaxConstants {
 	private String hash;
 	private String pack;
 	RTextScrollPane scrollPane;
+	Panel image_pane;
 	RSyntaxTextArea textArea;
 	DecompJar jar;
 	List<String> list = new ArrayList<String>();
@@ -94,16 +98,24 @@ public class HashFile implements SyntaxConstants {
 			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_PYTHON);
 		else
 			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_PROPERTIES_FILE);
-		
-		scrollPane = new RTextScrollPane(textArea, true);
-		scrollPane.setIconRowHeaderEnabled(true);		
-		this.image = (Icon) new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/warn.png")));
-		try {
-			this.load();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(file.getName().toLowerCase().endsWith(".png")
+				||file.getName().toLowerCase().endsWith(".jpg")
+				||file.getName().toLowerCase().endsWith(".jpeg")
+				||file.getName().toLowerCase().endsWith(".gif")){
+    		Image newimage = new ImageIcon(Toolkit.getDefaultToolkit().getImage(file.getAbsolutePath())).getImage();
+    		textArea.setBackgroundImage(newimage);
+    		scrollPane = new RTextScrollPane(textArea, true);
+		}else{
+			scrollPane = new RTextScrollPane(textArea, true);
+			scrollPane.setIconRowHeaderEnabled(true);		
+			this.image = (Icon) new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/warn.png")));
+			try {
+				this.load();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}		
 		}
 	}
 	
