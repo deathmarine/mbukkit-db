@@ -489,7 +489,8 @@ public class Chekkit extends JFrame implements WindowListener {
             return;
         }
         for (final File f : files) {
-            if (!f.isDirectory() && f.getName().toLowerCase().contains(".jar")) {
+            if (!f.isDirectory() && (f.getName().toLowerCase().contains(".jar") ||
+            		f.getName().toLowerCase().contains(".zip"))) {
                 try {
                     log.info("Removing all Java source files from ZIP...");
                     deleteCodeFiles(f);
