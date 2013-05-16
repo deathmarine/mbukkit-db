@@ -503,7 +503,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
                 int value = JOptionPane.showConfirmDialog(co,"Save to database?");
                 if(value==JOptionPane.CLOSED_OPTION || value == JOptionPane.CANCEL_OPTION){
                     return;
-                }else if(value==JOptionPane.YES_OPTION){
+                }else if(value==JOptionPane.YES_OPTION && !safe.containsValue(hash)){
                     safe.put(title, hash);
                     if(open.containsKey(title)){
                         HashFile file = open.get(title);
