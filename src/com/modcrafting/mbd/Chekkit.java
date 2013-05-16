@@ -201,11 +201,11 @@ public class Chekkit extends JFrame implements WindowListener {
                 }
             }
         });
+    	final Chekkit c = this;
         exitMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Frame frame = Frame.getFrames()[0];
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                c.dispatchEvent(new WindowEvent(c, WindowEvent.WINDOW_CLOSING));
             }
         });
         clearMenuItem.addActionListener(new ActionListener() {
@@ -498,23 +498,55 @@ public class Chekkit extends JFrame implements WindowListener {
                     log.severe("Java source file removal failed!");
                     log.severe(e.getMessage());
                     e.printStackTrace();
-
                     return;
                 }
-                final Chekkit c = this;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        decompilingJars.add(new DecompJar(c, f, datab, keyword, bannedpackage, hideProgress, useNimbus));
-
-                    }
-                }).start();
+                try {
+					for(final File fil : goForZip(f)){
+					    final Chekkit c = this;
+					    new Thread(new Runnable() {
+					        @Override
+					        public void run() {
+					            decompilingJars.add(new DecompJar(c, fil, datab, keyword, bannedpackage, hideProgress, useNimbus));
+					        }
+					    }).start();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
             }
         }
     }
 
-    private void Log(String string) {
+    private File[] goForZip(File f) throws IOException {
+    	List<File> temp = new ArrayList<File>();
+        byte[] buf = new byte[1024];
+        ZipInputStream zin = new ZipInputStream(new FileInputStream(f));
+        ZipEntry entry = zin.getNextEntry();
+        while (entry != null) {
+            String name = entry.getName();
+            if (name.endsWith(".jar")||name.endsWith(".zip")) {
+            	File tempFile = new File(new File(PATH+File.separator), name);
+            	tempFile.createNewFile();
+                FileOutputStream fout = new FileOutputStream(tempFile);
+                int len;
+                while ((len = zin.read(buf)) > 0) {
+                    fout.write(buf, 0, len);
+                }
+                fout.close();
+                temp.add(tempFile);
+            }
+            entry = zin.getNextEntry();
+        	
+        }
+        zin.close();
+        if(temp.isEmpty()){
+        	temp.add(f);
+        }
+        
+		return temp.toArray(new File[]{});
+	}
+
+	private void Log(String string) {
         log.info(string);
     }
 
