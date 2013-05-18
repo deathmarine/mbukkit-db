@@ -496,7 +496,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    String title = tabbed.getTitleAt(index);
         if(open.containsKey(title)){
             HashFile hash = open.get(title);
-            if(safe.containsKey(title) || title.endsWith(".MF")){
+            if(safe.containsKey(title) || title.endsWith(".MF") || title.endsWith(".yml")){
                 open.remove(title);
                 tabbed.remove(co);
                 return;
@@ -600,7 +600,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		        popup.show(event.getComponent(), event.getX(), event.getY());
 		        return;
 			}
-			if(event.getClickCount()==1 && SwingUtilities.isLeftMouseButton(event)){
+			/*if(event.getClickCount()==1 && SwingUtilities.isLeftMouseButton(event)){ //ActionPerformed happens anyway, no need to add twice
 				if(args.length<2)
 					return;
 				if(args.length==2){
@@ -623,7 +623,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 						}
 					}
 				}
-			}
+			}*/
 		}
 		@Override
 		public void actionPerformed(ActionEvent event) {
