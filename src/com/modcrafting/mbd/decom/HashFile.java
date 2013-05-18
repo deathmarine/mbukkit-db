@@ -16,6 +16,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -28,6 +31,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 //import com.modcrafting.mbd.MasterPluginDatabase;
 
 public class HashFile implements SyntaxConstants {
+    Pattern pattern = Pattern.compile("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b");
 	private File file;
 	private String hash;
 	private String pack;
@@ -138,6 +142,12 @@ public class HashFile implements SyntaxConstants {
 						set.add(lineNum-1);
 					}
 				}
+				if(validIP(line.toLowerCase())){
+					String check = "[SEVERE] IP was found embedded.";
+					list.add(check+" ("+pack+"."+ file.getName()+ " @L" + lineNum + ")\n"+line.trim());
+					line = line+" //"+check;
+					set.add(lineNum-1);	
+				}
 			}
 			if(file.getName().toLowerCase().contains("plugin.yml") && line.startsWith("main: "))
 				jar.mainclass = line.replace("main: ", "").trim();
@@ -180,6 +190,16 @@ public class HashFile implements SyntaxConstants {
 	
 	public boolean checkDiffs(String hash){
 		return this.hash.equals(hash);
+	}
+
+	public boolean validIP(String ip) {
+	    if (ip == null || ip.isEmpty()) return false;
+	    ip = ip.trim();
+	    try {
+	        return pattern.matcher(ip).find();
+	    } catch (PatternSyntaxException ex) {
+	        return false;
+	    }
 	}
 
 }

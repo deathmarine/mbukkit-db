@@ -548,7 +548,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		        tree.getSelectionModel().setSelectionPath(selPath);
 		        JPopupMenu popup = new JPopupMenu();
 		        for (String ac : new String[]{
-		        		"Open",
 		        		"Save",
 		        		"Acknowledge",
 		        		"Close",
@@ -563,7 +562,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		        	if(selPath.toString().contains(".java") && menuItem.isEnabled()){
 		        		
 			        	menuItem.addActionListener(new TreeListener(tree, selPath));
-			        	
+		        	} else if(safe.containsKey(args[args.length-1]) && ac.equals("Save")){
+		        		menuItem.setEnabled(false);			        	
 		        	} else if(open.containsKey(args[args.length-1]) && ac.equals("Close")){
 		        		menuItem.addActionListener(new ActionListener(){
 							@Override
