@@ -68,9 +68,10 @@ public class MessageSendOperation implements Runnable {
                     //We don't care :-D
                     e.printStackTrace();
                 }
-                closeWindow();
+                
             }
         }
+        closeWindow();
         
     }
 

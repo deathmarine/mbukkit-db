@@ -84,6 +84,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	File file;
 	private int processID;
     private Chekkit main;
+    private JTree tree;
         
 	public DecompJar(Chekkit main, File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
@@ -221,7 +222,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 			Icon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/badskull_large.png")));
             JOptionPane.showMessageDialog(this, "Restricted Library \""+badpack+"\" was found.\nRecommend Deny.", "Restricted Lib", JOptionPane.PLAIN_MESSAGE, img2);
 	    }
-	    JTree tree = new JTree(top);
+	    tree = new JTree(top);
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
 	    TreeListener tl = new TreeListener(tree);
@@ -435,6 +436,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 
 	private void setFileSafe(final HashFile file){
 		safe.put(file.getFile().getName(), file);
+		tree.updateUI();
 		if(open.containsKey(file.getFile().getName())){
 			open.remove(file.getFile().getName());
 			//database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());

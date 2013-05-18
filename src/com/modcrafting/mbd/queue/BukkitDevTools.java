@@ -106,18 +106,15 @@ public class BukkitDevTools {
                         BukkitDevTools.showLabel("Downloading " + name + "...", qw);
                         File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
 
-                        if (!destination.getPath().endsWith(".jar") && !qf.isServerMod()) {
-                            JOptionPane.showMessageDialog(qw, "This file isn't a server mod. We'll try and download it and rename it to a JAR if it isn't one already.", "Warning!", JOptionPane.WARNING_MESSAGE);
-                            destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name + ".jar");
-                        } else {
-                            if (!destination.getPath().endsWith(".jar") && qf.isServerMod()) {
-                                JOptionPane.showMessageDialog(qw, "This file is a not a JAR. It'll be downloaded, but you'll need to extract/process it manually.", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        
+                            if (!destination.getPath().endsWith(".jar") && !destination.getPath().endsWith(".zip") && qf.isServerMod()) {
+                                JOptionPane.showMessageDialog(qw, "This file is a not a JAR or ZIP. It'll be downloaded, but you'll need to extract/process it manually.", "Warning!", JOptionPane.WARNING_MESSAGE);
                             }
-                        }
+                        
                         FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
 
 
-                        if (destination.getPath().endsWith(".jar")) {
+                        if (destination.getPath().endsWith(".jar") || destination.getPath().endsWith(".zip")) {
                             filesToDecompile.add(destination);
                         }
 
