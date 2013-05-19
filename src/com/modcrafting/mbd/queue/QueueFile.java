@@ -165,7 +165,7 @@ public class QueueFile {
         int d = cal.get(Calendar.DAY_OF_MONTH);
         String dayPart = BukkitDevTools.ordinal(d) + " ";
         String date = dayPart + sdf.format(nextWeek);
-        BukkitDevPM message = new BukkitDevPM(this.author, "Hi " + this.author + "!\n\nThanks for uploading your file for " + this.projectName + ". Before it can be approved, you need to edit the file and add a version number to it. Example: 'LiteKits v1.0'.\n\nTo do this now, hit the button below and add the version to the 'Name' field.\n\n[[" + editURL + "|{{http://i.imgur.com/TvLphUs.png|}}]]\n\nPlease note that if you do not add a version before " + date + ", your file will be deleted and you'll need to upload it again.\n\nThanks!", "Your file, " + this.title);
+        BukkitDevPM message = new BukkitDevPM(this.author, "Hi " + this.author + "!\n\nThanks for uploading your file for " + this.projectName + ". Before it can be approved, you need to edit the file and add a version number to it. Example: 'LiteKits v1.0'.\n\nTo do this now, hit the button below and add the version to the 'Name' field.\n\n[[" + editURL + "|{{http://i.imgur.com/TvLphUs.png|}}]]\n\nPlease note that if you do not add a version before " + date + ", your file will be deleted and you'll need to upload it again.\n\n**Once you've added your version, you should reply to this PM to let me know your file can be approved. This will save time for you and me.**\n\nThanks!", "Your file, " + this.title);
         return message;
     }
 
