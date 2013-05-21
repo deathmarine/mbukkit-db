@@ -156,9 +156,12 @@ public class QueueFile {
     }
     
     public BukkitDevPM getVersionPM() {
-        
-        long theFuture = System.currentTimeMillis() + (86400 * Chekkit.config.getInteger("version-pm-days", 7) * 1000);
-        
+        int num = Chekkit.config.getInteger("version-pm-days", 7);
+        Chekkit.log.info(Integer.toString(num));
+        Chekkit.log.info("Now: " + System.currentTimeMillis());
+        long secs = (86400000L * num);
+        long theFuture = System.currentTimeMillis() + secs;
+        Chekkit.log.info(Long.toString(theFuture));
         
         Date nextWeek = new Date(theFuture);
         SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy");
