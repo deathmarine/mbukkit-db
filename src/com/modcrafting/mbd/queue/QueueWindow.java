@@ -17,6 +17,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -37,6 +38,8 @@ import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 
 import com.modcrafting.mbd.Chekkit;
+import com.modcrafting.mbd.objects.VersionPMConfig;
+
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
@@ -120,6 +123,16 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         JMenu mnFile = new JMenu("File");
         menuBar.add(mnFile);
         mnFile.add(this.autoRefresh);
+        
+        JMenuItem mntmVersionPms = new JMenuItem("Version PMs");
+        mntmVersionPms.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                VersionPMConfig dialog = new VersionPMConfig();
+                dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                dialog.setVisible(true);
+            }
+        });
+        mnFile.add(mntmVersionPms);
         mnFile.add(this.exit);
         this.autoRefresh.addActionListener(this);
         this.exit.addActionListener(this);

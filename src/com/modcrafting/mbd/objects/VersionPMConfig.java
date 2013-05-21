@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.GridLayout;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JTextField;
 import javax.swing.BoxLayout;
@@ -22,28 +23,23 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.SwingConstants;
 
+import com.modcrafting.mbd.Chekkit;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 public class VersionPMConfig extends JDialog {
 
     private final JPanel contentPanel = new JPanel();
     private JTextField textField;
 
-    /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        try {
-            VersionPMConfig dialog = new VersionPMConfig();
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            dialog.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Create the dialog.
      */
     public VersionPMConfig() {
+        setResizable(false);
+        
         setTitle("Version PM Configuration");
         setBounds(100, 100, 450, 329);
         getContentPane().setLayout(new BorderLayout());
@@ -60,10 +56,10 @@ public class VersionPMConfig extends JDialog {
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         GridBagLayout gbl_contentPanel = new GridBagLayout();
-        gbl_contentPanel.rowHeights = new int[] {30, 150, 30};
-        gbl_contentPanel.columnWidths = new int[] {120, 300};
-        gbl_contentPanel.columnWeights = new double[]{0.0, 0.0};
-        gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0};
+        gbl_contentPanel.rowHeights = new int[] {30, 150, 30 };
+        gbl_contentPanel.columnWidths = new int[] {120, 300 };
+        gbl_contentPanel.columnWeights = new double[] {0.0, 0.0 };
+        gbl_contentPanel.rowWeights = new double[] {0.0, 0.0, 0.0 };
         contentPanel.setLayout(gbl_contentPanel);
         {
             JLabel lblNewLabel = new JLabel("Subject");
@@ -84,6 +80,7 @@ public class VersionPMConfig extends JDialog {
             contentPanel.add(textField, gbc_textField);
             textField.setAlignmentX(Component.RIGHT_ALIGNMENT);
             textField.setColumns(10);
+            textField.setText(Chekkit.config.getString("version-pm-subject", ""));
         }
         {
             JLabel lblNewLabel_1 = new JLabel("Message");
@@ -96,13 +93,20 @@ public class VersionPMConfig extends JDialog {
             lblNewLabel_1.setAlignmentY(Component.BOTTOM_ALIGNMENT);
         }
         {
+            
             JEditorPane editorPane = new JEditorPane();
             GridBagConstraints gbc_editorPane = new GridBagConstraints();
             gbc_editorPane.fill = GridBagConstraints.BOTH;
             gbc_editorPane.insets = new Insets(0, 0, 5, 0);
             gbc_editorPane.gridx = 1;
             gbc_editorPane.gridy = 1;
-            contentPanel.add(editorPane, gbc_editorPane);
+            JScrollPane jsp = new JScrollPane(editorPane);
+            jsp.setSize(editorPane.getSize());
+            contentPanel.add(jsp, gbc_editorPane);
+            editorPane.setText(Chekkit.config.getString("version-pm-msg", ""));
+           
+            
+            
         }
         {
             JLabel lblNewLabel_2 = new JLabel("Deadline in days");
@@ -112,6 +116,7 @@ public class VersionPMConfig extends JDialog {
             gbc_lblNewLabel_2.gridx = 0;
             gbc_lblNewLabel_2.gridy = 2;
             contentPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
+            
         }
         {
             JSpinner spinner = new JSpinner();
@@ -122,6 +127,7 @@ public class VersionPMConfig extends JDialog {
             gbc_spinner.gridx = 1;
             gbc_spinner.gridy = 2;
             contentPanel.add(spinner, gbc_spinner);
+            spinner.setValue(Integer.parseInt(Chekkit.config.getString("version-pm-days", "")));
         }
         {
             JPanel buttonPane = new JPanel();
@@ -135,6 +141,11 @@ public class VersionPMConfig extends JDialog {
             }
             {
                 JButton cancelButton = new JButton("Cancel");
+                cancelButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        dispose();
+                    }
+                });
                 cancelButton.setActionCommand("Cancel");
                 buttonPane.add(cancelButton);
             }
