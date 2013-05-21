@@ -37,7 +37,7 @@ public class BukkitDevTools {
     public static void sendBukkitDevPM(String user, String subject, String message, String key) {
         try {
             String url = "http://dev.bukkit.org/home/send-private-message/?api-key=" + key;
-            Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent(Chekkit.USER_AGENT).ignoreHttpErrors(true).post();
+            Document doc = Jsoup.connect(url).data("cc_users", "").data("standard_users", user).data("subject", subject).data("markup_type", "creole").data("markup", message).userAgent(Chekkit.USER_AGENT).ignoreHttpErrors(true).timeout(0).post();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -50,10 +50,10 @@ public class BukkitDevTools {
                 .replace(":fileLink:", qf.getFilePageURL())
                 .replace(":fileURL:", qf.getFileDownloadURL())
                 .replace(":fileEditURL:", qf.getFilePageURL() + "edit/")
-                .replace(":editButton:", "[[" + qf.getFilePageURL() + "edit/" + "|{{http://i.imgur.com/TvLphUs.png|}}]]")
+                .replace(":editButton:", "[[" + qf.getFilePageURL() + "edit/" + "|{{http://i.imgur.com/49jgiZM.png|}}]]")
                 .replace(":authorName:", qf.getAuthor())
                 .replace(":authorURL", "http://dev.bukkit.org/profiles/" + qf.getAuthor())
-                .replace(":claimedName", qf.getClaimed())
+                .replace(":claimedName", Chekkit.bukkitDevUsername)
                 .replace(":claimedURL", "http://dev.bukkit.org/profiles/" + qf.getClaimed())
                 .replace(":deadline:", deadline)
                 .replace(":titleExample:", "'LiteKits v1.0'")
@@ -124,14 +124,14 @@ public class BukkitDevTools {
 
                 } else {
                     try {
-                        String name = qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/') + 1, qf.getFileDownloadURL().length());
+                        String name = qf.getFileID() + "." + qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/') + 1, qf.getFileDownloadURL().length());
                         BukkitDevTools.showLabel("Downloading " + name + "...", qw);
-                        File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
-
                         
-                            if (!destination.getPath().endsWith(".jar") && !destination.getPath().endsWith(".zip") && qf.isServerMod()) {
-                                JOptionPane.showMessageDialog(qw, "This file is a not a JAR or ZIP. It'll be downloaded, but you'll need to extract/process it manually.", "Warning!", JOptionPane.WARNING_MESSAGE);
-                            }
+                        File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
+                        
+                        if (!destination.getPath().endsWith(".jar") && !destination.getPath().endsWith(".zip") && qf.isServerMod()) {
+                            JOptionPane.showMessageDialog(qw, "This file is a not a JAR or ZIP. It'll be downloaded, but you'll need to extract/process it manually.", "Warning!", JOptionPane.WARNING_MESSAGE);
+                        }
                         
                         FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
 
@@ -191,7 +191,7 @@ public class BukkitDevTools {
     }
 
     public static String ordinal(int num) {
-        String[] suffix = {"th", "st", "nd', 'rd", "th", "th", "th", "th", "th", "th" };
+        String[] suffix = {"th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
         int m = num % 100;
         return num + suffix[(m > 10 && m < 20) ? 0 : (m % 10)];
     }
@@ -597,6 +597,31 @@ public class BukkitDevTools {
         showLabel("Files approved!", queueWindow);
         requestQueueUpdate(queueWindow);
 
+    }
+
+    public static void recoverFiles(List<QueueFile> files, QueueWindow queueWindow, Chekkit ck) {
+        List<File> toDecompile = new ArrayList<File>();
+        for (QueueFile qf : files) {
+            if (qf.selected) {
+                String name = qf.getFileID() + "." + qf.getFileDownloadURL().substring(qf.getFileDownloadURL().lastIndexOf('/') + 1, qf.getFileDownloadURL().length());
+                File destination = new File(Chekkit.PATH + File.separator + "downloads" + File.separator + name);
+                if (destination.exists()) {
+                    Chekkit.log.info("Found the file, let's try processing it.");
+                    toDecompile.add(destination);
+                } else {
+                    Chekkit.log.info("Didn't find " + name + " - let's download it.");
+                    
+                    try {
+                        FileUtils.copyURLToFile(new URL(qf.getFileDownloadURL()), destination);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    toDecompile.add(destination);
+                }
+            }
+        }
+        decompileSomeFiles(toDecompile, ck);
+        
     }
 
 }

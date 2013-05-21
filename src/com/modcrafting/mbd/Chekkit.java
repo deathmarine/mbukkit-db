@@ -305,7 +305,7 @@ public class Chekkit extends JFrame implements WindowListener {
         
         if (!config.contains("version-pm-msg")) {
             String msg = "Hi :authorName:!\n\n" +
-                    "Thanks for uploading your file for {{:projectURL|:ProjectName:}}. Before it can be approved, you need to edit the file and add a version number to it. Example: :titleExample:." +
+                    "Thanks for uploading your file for [[:projectURL:|:projectName:]]. Before it can be approved, you need to edit the file and add a version number to it. Example: :titleExample:." +
                     "\n\nTo do this now, hit the button below and add the version to the 'Name' field." +
                     "\n\n:editButton:\n\nPlease note that if you do not add a version before :deadline:, your file will be deleted and you'll need to upload it again." +
                     "\n\n**Once you've added your version, you should reply to this PM to let me know your file can be approved. This will save time for you and me.**" +

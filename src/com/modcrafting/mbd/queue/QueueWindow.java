@@ -38,6 +38,8 @@ import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 
 import com.modcrafting.mbd.Chekkit;
+import com.modcrafting.mbd.objects.BukkitDevPM;
+import com.modcrafting.mbd.objects.MessageQueue;
 import com.modcrafting.mbd.objects.VersionPMConfig;
 
 import javax.swing.KeyStroke;
@@ -74,6 +76,13 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
     private final JMenuItem mntmDeleteMarkedFiles = new JMenuItem("Delete marked files");
     private String DBOName;
     private Chekkit ck;
+    private final JMenuItem mntmRecoverredownload = new JMenuItem("Recover/redownload");
+    private final JMenuItem mntmManuallySendVersion = new JMenuItem("Manually send version PM");
+    private final JMenuItem claimPopupItem = new JMenuItem("Claim");
+    private final JMenuItem approvePoupItem = new JMenuItem("Approve");
+    private final JMenuItem deletePopupItem = new JMenuItem("Delete");
+    private final JMenuItem sendVersionPopupItem = new JMenuItem("Manually send version PM");
+    private final JMenuItem banAuthorPopupItem = new JMenuItem("Ban author");
 
     /**
      * Initialize the object
@@ -127,7 +136,7 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         JMenuItem mntmVersionPms = new JMenuItem("Version PMs");
         mntmVersionPms.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                VersionPMConfig dialog = new VersionPMConfig();
+                VersionPMConfig dialog = new VersionPMConfig(ck);
                 dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
                 dialog.setVisible(true);
             }
@@ -179,6 +188,12 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
         
         mntmDeleteMarkedFiles.addActionListener(this);
         mnFiles.add(mntmDeleteMarkedFiles);
+        mntmRecoverredownload.addActionListener(this);
+        
+        mnFiles.add(mntmRecoverredownload);
+        mntmManuallySendVersion.addActionListener(this);
+        
+        mnFiles.add(mntmManuallySendVersion);
         this.refreshQueue.addActionListener(this);
 
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -314,11 +329,18 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                     }
                 };
                 JPopupMenu contextMenu = new JPopupMenu();
-                contextMenu.add(new JMenuItem("Claim"));
-                contextMenu.add(new JMenuItem("Approve"));
-                contextMenu.add(new JMenuItem("Reject"));
-                contextMenu.add(new JMenuItem("Send version PM"));
-                contextMenu.add(new JMenuItem("Ban author"));
+                claimPopupItem.addActionListener(QueueWindow.this);
+                approvePoupItem.addActionListener(QueueWindow.this);
+                deletePopupItem.addActionListener(QueueWindow.this);
+                sendVersionPopupItem.addActionListener(QueueWindow.this);
+                banAuthorPopupItem.addActionListener(QueueWindow.this);
+                
+                contextMenu.add(claimPopupItem);
+                contextMenu.add(approvePoupItem);
+                contextMenu.add(deletePopupItem);
+                contextMenu.add(sendVersionPopupItem);
+                contextMenu.add(banAuthorPopupItem);
+                
                 table.setComponentPopupMenu(contextMenu);
                 table.setDefaultRenderer(String.class, new FileCellRenderer(aq.getFileList()));
                 table.setAutoCreateRowSorter(true);
@@ -605,6 +627,36 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     BukkitDevTools.harvestDeletionReasons(ftm.files, QueueWindow.this, APIKey, ck);
+                }
+            });
+            t.start();
+        } else if (e.getSource() == mntmRecoverredownload) {
+            final FileTableModel ftm = (FileTableModel) table.getModel();
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    BukkitDevTools.recoverFiles(ftm.files, QueueWindow.this, ck);
+                }
+            });
+            t.start();
+        } else if (e.getSource() == mntmManuallySendVersion) {
+            final FileTableModel ftm = (FileTableModel) table.getModel();
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    final List<BukkitDevPM> PMs = new ArrayList<BukkitDevPM>();
+                    for (QueueFile qf : ftm.files) {
+                        if (qf.selected) {
+                            Chekkit.log.info("Queueing PM for " + qf.getFileID() + ": '" + qf.getTitle() + "'");
+                            PMs.add(qf.getVersionPM());
+                        }
+                    }
+                    if (PMs.size() > 0) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                new MessageQueue(PMs, APIKey).setVisible(true); 
+                            }
+                        });
+                    }
                 }
             });
             t.start();

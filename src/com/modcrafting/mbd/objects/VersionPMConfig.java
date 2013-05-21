@@ -30,14 +30,23 @@ import java.awt.event.ActionEvent;
 
 public class VersionPMConfig extends JDialog {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8318537089814179694L;
     private final JPanel contentPanel = new JPanel();
-    private JTextField textField;
+    private JTextField textField = new JTextField();
+    private JSpinner spinner = new JSpinner();
+    private JEditorPane editorPane = new JEditorPane();
+    private Chekkit ck;
+    
 
 
     /**
      * Create the dialog.
      */
-    public VersionPMConfig() {
+    public VersionPMConfig(final Chekkit ck) {
+        this.ck = ck;
         setResizable(false);
         
         setTitle("Version PM Configuration");
@@ -71,7 +80,7 @@ public class VersionPMConfig extends JDialog {
             contentPanel.add(lblNewLabel, gbc_lblNewLabel);
         }
         {
-            textField = new JTextField();
+            
             GridBagConstraints gbc_textField = new GridBagConstraints();
             gbc_textField.fill = GridBagConstraints.BOTH;
             gbc_textField.insets = new Insets(0, 0, 5, 0);
@@ -80,7 +89,7 @@ public class VersionPMConfig extends JDialog {
             contentPanel.add(textField, gbc_textField);
             textField.setAlignmentX(Component.RIGHT_ALIGNMENT);
             textField.setColumns(10);
-            textField.setText(Chekkit.config.getString("version-pm-subject", ""));
+            textField.setText(ck.config.getString("version-pm-subject", ""));
         }
         {
             JLabel lblNewLabel_1 = new JLabel("Message");
@@ -93,8 +102,6 @@ public class VersionPMConfig extends JDialog {
             lblNewLabel_1.setAlignmentY(Component.BOTTOM_ALIGNMENT);
         }
         {
-            
-            JEditorPane editorPane = new JEditorPane();
             GridBagConstraints gbc_editorPane = new GridBagConstraints();
             gbc_editorPane.fill = GridBagConstraints.BOTH;
             gbc_editorPane.insets = new Insets(0, 0, 5, 0);
@@ -103,7 +110,7 @@ public class VersionPMConfig extends JDialog {
             JScrollPane jsp = new JScrollPane(editorPane);
             jsp.setSize(editorPane.getSize());
             contentPanel.add(jsp, gbc_editorPane);
-            editorPane.setText(Chekkit.config.getString("version-pm-msg", ""));
+            editorPane.setText(ck.config.getString("version-pm-msg", ""));
            
             
             
@@ -119,7 +126,7 @@ public class VersionPMConfig extends JDialog {
             
         }
         {
-            JSpinner spinner = new JSpinner();
+            
             spinner.setModel(new SpinnerNumberModel(1, 1, 30, 1));
             GridBagConstraints gbc_spinner = new GridBagConstraints();
             gbc_spinner.insets = new Insets(0, 0, 5, 0);
@@ -127,7 +134,7 @@ public class VersionPMConfig extends JDialog {
             gbc_spinner.gridx = 1;
             gbc_spinner.gridy = 2;
             contentPanel.add(spinner, gbc_spinner);
-            spinner.setValue(Integer.parseInt(Chekkit.config.getString("version-pm-days", "")));
+            spinner.setValue(Integer.parseInt(ck.config.getString("version-pm-days", "")));
         }
         {
             JPanel buttonPane = new JPanel();
@@ -135,6 +142,17 @@ public class VersionPMConfig extends JDialog {
             getContentPane().add(buttonPane, BorderLayout.SOUTH);
             {
                 JButton okButton = new JButton("Save");
+                okButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        //Time to save!
+                        //Doing this in a static way breaks the rest of the config.
+                        ck.config.set("version-pm-days", spinner.getValue().toString());
+                        ck.config.set("version-pm-msg", editorPane.getText());
+                        ck.config.set("version-pm-subject", textField.getText());
+                        dispose();
+                        
+                    }
+                });
                 okButton.setActionCommand("OK");
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);
