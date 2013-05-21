@@ -43,6 +43,28 @@ public class BukkitDevTools {
 
         }
     }
+    
+    
+    public static String tokenizePMString(String PM, QueueFile qf, String deadline) {
+        PM = PM.replace(":fileTitle:", qf.getTitle())
+                .replace(":fileLink:", qf.getFilePageURL())
+                .replace(":fileURL:", qf.getFileDownloadURL())
+                .replace(":fileEditURL:", qf.getFilePageURL() + "edit/")
+                .replace(":editButton:", "[[" + qf.getFilePageURL() + "edit/" + "|{{http://i.imgur.com/TvLphUs.png|}}]]")
+                .replace(":authorName:", qf.getAuthor())
+                .replace(":authorURL", "http://dev.bukkit.org/profiles/" + qf.getAuthor())
+                .replace(":claimedName", qf.getClaimed())
+                .replace(":claimedURL", "http://dev.bukkit.org/profiles/" + qf.getClaimed())
+                .replace(":deadline:", deadline)
+                .replace(":titleExample:", "'LiteKits v1.0'")
+                .replace(":projectName:", qf.getProjectName())
+                .replace(":projectURL:", qf.getProjectURL())
+                .replace(":fileSize:", qf.getReadableSize())
+                .replace(":filePostDate:", BukkitDevTools.prettyTime(qf.getUploadTime()));
+        
+        return PM;
+        
+    }
 
     private static void showLabel(final String text, final QueueWindow qw) {
         SwingUtilities.invokeLater(new Runnable() {

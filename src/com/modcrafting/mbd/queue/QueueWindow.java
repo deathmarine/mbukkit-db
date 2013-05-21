@@ -2,6 +2,7 @@ package com.modcrafting.mbd.queue;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -274,7 +276,37 @@ public class QueueWindow extends JFrame implements ActionListener, WindowListene
                  */
                 final FileTableModel model = new FileTableModel(aq, QueueWindow.this);
 
-                table = new JTable(model);
+                table = new JTable(model) {
+                    /**
+                     * 
+                     */
+                    private static final long serialVersionUID = -66459293518731611L;
+
+                    /** 
+                     * @inherited <p>
+                     */
+                    @Override
+                    public JPopupMenu getComponentPopupMenu() {
+                        Point p = getMousePosition();
+                        // mouse over table and valid row
+                        if (p != null && rowAtPoint(p) >= 0) {
+                            // condition for showing popup triggered by mouse
+                            if (isRowSelected(rowAtPoint(p))) {
+                                return super.getComponentPopupMenu();
+                            } else {
+                                return null;
+                            }
+                        }
+                        return super.getComponentPopupMenu();
+                    }
+                };
+                JPopupMenu contextMenu = new JPopupMenu();
+                contextMenu.add(new JMenuItem("Claim"));
+                contextMenu.add(new JMenuItem("Approve"));
+                contextMenu.add(new JMenuItem("Reject"));
+                contextMenu.add(new JMenuItem("Send version PM"));
+                contextMenu.add(new JMenuItem("Ban author"));
+                table.setComponentPopupMenu(contextMenu);
                 table.setDefaultRenderer(String.class, new FileCellRenderer(aq.getFileList()));
                 table.setAutoCreateRowSorter(true);
                 table.removeColumn(table.getColumnModel().getColumn(7));

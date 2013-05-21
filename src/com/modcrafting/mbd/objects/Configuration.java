@@ -114,6 +114,18 @@ public class Configuration {
         return "";
     }
     
+    public String getString(String setting, String defaultValue){
+        String s = config.getProperty(setting);
+        if(s != null && !s.equals("")){
+            return s;
+        }
+        return defaultValue;
+    }
+    
+    public Boolean contains(String setting) {
+        return config.containsKey(setting);
+    }
+    
     public Boolean getBoolean(String setting){
         try{
             Boolean s = Boolean.parseBoolean(config.getProperty(setting));
@@ -152,6 +164,18 @@ public class Configuration {
             return null;
         }
         return null;
+    }
+    
+    public Integer getInteger(String setting, int defaultValue){
+        try{
+            Integer s = Integer.parseInt(config.getProperty(setting));
+            if(s instanceof Integer && s != null){
+                return s;
+            }
+        }catch (Exception e){
+            return defaultValue;
+        }
+        return defaultValue;
     }
     
     public Double getDouble(String setting){

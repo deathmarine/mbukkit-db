@@ -156,8 +156,10 @@ public class QueueFile {
     }
     
     public BukkitDevPM getVersionPM() {
-        String editURL = this.fileLink + "edit/";
-        long theFuture = System.currentTimeMillis() + (86400 * 7 * 1000);
+        
+        long theFuture = System.currentTimeMillis() + (86400 * Chekkit.config.getInteger("version-pm-days", 7) * 1000);
+        
+        
         Date nextWeek = new Date(theFuture);
         SimpleDateFormat sdf = new SimpleDateFormat("MMM yyyy");
         Calendar cal = Calendar.getInstance();
@@ -165,7 +167,16 @@ public class QueueFile {
         int d = cal.get(Calendar.DAY_OF_MONTH);
         String dayPart = BukkitDevTools.ordinal(d) + " ";
         String date = dayPart + sdf.format(nextWeek);
-        BukkitDevPM message = new BukkitDevPM(this.author, "Hi " + this.author + "!\n\nThanks for uploading your file for " + this.projectName + ". Before it can be approved, you need to edit the file and add a version number to it. Example: 'LiteKits v1.0'.\n\nTo do this now, hit the button below and add the version to the 'Name' field.\n\n[[" + editURL + "|{{http://i.imgur.com/TvLphUs.png|}}]]\n\nPlease note that if you do not add a version before " + date + ", your file will be deleted and you'll need to upload it again.\n\n**Once you've added your version, you should reply to this PM to let me know your file can be approved. This will save time for you and me.**\n\nThanks!", "Your file, " + this.title);
+        String subject = "Your file, :fileTitle:";
+        String msg = "Hi :authorName:!\n\n" +
+        		     "Thanks for uploading your file for {{:projectURL|:ProjectName:}}. Before it can be approved, you need to edit the file and add a version number to it. Example: :titleExample:." +
+        		     "\n\nTo do this now, hit the button below and add the version to the 'Name' field." +
+        		     "\n\n:editButton:\n\nPlease note that if you do not add a version before :deadline:, your file will be deleted and you'll need to upload it again." +
+        		     "\n\n**Once you've added your version, you should reply to this PM to let me know your file can be approved. This will save time for you and me.**" +
+        		     "\n\nThanks!";
+
+        BukkitDevPM message = new BukkitDevPM(this.author, BukkitDevTools.tokenizePMString(Chekkit.config.getString("version-pm-msg", msg), this, date), BukkitDevTools.tokenizePMString(Chekkit.config.getString("version-pm-subject", subject), this, date));
+        
         return message;
     }
 
