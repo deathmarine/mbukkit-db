@@ -436,7 +436,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 
 	private void setFileSafe(final HashFile file){
 		safe.put(file.getFile().getName(), file);
-		tree.updateUI();
 		if(open.containsKey(file.getFile().getName())){
 			open.remove(file.getFile().getName());
 			//database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
@@ -459,6 +458,10 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 //				
 //			});
 		}
+		tree.validate();
+		tree.repaint();
+		tree.updateUI();
+		
 	}
 	
 	private class Find extends AbstractAction{
