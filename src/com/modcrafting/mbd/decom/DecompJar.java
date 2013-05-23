@@ -88,7 +88,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
         
 	public DecompJar(Chekkit main, File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
 		long time = System.currentTimeMillis();
-                this.main = main;
+        this.main = main;
 		processID = Chekkit.processPanel.addProcess("Opening " + file.getName().replaceAll(".jar", ""));
 		database = sql;
 		this.map = map;
@@ -438,25 +438,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		safe.put(file.getFile().getName(), file);
 		if(open.containsKey(file.getFile().getName())){
 			open.remove(file.getFile().getName());
-			//database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
-
-//			SwingUtilities.invokeLater(new Runnable(){
-//				@Override
-//				public void run() {
-//                                    new Thread(new Runnable(){
-//
-//                                        @Override
-//                                        public void run() {
-//                                            database.setAddress(file.getPackage(), file.getFile().getName(), file.getHash());
-//                                            database.disconnect();
-//                                        }
-//                                        
-//                                    }).start();
-//					
-//		    		open.remove(file.getFile().getName());
-//				}
-//				
-//			});
 		}
 		tree.validate();
 		tree.repaint();
