@@ -502,6 +502,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 }
                 try {
 					for(final File fil : goForZip(f)){
+						System.out.println("Opening "+fil+".");
 					    final Chekkit c = this;
 					    new Thread(new Runnable() {
 					        @Override
@@ -539,9 +540,7 @@ public class Chekkit extends JFrame implements WindowListener {
         	
         }
         zin.close();
-        if(temp.isEmpty()){
-        	temp.add(f);
-        }
+        temp.add(f);
         
 		return temp.toArray(new File[]{});
 	}
