@@ -7,19 +7,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.swing.JFrame;
-
 import com.modcrafting.mbd.Chekkit;
 
 public class Configuration {
 
-    private JFrame window = new JFrame();
+    //private JFrame window = new JFrame();
     private File file;
     private Properties config = new Properties();
     private Properties defaults = new Properties();
     
     private Integer qRefRate = 15;
-    private Boolean hideProgress = false;
+    //private Boolean hideProgress = false;
     private Boolean useNimbus = false;
     private Boolean showAbout = false;
     private Boolean menteeMode = false;

@@ -1,7 +1,6 @@
 package com.modcrafting.mbd;
 
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -18,7 +17,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,9 +54,7 @@ import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProcessPanel;
 import com.modcrafting.mbd.objects.UserPassWindow;
-import com.modcrafting.mbd.queue.FileRejectionWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
-import com.modcrafting.mbd.queue.UserBanWindow;
 import com.modcrafting.mbd.sql.SQL;
 import java.util.*;
 

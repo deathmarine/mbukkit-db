@@ -83,7 +83,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
 	private int processID;
-    private Chekkit main;
+    public Chekkit main;
     private JTree tree;
         
 	public DecompJar(Chekkit main, File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){

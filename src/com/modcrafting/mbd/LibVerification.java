@@ -14,9 +14,6 @@ import java.util.zip.ZipFile;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -75,6 +72,7 @@ public class LibVerification extends JFrame {
                     IOUtils.closeQuietly(out);
                     
                 }
+                zipFile.close();
                 destination.delete();
                 this.restartApplication();
             } catch (Exception e) {

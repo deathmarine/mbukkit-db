@@ -10,11 +10,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.GridLayout;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 import javax.swing.JTextField;
-import javax.swing.BoxLayout;
 import java.awt.Component;
-import javax.swing.Box;
 import javax.swing.JEditorPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -38,15 +35,10 @@ public class VersionPMConfig extends JDialog {
     private JTextField textField = new JTextField();
     private JSpinner spinner = new JSpinner();
     private JEditorPane editorPane = new JEditorPane();
-    private Chekkit ck;
-    
-
-
     /**
      * Create the dialog.
      */
     public VersionPMConfig(final Chekkit ck) {
-        this.ck = ck;
         setResizable(false);
         
         setTitle("Version PM Configuration");
@@ -89,7 +81,7 @@ public class VersionPMConfig extends JDialog {
             contentPanel.add(textField, gbc_textField);
             textField.setAlignmentX(Component.RIGHT_ALIGNMENT);
             textField.setColumns(10);
-            textField.setText(ck.config.getString("version-pm-subject", ""));
+            textField.setText(Chekkit.config.getString("version-pm-subject", ""));
         }
         {
             JLabel lblNewLabel_1 = new JLabel("Message");
@@ -110,7 +102,7 @@ public class VersionPMConfig extends JDialog {
             JScrollPane jsp = new JScrollPane(editorPane);
             jsp.setSize(editorPane.getSize());
             contentPanel.add(jsp, gbc_editorPane);
-            editorPane.setText(ck.config.getString("version-pm-msg", ""));
+            editorPane.setText(Chekkit.config.getString("version-pm-msg", ""));
            
             
             
@@ -134,7 +126,7 @@ public class VersionPMConfig extends JDialog {
             gbc_spinner.gridx = 1;
             gbc_spinner.gridy = 2;
             contentPanel.add(spinner, gbc_spinner);
-            spinner.setValue(Integer.parseInt(ck.config.getString("version-pm-days", "")));
+            spinner.setValue(Integer.parseInt(Chekkit.config.getString("version-pm-days", "")));
         }
         {
             JPanel buttonPane = new JPanel();
@@ -146,9 +138,9 @@ public class VersionPMConfig extends JDialog {
                     public void actionPerformed(ActionEvent e) {
                         //Time to save!
                         //Doing this in a static way breaks the rest of the config.
-                        ck.config.set("version-pm-days", spinner.getValue().toString());
-                        ck.config.set("version-pm-msg", editorPane.getText());
-                        ck.config.set("version-pm-subject", textField.getText());
+                        Chekkit.config.set("version-pm-days", spinner.getValue().toString());
+                        Chekkit.config.set("version-pm-msg", editorPane.getText());
+                        Chekkit.config.set("version-pm-subject", textField.getText());
                         dispose();
                         
                     }
