@@ -470,7 +470,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
             if (selected != -1) {
                 closeOpenTab(selected);
             } else {
-                Chekkit.log.severe("No tab selected");
+                DecompJar.this.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(DecompJar.this, WindowEvent.WINDOW_CLOSING));
             }
         }
     }

@@ -147,9 +147,10 @@ public class Chekkit extends JFrame implements WindowListener {
         JMenuItem clearMenuItem = new JMenuItem("Clear");
         JMenuItem keysMenuItem = new JMenuItem("Keywords");
         JMenuItem queueMenuItem = new JMenuItem("Open Queue");
+        JMenuItem downloadsItem = new JMenuItem("Open downloads");
         fileMenu.add(openMenuItem);
         fileMenu.add(queueMenuItem);
-        
+        fileMenu.add(downloadsItem);
         JMenuItem aboutMenuItem = new JMenuItem("About");
         aboutMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -166,6 +167,18 @@ public class Chekkit extends JFrame implements WindowListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new KeywordFrame(keyword);
+            }
+        });
+        
+        downloadsItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    java.awt.Desktop.getDesktop().open(new File(Chekkit.PATH + File.separator + "downloads"));
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    Chekkit.log.severe("Desktop API not supported.");
+                }
             }
         });
 
