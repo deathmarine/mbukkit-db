@@ -1,19 +1,17 @@
 package com.modcrafting.mbd.objects;
 
+import java.awt.EventQueue;
 import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.SpringLayout;
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 public class MessageQueue extends JDialog {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 5105745342944671033L;
-	/**
      * Launch the application.
      */
     public JLabel lblNewLabel = new JLabel("Sending messages...");

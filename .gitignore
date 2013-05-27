@@ -1,4 +1,15 @@
-.classpath
 .project
-/.settings
+.classpath
 /bin
+/.settings
+.gitignore
+
+out.jardesc
+
+.DS_Store
+/nbproject/
+
+keywords.bin
+/dist
+/manifest.mf
+/nbbuild.xml

@@ -34,9 +34,15 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.modcrafting.mbd.Chekkit;
 import javax.swing.JProgressBar;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import javax.swing.Box;
+import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
+import java.awt.GridLayout;
 import java.awt.Font;
 
 public class UserPassWindow extends JFrame implements ActionListener, KeyListener {
