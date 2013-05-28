@@ -181,7 +181,7 @@ public class Chekkit extends JFrame implements WindowListener {
                 }
             }
         });
-
+        
         queueMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

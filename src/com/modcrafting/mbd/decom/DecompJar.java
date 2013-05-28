@@ -470,7 +470,9 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
             if (selected != -1) {
                 closeOpenTab(selected);
             } else {
-                DecompJar.this.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(DecompJar.this, WindowEvent.WINDOW_CLOSING));
+                if (Chekkit.config.getBoolean("escape-closes-file", true)) {
+                    DecompJar.this.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(DecompJar.this, WindowEvent.WINDOW_CLOSING));
+                }
             }
         }
     }

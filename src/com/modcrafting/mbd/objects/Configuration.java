@@ -69,7 +69,11 @@ public class Configuration {
                     defaults.put("key", "");
                 }else{
                     key = defaults.getProperty("key");
-                }   
+                }
+                
+                if(defaults.get("escape-closes-file") == null){
+                    defaults.put("escape-closes-file", "true");
+                } 
                 
                 if(defaults.get("open-notes-on-file-open") == null){
                     defaults.put("open-notes-on-file-open", false);
@@ -87,6 +91,7 @@ public class Configuration {
                 defaults.put("key", key);
                 defaults.put("mentee-mode", "false");
                 defaults.put("open-notes-on-file-open", openNotesOnFileOpen.toString());
+                defaults.put("escape-closes-file", "true");
                 defaults.store(new FileOutputStream(propF), "The Chekkit config.");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -136,6 +141,18 @@ public class Configuration {
             return false;
         }
         return false;
+    }
+    
+    public Boolean getBoolean(String setting, boolean defaultValue){
+        try{
+            Boolean s = Boolean.parseBoolean(config.getProperty(setting));
+            if(s instanceof Boolean && s != null){
+                return s;
+            }
+        }catch (Exception e){
+            return defaultValue;
+        }
+        return defaultValue;
     }
     
     public Boolean getUseNimbus() {
