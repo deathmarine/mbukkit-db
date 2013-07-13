@@ -383,12 +383,11 @@ public class DecompJar extends JFrame implements WindowListener{
 		}
 	}
 
-	private void setFileSafe(final JarFileEntry file){
+	private void setFileSafe(JarFileEntry file){
 		file.setSafe(true);
 		tree.validate();
 		tree.repaint();
 		tree.updateUI();
-		
 	}
 	
 	private class Find extends AbstractAction{
@@ -457,31 +456,22 @@ public class DecompJar extends JFrame implements WindowListener{
 				}
 			}
 			if(jfil != null && SwingUtilities.isRightMouseButton(event)){
-		        TreePath selPath = tree.getPathForLocation(event.getX(), event.getY());
+		        final TreePath selPath = tree.getPathForLocation(event.getX(), event.getY());
 		        tree.getSelectionModel().setSelectionPath(selPath);
 		        JPopupMenu popup = new JPopupMenu();
-		        /*
-		        for (String ac : new String[]{
-		        		"Save",
-		        		"Acknowledge",
-		        		"Close",
-		        		"Close All"
-		        		}) {
-		        	JMenuItem menuItem = new JMenuItem(ac);
-		        	if(selPath.toString().contains(".class") 
-		        			&& ac.equals("Save")
-		        			
-		        			){
-			        	menuItem.addActionListener(new TreeListener(selPath));
-		        	} else if(jfil.isSafe() && ac.equals("Save")){
-		        		menuItem.setEnabled(false);			        	        	
-		        	} else {
-		        		menuItem.setEnabled(false);
-		        	}
-			        popup.add(menuItem);
-		        }.
-		        
-		        */
+		        JMenuItem menuItem = new JMenuItem("Save");
+	        	menuItem.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						JarFileEntry file = getJarFileEntryFromPath(selPath);
+						if(file.getName().endsWith(".class") && 
+								file.getHash() != null){
+							setFileSafe(file);
+						}
+						
+					}
+	        	});	
+		        popup.add(menuItem);
 		        popup.show(event.getComponent(), event.getX(), event.getY());
 		        return;
 			}
@@ -532,6 +522,16 @@ public class DecompJar extends JFrame implements WindowListener{
 			int index = tabbed.indexOfTab(title);
 			closeOpenTab(index);
 		}
+	}
+	
+	public JarFileEntry getJarFileEntryFromPath(TreePath path){
+		for(JarFileEntry jar : files){
+			if(jar.getName().equalsIgnoreCase(getNameFromPath(path)) &&
+					jar.getPackage().equalsIgnoreCase(getPackageFromPath(path))){
+				return jar;
+			}
+		}
+		return null;
 	}
 	
 	public String getPackageFromPath(TreePath path){
