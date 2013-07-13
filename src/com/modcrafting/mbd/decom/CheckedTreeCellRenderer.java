@@ -11,6 +11,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 //import com.modcrafting.mbd.MasterPluginDatabase;
 
+import com.modcrafting.mbd.Chekkit;
+
 public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	private static final long serialVersionUID = -9076467828472979936L;
 	DecompJar jar;
@@ -70,7 +72,7 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode) value;
         String title = (String) node.getUserObject();
-        for(String b: jar.bannedPackage)
+        for(String b: Chekkit.bannedpackage)
     		if(title.startsWith(b))
     			return true;
 		return false;
@@ -79,11 +81,20 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	protected boolean isSafe(Object value) {
         DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode) value;
-        String title = (String) node.getUserObject();
-        
-        if (jar.safe.containsKey(title)){ //BAD
-            return true;
-        }
+        String[] args = node.getPath().toString().replace("[", "").replace("]", "").split(",");
+
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<args.length-1;i++){
+			sb.append(args[i]).append(".");
+		}
+		if(sb.length() > 0)
+			sb.deleteCharAt(sb.length()-1);
+		for(JarFileEntry jasr : jar.files){
+			if(jasr.getName().equalsIgnoreCase(args[args.length-1]) &&
+					jasr.getPackage().equalsIgnoreCase(sb.toString())){
+				return jasr.isSafe();
+			}
+		}
         return false;
     }
 	
@@ -93,10 +104,20 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         Enumeration<?> enums = node.children();
         int i = 0,o = 0;
         while(enums.hasMoreElements()){
-        	DefaultMutableTreeNode child = (DefaultMutableTreeNode) enums.nextElement();
-        	String ntitle = (String) child.getUserObject();
-        	if(jar.safe.containsKey(ntitle))
-        		o++;
+            String[] args = ((DefaultMutableTreeNode) enums.nextElement()).getPath().toString().replace("[", "").replace("]", "").split(",");
+
+    		StringBuilder sb = new StringBuilder();
+    		for(int ii=0;ii<args.length-1;ii++){
+    			sb.append(args[ii]).append(".");
+    		}
+    		if(sb.length() > 0)
+    			sb.deleteCharAt(sb.length()-1);
+    		for(JarFileEntry jasr : jar.files){
+    			if(jasr.getName().equalsIgnoreCase(args[args.length-1]) &&
+    					jasr.getPackage().equalsIgnoreCase(sb.toString()) && jasr.isSafe()){
+    				o++;
+    			}
+    		}
         	i++;
         }
         if(i==o)
@@ -108,12 +129,26 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode) value;
         Enumeration<?> enums = node.children();
+        int i = 0,o = 0;
         while(enums.hasMoreElements()){
-        	DefaultMutableTreeNode child = (DefaultMutableTreeNode) enums.nextElement();
-        	String ntitle = (String) child.getUserObject();
-        	if(jar.warn.containsKey(ntitle))
-        		return true;
+            String[] args = ((DefaultMutableTreeNode) enums.nextElement()).getPath().toString().replace("[", "").replace("]", "").split(",");
+
+    		StringBuilder sb = new StringBuilder();
+    		for(int ii=0;ii<args.length-1;ii++){
+    			sb.append(args[ii]).append(".");
+    		}
+    		if(sb.length() > 0)
+    			sb.deleteCharAt(sb.length()-1);
+    		for(JarFileEntry jasr : jar.files){
+    			if(jasr.getName().equalsIgnoreCase(args[args.length-1]) &&
+    					jasr.getPackage().equalsIgnoreCase(sb.toString()) && jasr.isWarn()){
+    				o++;
+    			}
+    		}
+        	i++;
         }
+        if(i==o)
+        	return true;
         return false;
 	}
 	
@@ -131,7 +166,7 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode)value;
         String title = (String) node.getUserObject();
-        if (title.endsWith(".java")) {
+        if (title.endsWith(".class")) {
             return true;
         }
         return false;
@@ -139,12 +174,22 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	
 	protected boolean isWarn(Object value) {
         DefaultMutableTreeNode node =
-                (DefaultMutableTreeNode)value;
-        String title = (String) node.getUserObject();
-        if (jar.warn.containsKey(title)) {
-            return true;
-        }
-        return false;		
+                (DefaultMutableTreeNode) value;
+        String[] args = node.getPath().toString().replace("[", "").replace("]", "").split(",");
+
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<args.length-1;i++){
+			sb.append(args[i]).append(".");
+		}
+		if(sb.length() > 0)
+			sb.deleteCharAt(sb.length()-1);
+		for(JarFileEntry jasr : jar.files){
+			if(jasr.getName().equalsIgnoreCase(args[args.length-1]) &&
+					jasr.getPackage().equalsIgnoreCase(sb.toString())){
+				return jasr.isWarn();
+			}
+		}
+        return false;	
 	}
 	
 	

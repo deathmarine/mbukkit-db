@@ -13,22 +13,22 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Pattern;
-
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -50,50 +50,53 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.fife.ui.rsyntaxtextarea.Theme;
-import org.fife.ui.rtextarea.RTextScrollPane;
-
 import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.CodeTab;
 import com.modcrafting.mbd.objects.NoteDialog;
 import com.modcrafting.mbd.sql.SQL;
+import com.strobel.assembler.metadata.JarTypeLoader;
+import com.strobel.assembler.metadata.MetadataSystem;
+import com.strobel.assembler.metadata.TypeDefinition;
+import com.strobel.assembler.metadata.TypeReference;
+import com.strobel.core.StringUtilities;
+import com.strobel.decompiler.DecompilationOptions;
+import com.strobel.decompiler.DecompilerSettings;
+import com.strobel.decompiler.PlainTextOutput;
+import com.strobel.decompiler.languages.Languages;
+import com.strobel.decompiler.languages.java.JavaFormattingOptions;
 
-public class DecompJar extends JFrame implements HyperlinkListener, WindowListener{
+public class DecompJar extends JFrame implements WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
 
-	HashMap<String, HashSet<HashFile>> files = new HashMap<String, HashSet<HashFile>>();
-	HashMap<String, HashSet<String>> opened = new HashMap<String, HashSet<String>>();
+	HashSet<JarFileEntry> files = new HashSet<JarFileEntry>();
 	public String mainclass;
 	JTabbedPane tabbed;
 	public SQL database;
-	Map<String, String> map;
-	HashMap<String, HashFile> safe = new HashMap<String, HashFile>();
-	HashMap<String, HashFile> open = new HashMap<String, HashFile>();
-	HashMap<String, HashFile> warn = new HashMap<String, HashFile>();
-	List<String> bannedPackage;
 	List<String> prevOpenBadFiles = new ArrayList<String>();
 	List<String> databaseUpdates = new ArrayList<String>();
 	File file;
 	private int processID;
     private Chekkit main;
     private JTree tree;
-        
-	public DecompJar(Chekkit main, File file, SQL sql, Map<String, String> map, List<String> banpack, Boolean progressDisplay, Boolean useNimbus){
+
+	DecompilerSettings settings;
+	DecompilationOptions decompilationOptions;
+    
+	public DecompJar(Chekkit main, File file, SQL sql, Boolean progressDisplay, Boolean useNimbus){
+		
 		long time = System.currentTimeMillis();
         this.main = main;
 		processID = Chekkit.processPanel.addProcess("Opening " + file.getName().replaceAll(".jar", ""));
 		database = sql;
-		this.map = map;
 		this.file = file;
-		this.bannedPackage = banpack;
 		Image img = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/bukkit-icon.png"))).getImage();
 		this.setIconImage(img);
 		try {
@@ -108,127 +111,118 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
                 e.printStackTrace();
            
         }
-		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
-				+ File.separator + file.getName());
-		String[] cl = new String[] { "java", "-jar",
-				Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar",
-				"-dgs=true", file.getAbsolutePath(), Chekkit.PATH + File.separator + "decomp" };
-		ProcessBuilder builder = new ProcessBuilder(cl);
-		builder.redirectErrorStream(true);
-		try {
-			Process process = builder.start();
-			BufferedReader reader = new BufferedReader (new InputStreamReader(process.getInputStream()));
-			String line;
-			while((line = reader.readLine())!=null){
-				System.out.println(line);
-			}
-			process.waitFor();
-			reader.close();
-			process.getErrorStream().close();
-			process.getOutputStream().close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		if(!newFile.exists()){
-			System.out.println("Failed");
-			this.dispose();
-		}
 		Chekkit.processPanel.setBarValue(processID, 25);
-		for(File fs : extract(newFile)){
-			recursiveFolderLoad(fs);
-		}
-		Chekkit.processPanel.setBarValue(processID, 50);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		final Dimension center = new Dimension((int)(screenSize.width*0.75), (int)(screenSize.height*0.75));
 		final int x = (int) (center.width * 0.2);
 		final int y = (int) (center.height * 0.2);
 		this.setBounds(x, y, center.width, center.height);
 		this.setTitle(file.getName());
-	    HashFile fa = null;
 		System.out.println("Connecting to database...");
 	    database.connect();
+		Chekkit.processPanel.setBarValue(processID, 50);
 		System.out.println("Building Tree...");
-	    DefaultMutableTreeNode top = new DefaultMutableTreeNode(file.getName());
-	    List<String> list = Arrays.asList(files.keySet().toArray(new String[0]));
-	    Collections.sort(list);
-	    Chekkit.processPanel.setBarValue(processID, 75);
-	    String badpack = new String();
-	    for(String packs : list){
-	    	if(packs.length()>0){
-	    		//TODO: Needs Better Package Breakdown
-	    		/*
-	    		 * Tree-
-	    		 *     |-Node
-	    		 *     |   |-File
-	    		 *     |   |-SubNode
-	    		 *     |       |-File
-	    		 *     |       |-File
-	    		 *  
-	    		StringBuilder sb = new StringBuilder();
-	    		for(String s: packs.split(".")){
-	    			if(files.containsKey(sb.toString())){
-	    		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(s);
-	    				if(files.containsKey(s)){
-	    			    	for(HashFile f: files.get(s)){
-	    			    		
-	    			    	}
-	    				}
-	    			}else{
-	    				sb.append(s).append(".");
-	    			}
-	    		}
-	    		 *Start Rework
-	    		*/
-	            for(String b: banpack){
-	        		if(packs.startsWith(b)){
-	        			badpack = b; 
-	        		}
-	            }
-	    		
-	    		
-		    	DefaultMutableTreeNode dmtn = new DefaultMutableTreeNode(packs);
-		    	for(HashFile f: files.get(packs)){
-			    	DefaultMutableTreeNode dmtn1 = new DefaultMutableTreeNode(f.getFile().getName());
-			    	dmtn.add(dmtn1);
-					System.out.println("Checking hash for: "+f.getFile().getName());
-					for(String hash : database.getHash(packs, f.getFile().getName())){
-						if(f.checkDiffs(hash)){
-							safe.put(f.getFile().getName(), f);
-						}
-					}
-					System.out.println("Checking warnings for: "+f.getFile().getName());
-					if(f.list.size()>0){
-						warn.put(f.getFile().getName(), f);
-						for(String s: f.list){
-							System.out.println("WARN: "+s);
-						}
-					}
-		    	}
-		    	top.add(dmtn);
-		    	//End
-	    	}else{
-		    	for(HashFile f: files.get(packs)){
-		    		if(f.getFile().getName().equalsIgnoreCase("plugin.yml")){
-				    	fa = f;
-		    		}
-			    	DefaultMutableTreeNode dmtn1 = new DefaultMutableTreeNode(f.getFile().getName());
-			    	top.add(dmtn1);
-		    	}
-	    	}
-	    }
-	    if(badpack.length()>0){
-			Icon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/badskull_large.png")));
-            JOptionPane.showMessageDialog(this, "Restricted Library \""+badpack+"\" was found.\nRecommend Deny.", "Restricted Lib", JOptionPane.PLAIN_MESSAGE, img2);
-	    }
-	    tree = new JTree(top);
+	    tree = new JTree();
 	    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 	    tree.setCellRenderer(new CheckedTreeCellRenderer(this));
-	    TreeListener tl = new TreeListener(tree);
+	    TreeListener tl = new TreeListener();
+	    
 	    tree.addMouseListener(tl);
 	    tree.addTreeSelectionListener(tl);
 	    
+		settings = new DecompilerSettings();
+	    if (settings.getFormattingOptions() == null)
+	      settings.setFormattingOptions(JavaFormattingOptions.createDefault());
+	    settings.setAlwaysGenerateExceptionVariableForCatchBlocks(true);
+	    settings.setFlattenSwitchBlocks(true);
+	    settings.setForceExplicitImports(true);
+	    settings.setLanguage(Languages.java());
+	    settings.setShowNestedTypes(true);
+	    settings.setShowSyntheticMembers(true);
+	    DefaultMutableTreeNode top = new DefaultMutableTreeNode(getName(file.getName()));
+	    JarFile jar;
+		try {
+			jar = new JarFile(file);
+		    settings.setTypeLoader(new JarTypeLoader(jar));
+			decompilationOptions = new DecompilationOptions();
+		    decompilationOptions.setSettings(settings);
+		    decompilationOptions.setFullDecompilation(true);
+		    Enumeration<JarEntry> entry = jar.entries();
+		    List<String> mass = new ArrayList<String>();
+		    String badpack = new String();
+		    while(entry.hasMoreElements()){
+		    	JarEntry jfi = entry.nextElement();
+		    	mass.add(jfi.getName());
+		    	String pack = jfi.getName().replace(getName(jfi.getName()), "");
+		    	pack = pack.substring(0, pack.length()-1).replaceAll("/", ".");
+		    	MessageDigest md = MessageDigest.getInstance("MD5");
+				InputStream is = new DigestInputStream(jar.getInputStream(jfi), md);
+				//process
+	            for(String b: Chekkit.bannedpackage){
+	        		if(pack.startsWith(b)){
+	        			badpack = b; 
+	        		}
+	            }
+				JarFileEntry hf = null;
+				if(jfi.getName().endsWith(".class")){
+					//Do Decompile
+					String internalName = StringUtilities.removeRight(jfi.getName(), ".class");
+				    MetadataSystem metadataSystem = new MetadataSystem(settings.getTypeLoader());
+				    TypeReference type = metadataSystem.lookupType(internalName);
+				    TypeDefinition resolvedType = null;
+				    if ((type == null) || ((resolvedType = type.resolve()) == null)) {
+				    	return;
+				    }
+				    StringWriter stringwriter = new StringWriter();
+				    settings.getLanguage().decompileType(resolvedType, new PlainTextOutput(stringwriter), decompilationOptions);
+				  
+				    hf = new JarFileEntry(pack, getName(jfi.getName()), stringwriter.getBuffer().toString());
+				    stringwriter.close();
+				}else{
+					BufferedReader br = new BufferedReader(new InputStreamReader(is));
+					StringBuilder sb = new StringBuilder();
+					String line = null;
+					while((line = br.readLine())!=null){
+						sb.append(line).append("\n");
+					}
+					br.close();
+				    hf = new JarFileEntry(pack, getName(jfi.getName()), sb.toString());
+				}
+				is.close();
+				byte[] mdbytes = md.digest();
+				StringBuffer hexString = new StringBuffer();
+		    	for (int i=0;i<mdbytes.length;i++) {
+		    		String hex=Integer.toHexString(0xff & mdbytes[i]);
+		   	     	if(hex.length()==1) hexString.append('0');
+		   	     	hexString.append(hex);
+		    	}
+		    	String hash = hexString.toString();
+				for(String hash1 : database.getHash(pack, getName(jfi.getName()))){
+					if(hash.equals(hash1)){
+						hf.setSafe(true);
+						hf.setHash(hash);
+					}
+				}
+				if(hf != null){
+					files.add(hf);
+				}
+		    }
+		    Collections.sort(mass,String.CASE_INSENSITIVE_ORDER);
+		    for(String pack : mass){
+		    	LinkedList<String> list = new LinkedList<String>(Arrays.asList(pack.split("/")));
+		    	load(top, list);
+		    }
+		    tree.setModel(new DefaultTreeModel(top));
+		    if(badpack.length()>0){
+				Icon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/badskull_large.png")));
+	            JOptionPane.showMessageDialog(this, "Restricted Library \""+badpack+"\" was found.\nRecommend Deny.", "Restricted Lib", JOptionPane.PLAIN_MESSAGE, img2);
+		    }
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    Chekkit.processPanel.setBarValue(processID, 75);
 	    
 	    JPanel panel2 = new JPanel();
 	    panel2.setLayout(new BoxLayout(panel2, 1));
@@ -237,9 +231,6 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	    
 	    tabbed = new JTabbedPane();
 	    tabbed.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-	    //tabbed.
-	    if(fa!=null)
-	    	addTab(fa.getFile().getName(), fa.scrollPane, fa);
 	    
 	    JPanel panel = new JPanel();
 	    panel.setLayout(new BoxLayout(panel, 1));
@@ -259,7 +250,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
         menu2.add(closeCurrentFile);
 		closeCurrentFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
         closeCurrentFile.getAccessibleContext().setAccessibleDescription("Closes the current tab");
-		closeCurrentFile.addActionListener(new CloseCurrentTab(this));
+		closeCurrentFile.addActionListener(new CloseCurrentTab());
                 
                 JMenuItem openNotes = new JMenuItem("Open Notes");
                 menu2.add(openNotes);
@@ -288,114 +279,72 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		
 		System.out.println("Done in : "+(System.currentTimeMillis()-time)+"ms");
 	}
-	
-	@ SuppressWarnings ("resource")
-	private File[] extract(File file) {
-		File newFile = new File(Chekkit.PATH + File.separator + "decomp"
-				+ File.separator + file.getName());
-		System.out.println("Extracting Contents...");
-		File dir = new File(Chekkit.PATH + File.separator + "ext"
-				+ File.separator);
-		dir.mkdir();
-		File newDir = new File(dir,file.getName());
-		try{
-			JarFile jar = new JarFile(newFile);
-			Enumeration<JarEntry> enums = jar.entries();
-			while (enums.hasMoreElements()) {
-				JarEntry je = (JarEntry) enums.nextElement();
-				File fl = new File(newDir +File.separator+ je.getName());
-		        if(!fl.exists()){
-		            fl.getParentFile().mkdirs();
-		            fl = new File(newDir +File.separator+ je.getName());
-		        }
-		        if(je.isDirectory())
-		            continue;
-		        InputStream is = jar.getInputStream(je);
-		        FileOutputStream fo = new FileOutputStream(fl);
-		        while(is.available()>0)
-		        {
-		            fo.write(is.read());
-		        }
-				fo.close();
-				is.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("Extraction Complete...");
-		return newDir.listFiles();
-	}
-	
-	public void recursiveFolderLoad(File fs){
-		
-		String pattern = Pattern.quote(System.getProperty("file.separator"));
-		String dir = new File(Chekkit.PATH + File.separator + "ext" + File.separator).getAbsolutePath();
-		StringBuilder sb = new StringBuilder();
-		String breakdown = fs.getAbsolutePath().replace(dir, "").trim();
-		int ss = breakdown.split(pattern).length;
-		for(String s:breakdown.split(pattern)){
-			if(!s.contains(".")){ //HERE
-				sb.append(s);
-				if(ss>1)
-					sb.append(".");
+    
+    public String getName(String path) {
+  		if(path==null)
+  			return "";
+  		int i = path.lastIndexOf("/");
+  		if(i==-1)
+  			i = path.lastIndexOf("\\");
+  		if(i!=-1)
+  			return path.substring(i+1);
+  		return path;
+  	}
+    
+    public DefaultMutableTreeNode load(DefaultMutableTreeNode node, List<String> args){
+    	if(args.size() > 0){
+    		String name = args.remove(0);
+    		DefaultMutableTreeNode nod = getChild(node, name);
+    		if(nod == null)
+    			nod = new DefaultMutableTreeNode(name);
+    		node.add(load(nod, args));
+    	}	    		
+    	return node;
+    }
+
+	@SuppressWarnings("unchecked")
+    public DefaultMutableTreeNode getChild(DefaultMutableTreeNode node, String name){
+		Enumeration<DefaultMutableTreeNode> entry = node.children();
+		while(entry.hasMoreElements()){
+			DefaultMutableTreeNode nods = entry.nextElement();
+			if(nods.getUserObject().equals(name)){
+				return nods;
 			}
 		}
-		if(sb.length()>0){
-			sb.deleteCharAt(sb.length()-1);
-		}
-		String packag = sb.toString();
-		if(!fs.isDirectory()){
-			HashSet<HashFile> set = new HashSet<HashFile>();
-			if(packag.length()>0)
-				packag = packag.substring(1);
-			if(this.files.containsKey(packag))
-				set = this.files.get(packag);
-			set.add(new HashFile(packag, fs, this));
-			System.out.println("Loading: "+packag+"."+fs.getName());
-			this.files.put(packag, set);
-		}else{
-			for(File s:fs.listFiles()){
-				recursiveFolderLoad(s);
-			}	
-		}
-	}
+		return null;
+    }
 	
-	public void addTab(String title, RTextScrollPane rTextScrollPane, HashFile file){
-		if(tabbed.indexOfTab(title)==-1){
-			tabbed.addTab(title, rTextScrollPane);
-			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
-			int index = tabbed.indexOfTab(title);
-			
-			CodeTab ct = new CodeTab(title);
-			ct.getButton().addMouseListener(new CloseTab(title));
+	public void addTab(JarFileEntry file){
+		if(file.isOpen()){
+			tabbed.setSelectedIndex(tabbed.indexOfTab(file.getName()));
+			return;
+		}
+		if(tabbed.indexOfTab(file.getName())==-1){
+			tabbed.addTab(file.getName(), file.scrollPane);
+			tabbed.setSelectedIndex(tabbed.indexOfTab(file.getName()));
+			int index = tabbed.indexOfTab(file.getName());
+			CodeTab ct = new CodeTab(file);
+			ct.getButton().addMouseListener(new CloseTab(file.getName()));
 			tabbed.setTabComponentAt(index, ct);
-		}else{
-			tabbed.setSelectedIndex(tabbed.indexOfTab(title));
 		}
-		if(!open.containsKey(file)){
-			open.put(title, file);
-			if(file.list.size()>0 && !prevOpenBadFiles.contains(title)){
-				JList<String> list = new JList<String>(file.list.toArray(new String[0]));
-				JScrollPane jsp = new JScrollPane(list);
-				jsp.setPreferredSize(new Dimension(750,225));
-				jsp.setMaximumSize(new Dimension(1000,300));
-				prevOpenBadFiles.add(title);
-				JOptionPane.showMessageDialog(this, jsp, "Warning!", JOptionPane.ERROR_MESSAGE);
-			}
+		file.setOpen(true);
+		if(file.list.size()>0 && !prevOpenBadFiles.contains(file.getName())){
+			JList<String> list = new JList<String>(file.list.toArray(new String[0]));
+			JScrollPane jsp = new JScrollPane(list);
+			jsp.setPreferredSize(new Dimension(750,225));
+			jsp.setMaximumSize(new Dimension(1000,300));
+			prevOpenBadFiles.add(file.getName());
+			JOptionPane.showMessageDialog(this, jsp, "Warning!", JOptionPane.ERROR_MESSAGE);
 		}
 		if(Chekkit.getTheme()!=null)
 			Chekkit.getTheme().apply(file.textArea);
 	}
 
 	@Override
-	public void hyperlinkUpdate(HyperlinkEvent event) {
-		System.out.println(event.getURL());
-	}
-
-	@Override
 	public void windowClosing(WindowEvent ev) {
-		if(open.size()>0){
-    		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have " + open.size() + " files open.\nAre you sure you want to close?", "OpenWindows", JOptionPane.YES_NO_OPTION);
+		int size = tabbed.getComponentCount();
+		if(size>0){
+    		int value = JOptionPane.showConfirmDialog(ev.getWindow(),"You still have " + size + " files open.\nAre you sure you want to close?", "OpenWindows", JOptionPane.YES_NO_OPTION);
     		if(value==JOptionPane.NO_OPTION || value==JOptionPane.NO_OPTION){
     			this.setVisible(true);
     			return;
@@ -434,11 +383,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		}
 	}
 
-	private void setFileSafe(final HashFile file){
-		safe.put(file.getFile().getName(), file);
-		if(open.containsKey(file.getFile().getName())){
-			open.remove(file.getFile().getName());
-		}
+	private void setFileSafe(final JarFileEntry file){
+		file.setSafe(true);
 		tree.validate();
 		tree.repaint();
 		tree.updateUI();
@@ -459,13 +405,8 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	
 	private class CloseCurrentTab extends AbstractAction{
         private static final long serialVersionUID = 836048800878134300L;
-        //DecompJar jar;
-        public CloseCurrentTab(DecompJar jar){
-            //this.jar = jar;
-        }
         @Override
         public void actionPerformed(ActionEvent e) {
-            //JMenuItem me = (JMenuItem) e.getSource();
             int selected = tabbed.getSelectedIndex();
             if (selected != -1) {
                 closeOpenTab(selected);
@@ -479,60 +420,47 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 	
 	public void closeOpenTab(int index) {
 	    Component co = tabbed.getComponentAt(index);
-	    String title = tabbed.getTitleAt(index);
-        if(open.containsKey(title)){
-            HashFile hash = open.get(title);
-            if(safe.containsKey(title) || title.endsWith(".MF") || title.endsWith(".yml")){
-                open.remove(title);
-                tabbed.remove(co);
-                return;
-            }
-            if(hash.getFile().getName().endsWith(".java")){
+	    if(co instanceof CodeTab){
+	    	JarFileEntry hash = ((CodeTab) co).getJarFileEntry();
+	    	hash.setOpen(false);
+
+            if(hash.getName().endsWith(".class")){
                 int value = JOptionPane.showConfirmDialog(co,"Save to database?");
                 if(value==JOptionPane.CLOSED_OPTION || value == JOptionPane.CANCEL_OPTION){
                     return;
-                }else if(value==JOptionPane.YES_OPTION && !safe.containsValue(hash)){
-                    safe.put(title, hash);
-                    if(open.containsKey(title)){
-                        HashFile file = open.get(title);
+                }else if(value==JOptionPane.YES_OPTION && !hash.isSafe()){
+                    hash.setSafe(true);
                         //setFileSafe(file);
                         databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
-                                file.getPackage() + "','" +
-                                file.getFile().getName() + "','" +
-                                file.getHash() +
+                        		hash.getPackage() + "','" +
+                        		hash.getName() + "','" +
+                        		hash.getHash() +
                                 "')");
-                        open.remove(title); 
-                        tabbed.remove(co);  
-                        return;
-                    }
                 }
-                open.remove(title);
             }
-        }
+	    }
         tabbed.remove(co);
 	}
 
 	private class TreeListener extends MouseAdapter implements ActionListener, TreeSelectionListener{
-		JTree tree;
-		TreePath path;
-		public TreeListener(JTree tree){
-			this.tree = tree;
-		}
-		public TreeListener(JTree tree, TreePath path){
-			this.tree = tree;
-			this.path = path;
-		}
 		
         @Override
 		public void mouseClicked(MouseEvent event) {
 			TreePath trp = tree.getPathForLocation(event.getX(), event.getY());
 			if(trp==null)
 				return;
-			final String[] args = trp.toString().replace("[", "").replace("]", "").split(",");
-			if(SwingUtilities.isRightMouseButton(event)){
+			JarFileEntry jfil = null;
+			for(JarFileEntry jar : files){
+				if(jar.getName().equalsIgnoreCase(getNameFromPath(trp)) &&
+						jar.getPackage().equalsIgnoreCase(getPackageFromPath(trp))){
+					jfil = jar;
+				}
+			}
+			if(jfil != null && SwingUtilities.isRightMouseButton(event)){
 		        TreePath selPath = tree.getPathForLocation(event.getX(), event.getY());
 		        tree.getSelectionModel().setSelectionPath(selPath);
 		        JPopupMenu popup = new JPopupMenu();
+		        /*
 		        for (String ac : new String[]{
 		        		"Save",
 		        		"Acknowledge",
@@ -540,168 +468,56 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		        		"Close All"
 		        		}) {
 		        	JMenuItem menuItem = new JMenuItem(ac);
-					if(args.length==2 && opened.containsKey("")){
-						if(opened.get("").contains(args[1])){
-							menuItem.setEnabled(false);
-						}
-					}
-		        	if(selPath.toString().contains(".java") && menuItem.isEnabled()){
-		        		
-			        	menuItem.addActionListener(new TreeListener(tree, selPath));
-		        	} else if(safe.containsKey(args[args.length-1]) && ac.equals("Save")){
-		        		menuItem.setEnabled(false);			        	
-		        	} else if(open.containsKey(args[args.length-1]) && ac.equals("Close")){
-		        		menuItem.addActionListener(new ActionListener(){
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								int index = tabbed.indexOfTab(args[args.length-1]);
-								Component co = tabbed.getComponentAt(index);
-				        		open.remove(args[args.length-1]);
-				    			tabbed.remove(co);
-								
-							}
+		        	if(selPath.toString().contains(".class") 
+		        			&& ac.equals("Save")
 		        			
-		        		});
-		        	} else if(ac.equals("Close All")){
-		        		menuItem.addActionListener(new ActionListener(){
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								for(int i=tabbed.getTabCount();i>tabbed.getTabCount();i--){
-									String title = tabbed.getTitleAt(i);
-									if(open.containsKey(title))
-									open.remove(i);
-									tabbed.removeTabAt(i);
-								}
-								
-							}
-		        			
-		        		});
+		        			){
+			        	menuItem.addActionListener(new TreeListener(selPath));
+		        	} else if(jfil.isSafe() && ac.equals("Save")){
+		        		menuItem.setEnabled(false);			        	        	
 		        	} else {
 		        		menuItem.setEnabled(false);
 		        	}
-		        	if(ac.equals("Acknowledge"))
-		        		menuItem.setEnabled(false);
 			        popup.add(menuItem);
-		        }
+		        }.
+		        
+		        */
 		        popup.show(event.getComponent(), event.getX(), event.getY());
 		        return;
 			}
-			/*if(event.getClickCount()==1 && SwingUtilities.isLeftMouseButton(event)){ //ActionPerformed happens anyway, no need to add twice
-				if(args.length<2)
-					return;
-				if(args.length==2){
-					if(files.containsKey("")){
-						for(HashFile file :files.get("")){
-							if(file.getFile().getName().equals(args[1].trim())){
-								addTab(file.getFile().getName(), file.scrollPane, file);
-								return;
-							}
-						}
-					}
-				}
-				if(args.length==3){
-					if(files.containsKey(args[1].trim().toString())){
-						for(HashFile file :files.get(args[1].trim().toString())){
-							if(file.getFile().getName().equals(args[2].trim())){
-								addTab(file.getFile().getName(), file.scrollPane, file);
-								return;
-							}
-						}
-					}
-				}
-			}*/
 		}
+        
 		@Override
 		public void actionPerformed(ActionEvent event) {
 		    JMenuItem source = (JMenuItem) event.getSource();
 		    String action = source.getText();
-	    	String[] args = path.toString().replace("[", "").replace("]", "").split(",");
-		    if (action.equals("Open")){
-				if(args.length<2)
-					return;
-				if(args.length==2){
-					if(files.containsKey("")){
-						for(HashFile file :files.get("")){
-							if(file.getFile().getName().equals(args[1].trim())){
-								addTab(file.getFile().getName(), file.scrollPane, file);
-								return;
-							}
-						}
-					}
+			final String[] args = action.replace("[", "").replace("]", "").split(",");
+			StringBuilder sb = new StringBuilder();
+			for(int i=0;i<args.length-1;i++){
+				sb.append(args[i]).append(".");
+			}
+			if(sb.length() > 0)
+				sb.deleteCharAt(sb.length()-1);
+			for(JarFileEntry jar : files){
+				if(jar.getName().equalsIgnoreCase(args[args.length-1]) &&
+						jar.getPackage().equalsIgnoreCase(sb.toString())){
+					addTab(jar);
+					System.out.println("Cleared Tab.");
 				}
-				if(args.length==3){
-					if(files.containsKey(args[1].trim().toString())){
-						for(HashFile file :files.get(args[1].trim().toString())){
-							if(file.getFile().getName().equals(args[2].trim())){
-								addTab(file.getFile().getName(), file.scrollPane, file);
-								return;
-							}
-						}
-					}
-				}
-		    }
-		    if (action.equals("Save")){
-				if(args.length<2)
-					return;
-				if(args.length==2){
-					if(files.containsKey("")){
-						for(final HashFile file :files.get("")){
-							if(file.getFile().getName().equals(args[1].trim())
-									&& !safe.values().contains(file)
-									&& file.getFile().getName().endsWith(".java")){
-									
-								
-								setFileSafe(file);
-								return;
-							}
-						}
-					}
-				}
-				if(args.length==3){
-					if(files.containsKey(args[1].trim().toString())){
-						for(final HashFile file :files.get(args[1].trim().toString())){
-							if(file.getFile().getName().equals(args[2].trim())
-									&& !safe.values().contains(file)
-									&& file.getFile().getName().endsWith(".java")){
-								setFileSafe(file);
-								return;
-							}
-						}
-					}
-				}
-		    }
-		    if (action.equals("Acknowledge")){}
+			}
 		}
 
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
 			TreePath trp = e.getPath();
-			if(trp == null){
+			if(trp == null)
 				return;
+			for(JarFileEntry jar : files){
+				if(jar.getName().equalsIgnoreCase(getNameFromPath(trp)) &&
+						jar.getPackage().equalsIgnoreCase(getPackageFromPath(trp))){
+					addTab(jar);
+				}
 			}
-			final String[] args = trp.toString().replace("[", "").replace("]", "").split(",");
-			if(args.length<2)
-				return;
-		    if(args.length==2){
-		    	if(files.containsKey("")){
-		    		for(HashFile file :files.get("")){
-		    			if(file.getFile().getName().equals(args[1].trim())){
-		    				addTab(file.getFile().getName(), file.scrollPane, file);
-		    				return;
-		    			}
-		    		}
-		    	}
-		    }
-		    if(args.length==3){
-		    	if(files.containsKey(args[1].trim().toString())){
-		    		for(HashFile file :files.get(args[1].trim().toString())){
-		    			if(file.getFile().getName().equals(args[2].trim())){
-		    				addTab(file.getFile().getName(), file.scrollPane, file);
-		    				return;
-		    			}
-		    		}
-		    	}
-		    }
 		}
 	}
 	
@@ -715,8 +531,23 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 		public void mouseClicked(MouseEvent e) {
 			int index = tabbed.indexOfTab(title);
 			closeOpenTab(index);
-			
 		}
+	}
+	
+	public String getPackageFromPath(TreePath path){
+		final String[] args = path.toString().replace("[", "").replace("]", "").split(",");
+		StringBuilder sb = new StringBuilder();
+		for(int i=1;i<args.length-1;i++){
+			sb.append(args[i].trim()).append(".");
+		}
+		if(sb.length() > 0)
+			sb.deleteCharAt(sb.length()-1);
+		return sb.toString();
+	}
+	
+	public String getNameFromPath(TreePath path){
+		final String[] args = path.toString().replace("[", "").replace("]", "").split(",");
+		return args[args.length-1].trim();
 	}
 	
 	private class ThemeAction extends AbstractAction {
@@ -738,7 +569,7 @@ public class DecompJar extends JFrame implements HyperlinkListener, WindowListen
 				if(in!=null){
 					Theme theme = Theme.load(in);
 					Chekkit.setTheme(theme);
-					for(HashFile hf : open.values()){
+					for(JarFileEntry hf : files){
 						theme.apply(hf.textArea);
 					}
 				}

@@ -9,6 +9,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.modcrafting.mbd.decom.JarFileEntry;
+
 
 public class CodeTab extends JPanel{
 
@@ -16,16 +18,20 @@ public class CodeTab extends JPanel{
 	private JLabel closeButton = new JLabel(new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/icon_close.png"))));
 	private JLabel tabTitle = new JLabel();
 	private String title = "";
+	JarFileEntry file;
 	
-	
-	public CodeTab(String t){
+	public CodeTab(JarFileEntry t){
 		super(new GridBagLayout());
+		file = t;
 		this.setOpaque(false);
-		
-		this.title = t;
+		this.title = t.getName();
 		this.tabTitle = new JLabel(title);
 		
 		this.createTab();
+	}
+	
+	public JarFileEntry getJarFileEntry(){
+		return file;
 	}
 	
 	public JLabel getButton(){

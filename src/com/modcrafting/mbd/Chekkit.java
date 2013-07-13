@@ -1,7 +1,6 @@
 package com.modcrafting.mbd;
 
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -18,9 +17,11 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +57,8 @@ import com.modcrafting.mbd.objects.KeywordFrame;
 import com.modcrafting.mbd.objects.MDTextArea;
 import com.modcrafting.mbd.objects.ProcessPanel;
 import com.modcrafting.mbd.objects.UserPassWindow;
-import com.modcrafting.mbd.queue.FileRejectionWindow;
 import com.modcrafting.mbd.queue.QueueWindow;
-import com.modcrafting.mbd.queue.UserBanWindow;
 import com.modcrafting.mbd.sql.SQL;
-import java.util.*;
 
 @SuppressWarnings({"rawtypes" })
 public class Chekkit extends JFrame implements WindowListener {
@@ -74,8 +72,8 @@ public class Chekkit extends JFrame implements WindowListener {
     public static ProcessPanel processPanel = new ProcessPanel();
     public SQL datab;
     public static String username = new String();
-    private Map<String, String> keyword = new HashMap<String, String>();
-    private List<String> bannedpackage = new ArrayList<String>();
+    public static Map<String, String> keyword = new HashMap<String, String>();
+    public static List<String> bannedpackage = new ArrayList<String>();
     private static Theme theme;
     public static final String VERSION = "1.6";
     public static final String JENKINS_BUILD = "#JENKINSBUILDNUMBER";
@@ -356,12 +354,6 @@ public class Chekkit extends JFrame implements WindowListener {
             System.exit(0);
         }
 
-        File libDecompiler = new File(Chekkit.PATH + File.separator + "lib" + File.separator + "fernflower.jar");
-        if (!libDecompiler.exists()) {
-            new LibVerification().displayError();
-            System.exit(0);
-        }
-
         List<String> argList = new ArrayList<String>();
         argList.addAll(Arrays.asList(args));
 
@@ -542,7 +534,7 @@ public class Chekkit extends JFrame implements WindowListener {
 					    new Thread(new Runnable() {
 					        @Override
 					        public void run() {
-					            decompilingJars.add(new DecompJar(c, fil, datab, keyword, bannedpackage, hideProgress, useNimbus));
+					            decompilingJars.add(new DecompJar(c, fil, datab, hideProgress, useNimbus));
 					        }
 					    }).start();
 					}

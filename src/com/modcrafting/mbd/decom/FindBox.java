@@ -14,6 +14,9 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
@@ -37,9 +40,9 @@ public class FindBox extends JDialog{
 
 		int pos = base.tabbed.getSelectedIndex();
 		if(pos>=0){
-			String title = base.tabbed.getTitleAt(pos);
-			HashFile hfile = base.open.get(title);
-			textField.setText(hfile.textArea.getSelectedText());
+		    RTextScrollPane co = (RTextScrollPane) base.tabbed.getComponentAt(pos);
+		    RSyntaxTextArea pane = (RSyntaxTextArea) co.getViewport().getView();
+			textField.setText(pane.getSelectedText());
 		}
         mcase = new JCheckBox("Match Case");
         regex = new JCheckBox("Regex");
@@ -100,6 +103,7 @@ public class FindBox extends JDialog{
         this.setName("Find");
         this.setVisible(true);
     }
+
 	private class FindButton extends AbstractAction{
 		/**
 		 * 
@@ -109,21 +113,21 @@ public class FindBox extends JDialog{
 		@Override
 		public void actionPerformed(ActionEvent event) {
 			int pos = base.tabbed.getSelectedIndex();
-			String title = base.tabbed.getTitleAt(pos);
-			HashFile hfile = base.open.get(title);
 			SearchContext context = new SearchContext();
       		if (textField.getText().length() == 0)
 		         return;
-      		
+		    RTextScrollPane co = (RTextScrollPane) base.tabbed.getComponentAt(pos);
+		    RSyntaxTextArea pane = (RSyntaxTextArea) co.getViewport().getView();
+		    
       		context.setSearchFor(textField.getText());
       		context.setMatchCase(mcase.isSelected());
       		context.setRegularExpression(regex.isSelected());
       		context.setSearchForward(!reverse.isSelected());
       		context.setWholeWord(wholew.isSelected());
       		
-            if (!SearchEngine.find(hfile.textArea, context)) {
-               hfile.textArea.setSelectionStart(0);
-               hfile.textArea.setSelectionEnd(0);
+            if (!SearchEngine.find(pane, context)) {
+               pane.setSelectionStart(0);
+               pane.setSelectionEnd(0);
             }
 		}
 		
