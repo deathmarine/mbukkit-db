@@ -374,6 +374,11 @@ public class DecompJar extends JFrame implements WindowListener{
 
 	private void setFileSafe(JarFileEntry file){
 		file.setSafe(true);
+        databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
+        		file.getPackage() + "','" +
+        		file.getName() + "','" +
+        		file.getHash() +
+                "')");
 		tree.validate();
 		tree.repaint();
 		tree.updateUI();
@@ -417,13 +422,7 @@ public class DecompJar extends JFrame implements WindowListener{
                 if(value==JOptionPane.CLOSED_OPTION || value == JOptionPane.CANCEL_OPTION){
                     return;
                 }else if(value==JOptionPane.YES_OPTION && !hash.isSafe()){
-                    hash.setSafe(true);
-                        //setFileSafe(file);
-                        databaseUpdates.add("REPLACE INTO db_masterdbo (package,class,hash_contents) VALUES('" +
-                        		hash.getPackage() + "','" +
-                        		hash.getName() + "','" +
-                        		hash.getHash() +
-                                "')");
+                	setFileSafe(hash);
                 }
             }
 	    }

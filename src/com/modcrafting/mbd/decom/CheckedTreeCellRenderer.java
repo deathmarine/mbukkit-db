@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 //import com.modcrafting.mbd.MasterPluginDatabase;
 
 import com.modcrafting.mbd.Chekkit;
@@ -16,6 +17,7 @@ import com.modcrafting.mbd.Chekkit;
 public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	private static final long serialVersionUID = -9076467828472979936L;
 	DecompJar jar;
+	JTree tree;
 	Icon image;
 	Icon image2;
 	Icon image3;
@@ -39,6 +41,7 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	}
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		this.tree = tree;
 		if(!leaf && isBannedPack(value)){
 			setIcon(image9);
 			return this;
@@ -78,24 +81,12 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 		return false;
 	}
 	
+	protected boolean isWarn(Object value) {
+        return jar.getJarFileEntryFromPath(new TreePath(((DefaultMutableTreeNode) value).getPath())).isWarn();
+	}
+	
 	protected boolean isSafe(Object value) {
-        DefaultMutableTreeNode node =
-                (DefaultMutableTreeNode) value;
-        String[] args = node.getPath().toString().replace("[", "").replace("]", "").split(",");
-
-		StringBuilder sb = new StringBuilder();
-		for(int i=0;i<args.length-1;i++){
-			sb.append(args[i]).append(".");
-		}
-		if(sb.length() > 0)
-			sb.deleteCharAt(sb.length()-1);
-		for(JarFileEntry jasr : jar.files){
-			if(jasr.getName().equalsIgnoreCase(args[args.length-1]) &&
-					jasr.getPackage().equalsIgnoreCase(sb.toString())){
-				return jasr.isSafe();
-			}
-		}
-        return false;
+        return jar.getJarFileEntryFromPath(new TreePath(((DefaultMutableTreeNode) value).getPath())).isSafe();
     }
 	
 	protected boolean isPackageSafe(Object value) {
@@ -105,10 +96,9 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         int i = 0,o = 0;
         while(enums.hasMoreElements()){
             String[] args = ((DefaultMutableTreeNode) enums.nextElement()).getPath().toString().replace("[", "").replace("]", "").split(",");
-
     		StringBuilder sb = new StringBuilder();
-    		for(int ii=0;ii<args.length-1;ii++){
-    			sb.append(args[ii]).append(".");
+    		for(int ii=1;ii<args.length-1;ii++){
+    			sb.append(args[ii].trim()).append(".");
     		}
     		if(sb.length() > 0)
     			sb.deleteCharAt(sb.length()-1);
@@ -132,10 +122,9 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         int i = 0,o = 0;
         while(enums.hasMoreElements()){
             String[] args = ((DefaultMutableTreeNode) enums.nextElement()).getPath().toString().replace("[", "").replace("]", "").split(",");
-
     		StringBuilder sb = new StringBuilder();
-    		for(int ii=0;ii<args.length-1;ii++){
-    			sb.append(args[ii]).append(".");
+    		for(int ii=1;ii<args.length-1;ii++){
+    			sb.append(args[ii].trim()).append(".");
     		}
     		if(sb.length() > 0)
     			sb.deleteCharAt(sb.length()-1);
@@ -171,26 +160,6 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
         }
         return false;
     }
-	
-	protected boolean isWarn(Object value) {
-        DefaultMutableTreeNode node =
-                (DefaultMutableTreeNode) value;
-        String[] args = node.getPath().toString().replace("[", "").replace("]", "").split(",");
-
-		StringBuilder sb = new StringBuilder();
-		for(int i=0;i<args.length-1;i++){
-			sb.append(args[i]).append(".");
-		}
-		if(sb.length() > 0)
-			sb.deleteCharAt(sb.length()-1);
-		for(JarFileEntry jasr : jar.files){
-			if(jasr.getName().equalsIgnoreCase(args[args.length-1]) &&
-					jasr.getPackage().equalsIgnoreCase(sb.toString())){
-				return jasr.isWarn();
-			}
-		}
-        return false;	
-	}
 	
 	
 }
