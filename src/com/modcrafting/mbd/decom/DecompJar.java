@@ -200,10 +200,10 @@ public class DecompJar extends JFrame implements WindowListener{
 				for(String hash1 : database.getHash(pack, getName(jfi.getName()))){
 					if(hash.equals(hash1)){
 						hf.setSafe(true);
-						hf.setHash(hash);
 					}
 				}
 				if(hf != null){
+					hf.setHash(hash);
 					files.add(hf);
 				}
 		    }
