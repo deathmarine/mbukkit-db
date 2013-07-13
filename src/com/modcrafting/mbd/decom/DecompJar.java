@@ -354,23 +354,10 @@ public class DecompJar extends JFrame implements WindowListener{
 		}else{
 			this.dispose();
 		}
-		//More efficient deletion
 		new Thread(
 			new Runnable(){
 			@Override
 			public void run(){
-				processID = Chekkit.processPanel.addProcess("Deleting leftover files from " + file.getName().replaceAll(".yml", ""));
-				File newFile = new File(Chekkit.PATH + File.separator + "decomp"
-						+ File.separator + file.getName());
-				File dir = new File(Chekkit.PATH + File.separator + "ext"
-						+ File.separator);
-				dir.mkdir();
-				File newDir = new File(dir,file.getName());
-				FileUtils.deleteFolder(newDir);
-				Chekkit.processPanel.setBarValue(processID, 50);
-				FileUtils.deleteFolder(newFile);
-				Chekkit.processPanel.setBarValue(processID, 100);
-				Chekkit.processPanel.removeProcess(processID);
 				processID = Chekkit.processPanel.addProcess("Updating database for " + file.getName().replaceAll(".yml", ""));
 				database.shutdown(databaseUpdates);
 				Chekkit.processPanel.setBarValue(processID, 100);
