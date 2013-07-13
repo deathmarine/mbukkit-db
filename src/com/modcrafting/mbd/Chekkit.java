@@ -563,12 +563,14 @@ public class Chekkit extends JFrame implements WindowListener {
             if (name.endsWith(".jar")||name.endsWith(".zip")) {
             	File tempFile = new File(new File(PATH+File.separator), name);
             	tempFile.createNewFile();
+            	
                 FileOutputStream fout = new FileOutputStream(tempFile);
                 int len;
                 while ((len = zin.read(buf)) > 0) {
                     fout.write(buf, 0, len);
                 }
                 fout.close();
+                deleteCodeFiles(tempFile);
                 temp.add(tempFile);
             }
             entry = zin.getNextEntry();
