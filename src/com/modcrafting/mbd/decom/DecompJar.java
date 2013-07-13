@@ -154,7 +154,9 @@ public class DecompJar extends JFrame implements WindowListener{
 		    	JarEntry jfi = entry.nextElement();
 		    	mass.add(jfi.getName());
 		    	String pack = jfi.getName().replace(getName(jfi.getName()), "");
-		    	pack = pack.substring(0, pack.length()-1).replaceAll("/", ".");
+		    	if(pack.length() > 0)
+		    		pack = pack.substring(0, pack.length()-1);
+		    	pack = pack.replaceAll("/", ".");
 		    	MessageDigest md = MessageDigest.getInstance("MD5");
 				InputStream is = new DigestInputStream(jar.getInputStream(jfi), md);
 				//process
