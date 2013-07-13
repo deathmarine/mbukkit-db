@@ -46,7 +46,8 @@ public class JarFileEntry implements SyntaxConstants {
 		textArea.setEditable(false);
 		textArea.setAntiAliasingEnabled(true);
 		textArea.setCodeFoldingEnabled(true);
-		if(name.toLowerCase().endsWith(".java"))
+		if(name.toLowerCase().endsWith(".java")
+				|| name.toLowerCase().endsWith(".class"))
 			textArea.setSyntaxEditingStyle(SYNTAX_STYLE_JAVA);
 		else if(name.toLowerCase().endsWith(".xml") 
 				|| name.toLowerCase().endsWith(".rss")
