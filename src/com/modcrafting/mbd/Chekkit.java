@@ -379,7 +379,7 @@ public class Chekkit extends JFrame implements WindowListener {
             }
             try {
                 String prop = "submitted=1&username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
-                HttpURLConnection httpcon = (HttpURLConnection) ((new URL("http://server.modcrafting.com:2063/check.php").openConnection()));
+                HttpURLConnection httpcon = (HttpURLConnection) ((new URL("http://174.34.167.26:2063/check.php").openConnection()));
                 httpcon.setDoOutput(true);
                 httpcon.setDoInput(true);
                 httpcon.setInstanceFollowRedirects(false);

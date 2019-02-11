@@ -82,11 +82,15 @@ public class CheckedTreeCellRenderer extends DefaultTreeCellRenderer{
 	}
 	
 	protected boolean isWarn(Object value) {
-        return jar.getJarFileEntryFromPath(new TreePath(((DefaultMutableTreeNode) value).getPath())).isWarn();
+		//NPE...
+        //return jar.getJarFileEntryFromPath(new TreePath(((DefaultMutableTreeNode) value).getPath())).isWarn();
+		return false;
 	}
 	
 	protected boolean isSafe(Object value) {
-        return jar.getJarFileEntryFromPath(new TreePath(((DefaultMutableTreeNode) value).getPath())).isSafe();
+		//NPE...
+        //return jar.getJarFileEntryFromPath(new TreePath(((DefaultMutableTreeNode) value).getPath())).isSafe();
+		return false;
     }
 	
 	protected boolean isPackageSafe(Object value) {

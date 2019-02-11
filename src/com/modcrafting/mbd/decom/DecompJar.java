@@ -23,10 +23,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import javax.swing.AbstractAction;
@@ -58,10 +62,12 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.fife.ui.rsyntaxtextarea.Theme;
+
 import com.modcrafting.mbd.Chekkit;
 import com.modcrafting.mbd.objects.CodeTab;
 import com.modcrafting.mbd.objects.NoteDialog;
 import com.modcrafting.mbd.sql.SQL;
+import com.strobel.assembler.metadata.ITypeLoader;
 import com.strobel.assembler.metadata.JarTypeLoader;
 import com.strobel.assembler.metadata.MetadataSystem;
 import com.strobel.assembler.metadata.TypeDefinition;
@@ -70,12 +76,18 @@ import com.strobel.core.StringUtilities;
 import com.strobel.decompiler.DecompilationOptions;
 import com.strobel.decompiler.DecompilerSettings;
 import com.strobel.decompiler.PlainTextOutput;
+import com.strobel.decompiler.languages.Language;
 import com.strobel.decompiler.languages.Languages;
 import com.strobel.decompiler.languages.java.JavaFormattingOptions;
 
 public class DecompJar extends JFrame implements WindowListener{
 	private static final long serialVersionUID = 1559666464481837372L;
-
+	final LuytenTypeLoader typeLoader = new LuytenTypeLoader();
+    final Map<String, Language> languageLookup = new HashMap<String, Language>();
+    MetadataSystem metadataSystem = new MetadataSystem(typeLoader);
+    DecompilerSettings settings;
+    DecompilationOptions decompilationOptions;
+    
 	HashSet<JarFileEntry> files = new HashSet<JarFileEntry>();
 	public String mainclass;
 	JTabbedPane tabbed;
@@ -86,9 +98,6 @@ public class DecompJar extends JFrame implements WindowListener{
 	private int processID;
     private Chekkit main;
     private JTree tree;
-
-	DecompilerSettings settings;
-	DecompilationOptions decompilationOptions;
     
 	public DecompJar(Chekkit main, File file, SQL sql, Boolean progressDisplay, Boolean useNimbus){
 		
@@ -133,7 +142,6 @@ public class DecompJar extends JFrame implements WindowListener{
 		settings = new DecompilerSettings();
 	    if (settings.getFormattingOptions() == null)
 	      settings.setFormattingOptions(JavaFormattingOptions.createDefault());
-	    settings.setAlwaysGenerateExceptionVariableForCatchBlocks(true);
 	    settings.setFlattenSwitchBlocks(true);
 	    settings.setForceExplicitImports(true);
 	    settings.setLanguage(Languages.java());
@@ -152,14 +160,15 @@ public class DecompJar extends JFrame implements WindowListener{
 		    String badpack = new String();
 		    while(entry.hasMoreElements()){
 		    	JarEntry jfi = entry.nextElement();
-		    	mass.add(jfi.getName());
+            	if(!jfi.isDirectory())
+                    mass.add(jfi.getName());
+            	System.out.println("Extracting: "+jfi.getName());
 		    	String pack = jfi.getName().replace(getName(jfi.getName()), "");
 		    	if(pack.length() > 0)
 		    		pack = pack.substring(0, pack.length()-1);
 		    	pack = pack.replaceAll("/", ".");
 		    	MessageDigest md = MessageDigest.getInstance("MD5");
 				InputStream is = new DigestInputStream(jar.getInputStream(jfi), md);
-				//process
 	            for(String b: Chekkit.bannedpackage){
 	        		if(pack.startsWith(b)){
 	        			badpack = b; 
@@ -167,7 +176,7 @@ public class DecompJar extends JFrame implements WindowListener{
 	            }
 				JarFileEntry hf = null;
 				if(jfi.getName().endsWith(".class")){
-					//Do Decompile
+					
 					String internalName = StringUtilities.removeRight(jfi.getName(), ".class");
 				    MetadataSystem metadataSystem = new MetadataSystem(settings.getTypeLoader());
 				    TypeReference type = metadataSystem.lookupType(internalName);
@@ -209,12 +218,36 @@ public class DecompJar extends JFrame implements WindowListener{
 					files.add(hf);
 				}
 		    }
-		    Collections.sort(mass,String.CASE_INSENSITIVE_ORDER);
-		    for(String pack : mass){
-		    	LinkedList<String> list = new LinkedList<String>(Arrays.asList(pack.split("/")));
-		    	load(top, list);
-		    }
-		    tree.setModel(new DefaultTreeModel(top));
+            List<String> sort = new ArrayList<String>();
+            Collections.sort(mass, String.CASE_INSENSITIVE_ORDER);
+            for(String m : mass)
+            	if(m.contains("META-INF") && !sort.contains(m))
+            		sort.add(m);
+            Set<String> set = new HashSet<String>();
+            for(String m : mass){
+            	if(m.contains("/")){
+                	set.add(m.substring(0, m.lastIndexOf("/")+1));
+            	}
+            }
+            List<String> packs = Arrays.asList(set.toArray(new String[]{}));
+            Collections.sort(packs, String.CASE_INSENSITIVE_ORDER);                
+            Collections.sort(packs, new Comparator<String>(){
+            	public int compare(String o1, String o2) {
+            		return o2.split("/").length - o1.split("/").length;
+            	}
+            });
+            for(String pack : packs)
+            	for(String m : mass)
+            		if(!m.contains("META-INF") && m.contains(pack) && !m.replace(pack, "").contains("/"))
+            			sort.add(m);
+            for(String m : mass)
+            	if(!m.contains("META-INF") && !m.contains("/") && !sort.contains(m))
+            		sort.add(m);
+            for (String pack : sort) {
+                LinkedList<String> list = new LinkedList<String>(Arrays.asList(pack.split("/")));
+                load(top, list);
+            }
+            tree.setModel(new DefaultTreeModel(top));
 		    if(badpack.length()>0){
 				Icon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/resources/badskull_large.png")));
 	            JOptionPane.showMessageDialog(this, "Restricted Library \""+badpack+"\" was found.\nRecommend Deny.", "Restricted Lib", JOptionPane.PLAIN_MESSAGE, img2);
@@ -581,7 +614,6 @@ public class DecompJar extends JFrame implements WindowListener{
 	public void windowOpened(WindowEvent arg0) {}
 
     private static class OpenNotes implements ActionListener {
-
         private DecompJar file;
         public OpenNotes(DecompJar aThis) {
             file = aThis;
